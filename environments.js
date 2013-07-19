@@ -1,6 +1,24 @@
 var Environments = 
 [
 	{
+		name : "Google",
+		servers : [
+			{ type: "development",     host: "lnxdaydev03:9060" },
+			{ type: "certification",   host: "certcsweb" },
+			{ type: "production",      host: "google.com" }
+		],
+		staging_path : "\\\\lngdaydatp001\\staging\\csweb"
+	},
+	{
+		name : "Google2",
+		servers : [
+			{ type: "development",     host: "lnxdaydev03:9060" },
+			{ type: "certification",   host: "certcsweb" },
+			{ type: "production",      host: "www.google.com" }
+		],
+		staging_path : "\\\\lngdaydatp001\\staging\\csweb"
+	},
+	{
 		name : "CSWeb",
 		servers : [
 			{ type: "my development",  host: "lnxdaydev03:9090" },
