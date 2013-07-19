@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="environments.js"></script>
+<script>
+function setup(){
+
+	// Get server from background page
+	var myServer = chrome.extension.getBackgroundPage().MatchingServer;
+	var currentURL = chrome.extension.getBackgroundPage().CurrentURL;
+	var tabId = chrome.extension.getBackgroundPage().TabID;
+
+	// Set popup title
+	document.getElementById("popup-title").textContent = myServer.name + " Server";
+	
+	var environmentServers = getServers(myServer.name);
+	var linklist = document.getElementById('link-list');
+	while(linklist.hasChildNodes()) linklist.removeChild(linklist.firstChild);
+
+	for (var i in environmentServers){
+	
+		li = document.createElement('li');
+		var a = document.createElement('a');
+		a.innerHTML = environmentServers[i].type.capitalize();
+		//a.href = "http://" + environmentServers[i].host + currentURL.pathname + currentURL.search + currentURL.hash
+		a.title = "http://" + environmentServers[i].host + currentURL.pathname + currentURL.search + currentURL.hash
+		a.addEventListener("click", loadExternal, false);
+		/*
+		a.onclick = (function() { 
+			chrome.tabs.update(tabId, {url: "http://" + environmentServers[i].host + currentURL.pathname + currentURL.search + currentURL.hash});
+		});
+		*/
+		if (myServer.type == environmentServers[i].type){
+			a.classList.add("active");
+		} else {
+			a.classList.add("inactive");
+		}
+		
+		li.appendChild(a);
+		linklist.appendChild(li);
+	
+	}
+
+}
+
+function loadExternal(target){
+//alert(target);
+//alert(this.title);
+chrome.tabs.update(chrome.extension.getBackgroundPage().TabID, { url: this.title, selected: true });
+//return false;
+}
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+</script>
+<style>
+h1 {
+
+	font-size: 9pt;
+	background: white;
+	margin: 0px;
+	text-align: center;
+}
+
+ul, li, body {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	font-family: Arial;
+	background: #eee;
+	width: 160px;
+}
+
+ul#link-list {
+	padding: 7px 0px;
+	margin: 0px;
+	display: block;
+	list-style-type: none;
+}
+ul#link-list a { 
+	display: block; 
+    padding: 1px 2px 1px 15px; 
+	text-decoration: none; 
+	cursor: pointer;
+}
+
+ul#link-list a.active { 
+	background: #888;
+	color: white; 
+}
+
+ul#link-list a:hover { 
+	background-color: #333; 
+	color: white;  
+}
+
+
+</style>
+</head>
+<body onload="setup()">
+<div id="environment-links">
+	<ul id="link-list">
+		<li><a href="#" class="active">Development</a></li>
+		<li><a href="#" class="inactive">Certification</a></li>
+		<li><a href="#" class="inactive">Production</a></li>
+	</ul>
+	<h1 id="popup-title">Switch Environment</h1>
+</div>
+</body>
+<html>

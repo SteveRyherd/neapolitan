@@ -1,0 +1,20 @@
+{
+  "name": "Environment Picker",
+  "version": "1.0",
+  "description": "CS Development Environment Picker",
+  "background_page": "background.html",
+  "options_page": "options.html",
+  "page_action" :
+  {
+    "default_icon" : "icon-d-19.png",
+    "default_title" : "Click here to choose an environment"
+  },
+  "permissions" : [
+    "tabs"
+  ],
+  "icons" : {
+    "19" : "icon.png",
+    "48" : "icon.png",
+    "128" : "icon.png"
+  }
+}

@@ -1,0 +1,53 @@
+<title>Notification Demo</title>
+<style>
+  /* Clone the look and feel of "chrome://" pages. */
+  body {
+    margin: 10px;
+    font: 84% Arial, sans-serif
+  }
+
+  h1 { font-size: 156% }
+
+  h1 img {
+    margin: 1px 5px 0 1px;
+    vertical-align: middle
+  }
+
+  h2 {
+    border-top: 1px solid #9cc2ef;
+    background-color: #ebeff9;
+    padding: 3px 5px;
+    font-size: 100%
+  }
+</style>
+<script>
+  onload = function() {
+	options.environment.value = unescape(localStorage.environment);
+	
+    // Set the display activation and frequency.
+	options.environment.onchange = function(){
+		localStorage.environment = escape(options.environment.value)
+	};
+  };
+</script>
+<h1>
+  <img src="icon.png" alt="Logo">
+  CS Development Environment Switcher
+</h1>
+<h2>Environments</h2>
+<form id="options">
+	<textarea id="environment" name="environment" cols="80" rows="20"></textarea>
+</form>
+<h2>Example Script</h2>
+<pre>
+[
+  { 
+    "production": ['csweb', 'csweb.lexisnexis.com'],
+    "development": ['lnxdaydev03:9060']
+  },
+  { 
+    "production" : ['csweb2', 'csweb2.lexisnexis.com'],
+    "development" : ['localhost']
+  }
+]
+</pre>
