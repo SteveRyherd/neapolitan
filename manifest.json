@@ -3,21 +3,29 @@
   "manifest_version": 2,
   "version": "1.0",
   "description": "CS Development Environment Picker",
+  
   "background": {
-    "page": "background.html"
+    /* "page": "background.html" */ 
+    "scripts": ["environments.js", "background.js"]
   },
-  "options_page": "options.html",
+
+
   "page_action" :
   {
-    "default_icon" : "icon-d-19.png",
+    /* "default_icon" : "indicators/dev-19x19.png", */ 
     "default_title" : "Click here to choose an environment"
   },
+
   "permissions" : [
     "tabs"
   ],
+  
+  "options_page": "options.html",
+
   "icons" : {
-    "19" : "icon.png",
-    "48" : "icon.png",
-    "128" : "icon.png"
+    "19" : "icons/app-icon.png",
+    "48" : "icons/app-icon.png",
+    "128" : "icons/app-icon.png"
   }
+
 }

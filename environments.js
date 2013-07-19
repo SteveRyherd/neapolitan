@@ -75,6 +75,9 @@ var Environments =
 
 
 function getEnvironmentServer ( host ){
+	/**
+	*  
+	*/
 	for (var i in Environments) {
 		var myEnvironment = Environments[i];
 		for (var j in myEnvironment.servers){
@@ -92,6 +95,9 @@ function getEnvironmentServer ( host ){
 }
 
 function getServers( environmentName ){
+	/**
+	*
+	*/
 
 	for (var i in Environments) {
 		var myEnvironment = Environments[i];
