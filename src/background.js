@@ -1,7 +1,4 @@
-// Import the webextension-polyfill
-import browser from './polyfill/browser-polyfill.js';
-import { getEnvironmentServer, getServers } from './environments.js';
-
+// Background script for Browser Environment Switcher
 // State management for service worker
 let state = {
   matchingServer: undefined,
@@ -9,14 +6,77 @@ let state = {
   tabID: null
 };
 
+// Include environments data directly in background.js
+const Environments = [
+  {
+    name: "Google",
+    servers: [
+      { type: "development", host: "lnxdaydev03:9060" },
+      { type: "staging", host: "certcsweb" },
+      { type: "production", host: "google.com" }
+    ],
+    staging_path: "\\\\lngdaydatp001\\staging\\csweb"
+  },
+  {
+    name: "Facebook",
+    servers: [
+      { type: "development", host: "lnxdaydev03:9060" },
+      { type: "stagingd", host: "certcsweb" },
+      { type: "production", host: "facebook.com" }
+    ],
+    staging_path: "\\\\lngdaydatp001\\staging\\csweb"
+  }
+  // Add more environments as needed
+];
+
+// Function to get environment server for a host
+function getEnvironmentServer(host) {
+  for (const environment of Environments) {
+    for (const server of environment.servers) {
+      // Check for various domain patterns
+      if (server.host === host || 
+          `${server.host}.lexisnexis.com` === host || 
+          `${server.host}.lexis-nexis.com` === host) {
+        
+        return { 
+          name: environment.name, 
+          type: server.type, 
+          host: server.host 
+        };
+      }
+    }
+  }
+  return undefined;
+}
+
+// Function to get all servers for an environment
+function getServers(environmentName) {
+  for (const environment of Environments) {
+    if (environment.name === environmentName) {
+      const serverList = [];
+      let lastServerType = null;
+      
+      for (const server of environment.servers) {
+        if (server.type !== lastServerType) {
+          serverList.push(server);
+          lastServerType = server.type;
+        }
+      }
+      
+      return serverList;
+    }
+  }
+  return [];
+}
+
 // Function to convert URL strings to URL objects
 function getLocation(href) {
   return new URL(href);
 }
 
 // Check if the URL matches any configured environment
-async function checkForValidUrl(tabId, changeInfo, tab) {
-  if (changeInfo.status === "loading") {
+function checkForValidUrl(tabId, changeInfo, tab) {
+  if (changeInfo.status === "loading" && tab.url && tab.url.startsWith("http")) {
     try {
       const currentURL = getLocation(tab.url);
       state.currentURL = currentURL;
@@ -27,23 +87,23 @@ async function checkForValidUrl(tabId, changeInfo, tab) {
       
       if (matchingServer) {
         // Show the action icon for matched server
-        browser.action.setIcon({
+        chrome.action.setIcon({
           tabId: tabId,
           path: {
-            16: `icons/${matchingServer.type}-16.png`,
-            32: `icons/${matchingServer.type}-32.png`
+            16: `/icons/${matchingServer.type}-16.png`,
+            32: `/icons/${matchingServer.type}-32.png`
           }
         });
         
-        browser.action.setTitle({
+        chrome.action.setTitle({
           tabId: tabId,
           title: `Currently Viewing: ${matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1)}`
         });
         
-        browser.action.enable(tabId);
+        chrome.action.enable(tabId);
       } else {
         // Disable the action when no matching server
-        browser.action.disable(tabId);
+        chrome.action.disable(tabId);
       }
     } catch (error) {
       console.error("Error in checkForValidUrl:", error);
@@ -52,12 +112,16 @@ async function checkForValidUrl(tabId, changeInfo, tab) {
 }
 
 // Listen for tab updates
-browser.tabs.onUpdated.addListener(checkForValidUrl);
+chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 // Message handling for communication with popup
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "getState") {
-    return Promise.resolve(state);
+    sendResponse(state);
+    return true;
+  } else if (message.action === "getServers") {
+    sendResponse(getServers(message.environmentName));
+    return true;
   }
   return false;
 });

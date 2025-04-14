@@ -1,22 +1,18 @@
-// Import the environments module
-import { Environments } from '../environments.js';
-
 // Wait for DOM content to load
 document.addEventListener('DOMContentLoaded', initialize);
 
 // Initialize the options page
-async function initialize() {
+function initialize() {
   try {
-    // Get saved environments from storage or use defaults
-    const result = await browser.storage.local.get('environments');
-    const environments = result.environments || Environments;
-    
-    // Display environments in textarea
-    document.getElementById('environment-config').value = JSON.stringify(environments, null, 2);
-    
-    // Set up button event listeners
-    document.getElementById('save-button').addEventListener('click', saveEnvironments);
-    document.getElementById('reset-button').addEventListener('click', resetToDefaults);
+    // Get saved environments from storage or use defaults from background script
+    chrome.runtime.sendMessage({ action: "getEnvironments" }, function(environments) {
+      // Display environments in textarea
+      document.getElementById('environment-config').value = JSON.stringify(environments, null, 2);
+      
+      // Set up button event listeners
+      document.getElementById('save-button').addEventListener('click', saveEnvironments);
+      document.getElementById('reset-button').addEventListener('click', resetToDefaults);
+    });
   } catch (error) {
     console.error("Error initializing options:", error);
     showStatus("Error loading environments", true);
@@ -24,13 +20,15 @@ async function initialize() {
 }
 
 // Save environments to storage
-async function saveEnvironments() {
+function saveEnvironments() {
   try {
     const configText = document.getElementById('environment-config').value;
     const environments = JSON.parse(configText);
     
-    await browser.storage.local.set({ environments });
-    showStatus("Settings saved successfully!");
+    chrome.storage.local.set({ environments }, function() {
+      showStatus("Settings saved successfully!");
+      chrome.runtime.sendMessage({ action: "environmentsUpdated" });
+    });
   } catch (error) {
     console.error("Error saving environments:", error);
     showStatus("Error saving: " + error.message, true);
@@ -38,11 +36,15 @@ async function saveEnvironments() {
 }
 
 // Reset to default environments
-async function resetToDefaults() {
+function resetToDefaults() {
   try {
-    document.getElementById('environment-config').value = JSON.stringify(Environments, null, 2);
-    await browser.storage.local.remove('environments');
-    showStatus("Reset to defaults");
+    chrome.runtime.sendMessage({ action: "getDefaultEnvironments" }, function(defaultEnvironments) {
+      document.getElementById('environment-config').value = JSON.stringify(defaultEnvironments, null, 2);
+      chrome.storage.local.remove('environments', function() {
+        showStatus("Reset to defaults");
+        chrome.runtime.sendMessage({ action: "environmentsUpdated" });
+      });
+    });
   } catch (error) {
     console.error("Error resetting environments:", error);
     showStatus("Error resetting: " + error.message, true);

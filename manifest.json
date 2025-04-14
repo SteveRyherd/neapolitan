@@ -5,8 +5,7 @@
   "description": "Switch between development, certification, and production environments easily",
   
   "background": {
-    "service_worker": "src/background.js",
-    "type": "module"
+    "service_worker": "src/background.js"
   },
   
   "action": {
