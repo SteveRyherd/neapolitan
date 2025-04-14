@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Environment Switcher Options</title>
+  <link rel="stylesheet" href="options.css">
+  <script src="../polyfill/browser-polyfill.js"></script>
+  <script src="options.js" type="module"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <img src="../../icons/app-icon-48.png" alt="Logo">
+      Browser Environment Switcher
+    </h1>
+    
+    <h2>Environments Configuration</h2>
+    <div class="editor-container">
+      <textarea id="environment-config" name="environment-config" rows="20"></textarea>
+    </div>
+    
+    <div class="button-container">
+      <button id="save-button">Save</button>
+      <button id="reset-button">Reset to Defaults</button>
+    </div>
+    
+    <div id="status-message"></div>
+    
+    <h2>Example Configuration</h2>
+    <pre class="example-code">
+[
+  { 
+    "name": "Google",
+    "servers": [
+      { "type": "development", "host": "lnxdaydev03:9060" },
+      { "type": "certification", "host": "certcsweb" },
+      { "type": "production", "host": "google.com" }
+    ]
+  }
+]
+</pre>
+  </div>
+</body>
+</html>
