@@ -16,19 +16,24 @@ const state = {
 // Default environment configurations
 const DEFAULT_ENVIRONMENTS = [
   {
-    name: "Google",
+    name: "Wikipedia",
     servers: [
-      { type: "development", host: "lnxdaydev03:9060" },
-      { type: "staging", host: "certcsweb" },
-      { type: "production", host: "google.com" }
+      { type: "development", host: "test.wikipedia.org" },
+      { type: "production", host: "wikipedia.org" }
     ]
   },
   {
-    name: "Facebook",
+    name: "Mozilla",
     servers: [
-      { type: "development", host: "lnxdaydev03:9060" },
-      { type: "staging", host: "certcsweb" },
-      { type: "production", host: "facebook.com" }
+      { type: "development", host: "developer.allizom.org" },
+      { type: "production", host: "developer.mozilla.org" }
+    ]
+  },
+  {
+    name: "BBC",
+    servers: [
+      { type: "development", host: "www.test.bbc.com" },
+      { type: "production", host: "www.bbc.com" }
     ]
   }
   // Add more environments as needed
