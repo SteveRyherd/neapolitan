@@ -181,28 +181,41 @@ function getLocation(href) {
  * @param {Object} matchingServer - The detected environment server
  */
 function updateExtensionIcon(tabId, matchingServer) {
-  if (!matchingServer) {
-    chrome.action.disable(tabId);
-    return;
-  }
-
-  // Enable and update icon for the matching environment
+  // Always enable the icon
   chrome.action.enable(tabId);
   
-  chrome.action.setIcon({
-    tabId: tabId,
-    path: {
-      16: `/icons/${matchingServer.type}-16.png`,
-      32: `/icons/${matchingServer.type}-32.png`
-    }
-  });
-  
-  // Update tooltip with current environment
-  const envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
-  chrome.action.setTitle({
-    tabId: tabId,
-    title: `Currently Viewing: ${envName}`
-  });
+  if (matchingServer) {
+    // If we have a match, use the appropriate environment icon
+    chrome.action.setIcon({
+      tabId: tabId,
+      path: {
+        16: `/icons/${matchingServer.type}-16.png`,
+        32: `/icons/${matchingServer.type}-32.png`
+      }
+    });
+    
+    // Update tooltip with current environment
+    const envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
+    chrome.action.setTitle({
+      tabId: tabId,
+      title: `Currently Viewing: ${envName}`
+    });
+  } else {
+    // No match found, show the unmatched icon
+    chrome.action.setIcon({
+      tabId: tabId,
+      path: {
+        16: `/icons/unmatched-16.png`,
+        32: `/icons/unmatched-32.png`
+      }
+    });
+    
+    // Update tooltip for unmatched site
+    chrome.action.setTitle({
+      tabId: tabId,
+      title: `No Environment Match`
+    });
+  }
 }
 
 /**
