@@ -1,19 +1,20 @@
 {
   "name": "Browser Environment Switcher",
   "manifest_version": 3,
-  "version": "2.0.0",
-  "description": "Switch between development, certification, and production environments easily",
+  "version": "3.0.0",
+  "description": "Switch between development, staging, and production environments easily",
   
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   
   "action": {
     "default_title": "Switch Environment",
     "default_popup": "src/popup/switcher.html",
     "default_icon": {
-      "16": "icons/app-icon-16.png",
-      "32": "icons/app-icon-32.png",
+      "16": "icons/unmatched-16.png",
+      "32": "icons/unmatched-32.png",
       "48": "icons/app-icon-48.png",
       "128": "icons/app-icon-128.png"
     }
