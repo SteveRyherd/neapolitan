@@ -53,3 +53,36 @@ ul#link-list a.active:hover {
   background-color: #2b70e2; 
   color: white;  
 }
+
+/* Create Configuration button style */
+.create-config-button {
+  display: block;
+  padding: 10px;
+  margin: 8px;
+  text-align: center;
+  background-color: #4285f4;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.create-config-button:hover {
+  background-color: #2b70e2;
+}
+
+/* Edit Configuration link style */
+.edit-config-link {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  padding: 5px 10px;
+  color: #4285f4;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.edit-config-link:hover {
+  text-decoration: underline;
+}

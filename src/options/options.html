@@ -13,31 +13,63 @@
       Browser Environment Switcher
     </h1>
     
-    <h2>Environments Configuration</h2>
-    <div class="editor-container">
-      <textarea id="environment-config" name="environment-config" rows="20"></textarea>
-    </div>
-    
-    <div class="button-container">
-      <button id="save-button">Save</button>
-      <button id="reset-button">Reset to Defaults</button>
+    <div class="panel-container">
+      <!-- Left Panel: Environment List -->
+      <div class="environments-panel">
+        <h2>Environments</h2>
+        <div class="environment-list" id="environment-list">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <button id="add-environment-button" class="add-button">+ Add Environment</button>
+      </div>
+      
+      <!-- Right Panel: Environment Editor -->
+      <div class="editor-panel" id="editor-panel">
+        <h2 id="editor-title">Select an environment</h2>
+        <div id="environment-form" class="hidden">
+          <div class="form-group">
+            <label for="project-name">Project Name:</label>
+            <input type="text" id="project-name" name="project-name">
+          </div>
+          
+          <h3>Servers</h3>
+          <div class="form-group">
+            <label for="development-server">Development:</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="development-server" name="development-server">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="staging-server">Staging (optional):</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="staging-server" name="staging-server">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="production-server">Production:</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="production-server" name="production-server">
+            </div>
+          </div>
+          
+          <div class="button-container">
+            <button id="save-environment-button">Save</button>
+            <button id="cancel-button" class="secondary-button">Cancel</button>
+            <button id="delete-environment-button" class="delete-button">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div id="status-message"></div>
-    
-    <h2>Example Configuration</h2>
-    <pre class="example-code">
-[
-  { 
-    "name": "Google",
-    "servers": [
-      { "type": "development", "host": "lnxdaydev03:9060" },
-      { "type": "staging", "host": "certcsweb" },
-      { "type": "production", "host": "google.com" }
-    ]
-  }
-]
-</pre>
+    <div class="global-buttons">
+      <button id="reset-button">Reset to Defaults</button>
+    </div>
   </div>
 </body>
 </html>

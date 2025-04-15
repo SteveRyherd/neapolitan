@@ -256,8 +256,35 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 function handleMessages(message, sender, sendResponse) {
   switch (message.action) {
     case "getState":
-      sendResponse(state);
-      return true;
+      // If a specific tab ID is provided, get state for that tab
+      if (message.tabId) {
+        chrome.tabs.get(message.tabId, function(tab) {
+          if (chrome.runtime.lastError) {
+            console.error("Error getting tab:", chrome.runtime.lastError);
+            sendResponse(null);
+            return;
+          }
+          
+          try {
+            const tabUrl = tab.url;
+            const tabLocation = getLocation(tabUrl);
+            const matchingServer = getEnvironmentServer(tabLocation.hostname);
+            
+            sendResponse({
+              matchingServer: matchingServer,
+              currentURL: tabUrl
+            });
+          } catch (error) {
+            console.error("Error processing tab state:", error);
+            sendResponse(null);
+          }
+        });
+        return true; // Async response
+      } else {
+        // Original behavior for current state
+        sendResponse(state);
+        return true;
+      }
       
     case "getServers":
       const servers = getServers(message.environmentName);
@@ -275,9 +302,19 @@ function handleMessages(message, sender, sendResponse) {
     case "environmentsUpdated":
       initializeEnvironments();
       return false;
+
+    case "createNewConfig":
+      // Store the data temporarily to be used by the options page
+      chrome.storage.local.set({ 
+        newConfigData: {
+          hostname: message.hostname,
+          url: message.url
+        }
+      });
+
+    default:
+      return false;
   }
-  
-  return false;
 }
 
 // Initialize environment data
