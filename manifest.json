@@ -5,16 +5,15 @@
   "description": "Switch between development, staging, and production environments easily",
   
   "background": {
-    "service_worker": "src/background.js",
-    "type": "module"
+    "service_worker": "src/background.js"
   },
   
   "action": {
     "default_title": "Switch Environment",
     "default_popup": "src/popup/switcher.html",
     "default_icon": {
-      "16": "icons/unmatched-16.png",
-      "32": "icons/unmatched-32.png",
+      "16": "icons/app-icon-16.png",
+      "32": "icons/app-icon-32.png",
       "48": "icons/app-icon-48.png",
       "128": "icons/app-icon-128.png"
     }
@@ -30,8 +29,7 @@
   ],
   
   "options_ui": {
-    "page": "src/options/options.html",
-    "open_in_tab": true
+    "page": "src/options/options.html"
   },
 
   "icons": {

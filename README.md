@@ -19,13 +19,15 @@ Safari supports most Chrome extension APIs through compatibility layers, with a 
 To build for Safari:
 
 1. First, ensure the extension works in Chrome
-2. Use the Safari Web Extension Converter tool in Xcode:
+2. Use the Safari Web Extension Converter tool in Xcode.  From the parent directory of your code run:
    ```
-   xcrun safari-web-extension-converter /path/to/extension
+   xcrun safari-web-extension-converter ./browser-environment-switcher --app-name "EnvSwitcher" --bundle-identifier "com.desatt.envswitcher"
    ```
 3. The tool will create a new Xcode project
 4. You'll need to sign the extension with your Apple Developer account
-5. You can then build and install the extension
+5. Ensure the Team is properly set, and the identifier bundles need to match for the app and extension (don't let xcode add .extension, that appears to fail)
+6. You can then build and install the extension
+
 
 ## Safari-Specific Issues to Watch For
 
