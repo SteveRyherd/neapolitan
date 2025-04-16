@@ -18,6 +18,9 @@ A browser extension that makes it easy to switch between development, staging, a
 |----------------|--------------|
 | ![Popup](screenshots/popup.png) | ![Options](screenshots/options.png) |
 
+
+---
+
 ## Usage
 
 1. Configure your environments in the options page
@@ -33,6 +36,8 @@ A browser extension that makes it easy to switch between development, staging, a
 3. Enable "Developer mode"
 4. Click "Load unpacked" and select the extension directory
 
+
+---
 
 # Safari Compatibility Notes
 

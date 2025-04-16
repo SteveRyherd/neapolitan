@@ -1,0 +1,1876 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+icons/
+  generate-icons.sh
+src/
+  options/
+    options.css
+    options.html
+    options.js
+  popup/
+    switcher.css
+    switcher.html
+    switcher.js
+  background.js
+  environments.js
+.gitignore
+manifest.json
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.npm/
+
+# Build output
+dist/
+build/
+
+# Browser extension packaging
+*.zip
+*.xpi
+*.crx
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime*
+</file>
+
+<file path="src/options/options.css">
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+h1 img {
+  margin-right: 10px;
+}
+
+h2 {
+  font-size: 18px;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+  color: #444;
+  margin-top: 0;
+}
+
+h3 {
+  font-size: 16px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.panel-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Left panel styles */
+.environments-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-width: 250px;
+}
+
+.environment-list {
+  margin-bottom: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.environment-item {
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background-color 0.2s;
+}
+
+.environment-item:hover {
+  background-color: #f0f0f0;
+}
+
+.environment-item.active {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+/* Right panel styles */
+.editor-panel {
+  flex: 2;
+  background: #fff;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.input-prefix-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  padding: 8px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  color: #666;
+  font-size: 14px;
+}
+
+.input-prefix + input[type="text"] {
+  border-radius: 0 4px 4px 0;
+}
+
+/* Button styles */
+button {
+  padding: 8px 15px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #2b70e2;
+}
+
+.add-button {
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.button-container {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.delete-button {
+  background-color: #f44336;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+.global-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+#reset-button {
+  background-color: #f44336;
+}
+
+#reset-button:hover {
+  background-color: #d32f2f;
+}
+
+#status-message {
+  min-height: 20px;
+  margin: 10px 0;
+}
+
+#status-message.success {
+  color: #4caf50;
+}
+
+#status-message.error {
+  color: #f44336;
+}
+
+.hidden {
+  display: none;
+}
+
+.secondary-button {
+  background-color: #f1f1f1;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.secondary-button:hover {
+  background-color: #e5e5e5;
+}
+</file>
+
+<file path="src/popup/switcher.css">
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f5f5f5;
+  width: 220px;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 14px;
+  background: #f8f8f8;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  color: #333;
+}
+
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+ul#link-list {
+  padding: 10px 0;
+  margin: 0;
+  display: block;
+}
+
+ul#link-list a { 
+  display: block; 
+  padding: 8px 15px;
+  text-decoration: none; 
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  margin: 2px 8px;
+}
+
+ul#link-list a.active { 
+  background: #4285f4;
+  color: white; 
+}
+
+ul#link-list a:hover { 
+  background-color: #e0e0e0; 
+  color: #000;  
+}
+
+ul#link-list a.active:hover { 
+  background-color: #2b70e2; 
+  color: white;  
+}
+
+/* Create Configuration button style */
+.create-config-button {
+  display: block;
+  padding: 10px;
+  margin: 8px;
+  text-align: center;
+  background-color: #4285f4;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.create-config-button:hover {
+  background-color: #2b70e2;
+}
+
+/* Edit Configuration link style */
+.edit-config-link {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  padding: 5px 10px;
+  color: #4285f4;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.edit-config-link:hover {
+  text-decoration: underline;
+}
+</file>
+
+<file path="src/environments.js">
+/**
+ * Default environment configurations
+ * 
+ * This serves as the single source of truth for environment data.
+ * The structure follows:
+ * {
+ *   name: "Environment Name",
+ *   servers: [
+ *     { type: "development", host: "dev-hostname" },
+ *     { type: "staging", host: "staging-hostname" },
+ *     { type: "production", host: "prod-hostname" }
+ *   ]
+ * }
+ */
+
+export const DEFAULT_ENVIRONMENTS = [
+  {
+    name: "Google",
+    servers: [
+      { type: "development", host: "lnxdaydev03:9060" },
+      { type: "staging", host: "certcsweb" },
+      { type: "production", host: "google.com" }
+    ]
+  },
+  {
+    name: "Facebook",
+    servers: [
+      { type: "development", host: "lnxdaydev03:9060" },
+      { type: "staging", host: "certcsweb" },
+      { type: "production", host: "facebook.com" }
+    ]
+  }
+  // Add more environments as needed
+];
+</file>
+
+<file path="icons/generate-icons.sh">
+# Generate standard icons in multiple sizes
+magick app-icon.png -resize 16x16 app-icon-16.png 
+magick app-icon.png -resize 32x32 app-icon-32.png
+magick app-icon.png -resize 48x48 app-icon-48.png
+magick app-icon.png -resize 64x64 app-icon-64.png
+magick app-icon.png -resize 128x128 app-icon-128.png
+
+# Generate environment icons in multiple sizes
+for env in development staging production; do
+  magick $env.png -resize 16x16 $env-16.png
+  magick $env.png -resize 32x32 $env-32.png
+done
+
+# Generate a generic "unmatched" icon
+magick app-icon.png -resize 16x16 -modulate 100,0 unmatched-16.png
+magick app-icon.png -resize 32x32 -modulate 100,0 unmatched-32.png
+</file>
+
+<file path="src/options/options.js">
+// Wait for DOM content to load
+document.addEventListener('DOMContentLoaded', initialize);
+
+// Global state
+let environments = [];
+let currentEnvironmentIndex = -1;
+let hasUnsavedChanges = false;
+let originalEnvironmentData = null; // Store original data for cancel functionality
+
+
+// Initialize the options page
+function initialize() {
+  try {
+    // Load environments from storage
+    chrome.runtime.sendMessage({ action: "getEnvironments" }, function(loadedEnvironments) {
+      environments = loadedEnvironments || [];
+      
+      // After environments are loaded, populate the list
+      populateEnvironmentList();
+      
+      // Then check for pending actions
+      checkPendingConfigActions();
+      
+      // Set up other event listeners
+      setupEventListeners();
+    });
+    
+    // Listen for storage changes to catch actions from popup
+    chrome.storage.onChanged.addListener(function(changes, namespace) {
+      if (namespace === 'local' && changes.pendingConfigAction) {
+        checkPendingConfigActions();
+      }
+    });
+  } catch (error) {
+    console.error("Error initializing options:", error);
+    showStatus("Error loading environments", true);
+  }
+}
+// Set up event listeners
+function setupEventListeners() {
+  document.getElementById('add-environment-button').addEventListener('click', addNewEnvironment);
+  document.getElementById('save-environment-button').addEventListener('click', saveCurrentEnvironment);
+  document.getElementById('cancel-button').addEventListener('click', cancelEditing);
+  document.getElementById('delete-environment-button').addEventListener('click', deleteCurrentEnvironment);
+  document.getElementById('reset-button').addEventListener('click', resetToDefaults);
+  
+  // Add form input change listeners to track unsaved changes
+  const formInputs = document.querySelectorAll('#environment-form input');
+  formInputs.forEach(input => {
+    input.addEventListener('change', () => { hasUnsavedChanges = true; });
+    input.addEventListener('keyup', () => { hasUnsavedChanges = true; });
+  });
+  
+  // Setup window beforeunload event to warn about unsaved changes
+  window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      return e.returnValue;
+    }
+  });
+}
+
+// Check for pending configuration actions from the popup
+function checkPendingConfigActions() {
+  chrome.storage.local.get('pendingConfigAction', function(data) {
+    if (data.pendingConfigAction) {
+      console.log("Pending config action found:", data.pendingConfigAction);
+      
+      // Only process actions that are less than 10 seconds old
+      const now = Date.now();
+      if (now - data.pendingConfigAction.timestamp < 10000) {
+        if (data.pendingConfigAction.action === "create") {
+          // Create new configuration
+          createConfigFromHostname(
+            data.pendingConfigAction.hostname, 
+            data.pendingConfigAction.url
+          );
+        } 
+        else if (data.pendingConfigAction.action === "edit") {
+          // Find and edit existing configuration
+          const targetName = data.pendingConfigAction.environmentName;
+          console.log("Looking for environment:", targetName);
+          console.log("Available environments:", environments);
+          
+          // Find the environment index
+          const envIndex = environments.findIndex(env => env.name === targetName);
+          console.log("Found environment at index:", envIndex);
+          
+          if (envIndex !== -1) {
+            // Make sure we select the environment with a slight delay to ensure
+            // the UI is ready to be updated
+            setTimeout(() => {
+              currentEnvironmentIndex = envIndex;
+              populateEnvironmentList();
+              selectEnvironment(envIndex);
+              showStatus(`Editing "${targetName}" configuration`);
+            }, 100);
+          }
+        }
+      }
+      
+      // Clear the temporary data
+      chrome.storage.local.remove('pendingConfigAction');
+    }
+  });
+}
+
+// Load environments from storage
+function loadEnvironments() {
+  chrome.runtime.sendMessage({ action: "getEnvironments" }, function(loadedEnvironments) {
+    environments = loadedEnvironments || [];
+    populateEnvironmentList();
+  });
+}
+
+// Populate the environment list in the left panel
+function populateEnvironmentList() {
+  const listElement = document.getElementById('environment-list');
+  listElement.innerHTML = '';
+  
+  if (environments.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.textContent = 'No environments configured';
+    emptyMsg.className = 'empty-message';
+    listElement.appendChild(emptyMsg);
+    return;
+  }
+  
+  environments.forEach((env, index) => {
+    const item = document.createElement('div');
+    item.textContent = env.name;
+    item.className = 'environment-item';
+    if (index === currentEnvironmentIndex) {
+      item.classList.add('active');
+    }
+    
+    item.addEventListener('click', () => {
+      selectEnvironment(index);
+    });
+    
+    listElement.appendChild(item);
+  });
+}
+
+// Select an environment and show its details
+function selectEnvironment(index) {
+  console.log("Selecting environment at index:", index);
+  
+  // Check for unsaved changes first
+  if (hasUnsavedChanges && currentEnvironmentIndex !== -1) {
+    if (confirm('You have unsaved changes. Do you want to save them before switching?')) {
+      saveCurrentEnvironment();
+    } else {
+      hasUnsavedChanges = false;
+    }
+  }
+  
+  currentEnvironmentIndex = index;
+  
+  // Store a deep copy of the original environment for cancel functionality
+  originalEnvironmentData = JSON.parse(JSON.stringify(environments[index]));
+  
+  // Update active state in list
+  const items = document.querySelectorAll('.environment-item');
+  items.forEach((item, i) => {
+    if (i === index) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+  
+  // Show the form
+  const formElement = document.getElementById('environment-form');
+  formElement.classList.remove('hidden');
+  
+  // Set the editor title
+  document.getElementById('editor-title').textContent = 'Edit Environment';
+  
+  // Populate form fields
+  const environment = environments[index];
+  document.getElementById('project-name').value = environment.name;
+  
+  // Find servers by type
+  const developmentServer = environment.servers.find(s => s.type === 'development');
+  const stagingServer = environment.servers.find(s => s.type === 'staging');
+  const productionServer = environment.servers.find(s => s.type === 'production');
+  
+  // Set server values
+  document.getElementById('development-server').value = developmentServer ? developmentServer.host : '';
+  document.getElementById('staging-server').value = stagingServer ? stagingServer.host : '';
+  document.getElementById('production-server').value = productionServer ? productionServer.host : '';
+  
+  // Reset unsaved changes flag
+  hasUnsavedChanges = false;
+  
+  console.log("Environment selected:", environment.name);
+}
+
+
+// Add a new environment
+function addNewEnvironment() {
+  // Check for unsaved changes first
+  if (hasUnsavedChanges && currentEnvironmentIndex !== -1) {
+    if (confirm('You have unsaved changes. Do you want to save them before creating a new environment?')) {
+      saveCurrentEnvironment();
+    } else {
+      hasUnsavedChanges = false;
+    }
+  }
+  
+  // Create a new environment
+  const newEnvironment = {
+    name: 'New Environment',
+    servers: [
+      { type: 'development', host: '' },
+      { type: 'production', host: '' }
+    ]
+  };
+  
+  // Add to environments array
+  environments.push(newEnvironment);
+  
+  // Save to storage immediately
+  chrome.storage.local.set({ environments }, function() {
+    // After saving, select the new environment
+    currentEnvironmentIndex = environments.length - 1;
+    populateEnvironmentList();
+    selectEnvironment(currentEnvironmentIndex);
+    showStatus('New environment created');
+    chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
+  });
+}
+
+// Save the current environment
+function saveCurrentEnvironment() {
+  if (currentEnvironmentIndex === -1) return;
+  
+  const nameInput = document.getElementById('project-name');
+  const devInput = document.getElementById('development-server');
+  const stagingInput = document.getElementById('staging-server');
+  const prodInput = document.getElementById('production-server');
+  
+  // Validate inputs
+  if (!nameInput.value.trim()) {
+    showStatus('Project name cannot be empty', true);
+    return;
+  }
+  
+  // Update the environment object
+  environments[currentEnvironmentIndex].name = nameInput.value.trim();
+  
+  // Clear existing servers
+  environments[currentEnvironmentIndex].servers = [];
+  
+  // Add Development server if provided
+  if (devInput.value.trim()) {
+    environments[currentEnvironmentIndex].servers.push({
+      type: 'development',
+      host: devInput.value.trim()
+    });
+  }
+  
+  // Add Staging server if provided
+  if (stagingInput.value.trim()) {
+    environments[currentEnvironmentIndex].servers.push({
+      type: 'staging',
+      host: stagingInput.value.trim()
+    });
+  }
+  
+  // Add Production server if provided
+  if (prodInput.value.trim()) {
+    environments[currentEnvironmentIndex].servers.push({
+      type: 'production',
+      host: prodInput.value.trim()
+    });
+  }
+  
+  // Save directly to storage
+  chrome.storage.local.set({ environments }, function() {
+    hasUnsavedChanges = false;
+    
+    // Update UI
+    populateEnvironmentList();
+    
+    // Update the original data for cancel functionality
+    originalEnvironmentData = JSON.parse(JSON.stringify(environments[currentEnvironmentIndex]));
+    
+    showStatus('Environment saved');
+    chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
+  });
+}
+
+// Cancel editing and revert to original data
+function cancelEditing() {
+  if (currentEnvironmentIndex === -1 || !originalEnvironmentData) return;
+  
+  // Revert to original data
+  environments[currentEnvironmentIndex] = JSON.parse(JSON.stringify(originalEnvironmentData));
+  
+  // Reset form
+  selectEnvironment(currentEnvironmentIndex);
+  
+  showStatus('Changes discarded');
+}
+
+// Delete the current environment
+function deleteCurrentEnvironment() {
+  if (currentEnvironmentIndex === -1) return;
+  
+  if (confirm('Are you sure you want to delete this environment?')) {
+    environments.splice(currentEnvironmentIndex, 1);
+    
+    // Save to storage
+    chrome.storage.local.set({ environments }, function() {
+      // Reset state
+      if (environments.length > 0) {
+        currentEnvironmentIndex = 0;
+      } else {
+        currentEnvironmentIndex = -1;
+        document.getElementById('environment-form').classList.add('hidden');
+        document.getElementById('editor-title').textContent = 'Select an environment';
+      }
+      
+      // Update UI
+      populateEnvironmentList();
+      
+      if (currentEnvironmentIndex !== -1) {
+        selectEnvironment(currentEnvironmentIndex);
+      }
+      
+      showStatus('Environment deleted');
+      chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
+    });
+  }
+}
+
+// Reset to default environments
+function resetToDefaults() {
+  if (confirm('Are you sure you want to reset to default environments? All custom environments will be lost.')) {
+    chrome.runtime.sendMessage({ action: 'getDefaultEnvironments' }, function(defaultEnvironments) {
+      environments = defaultEnvironments;
+      
+      // Save to storage
+      chrome.storage.local.set({ environments }, function() {
+        // Reset state
+        currentEnvironmentIndex = -1;
+        hasUnsavedChanges = false;
+        
+        // Update UI
+        populateEnvironmentList();
+        document.getElementById('environment-form').classList.add('hidden');
+        document.getElementById('editor-title').textContent = 'Select an environment';
+        
+        showStatus('Reset to defaults');
+        chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
+      });
+    });
+  }
+}
+
+// Show status message
+function showStatus(message, isError = false) {
+  const statusElement = document.getElementById('status-message');
+  statusElement.textContent = message;
+  statusElement.className = isError ? 'error' : 'success';
+  
+  // Clear the message after 3 seconds
+  setTimeout(() => {
+    statusElement.textContent = '';
+    statusElement.className = '';
+  }, 3000);
+}
+
+
+// Check if we need to create a new configuration from popup
+chrome.storage.local.get('newConfigData', function(data) {
+  if (data.newConfigData) {
+    // Create a new configuration based on the hostname
+    createConfigFromHostname(data.newConfigData.hostname, data.newConfigData.url);
+    
+    // Clear the temporary data
+    chrome.storage.local.remove('newConfigData');
+  }
+});
+
+
+
+// Create a new configuration from hostname
+// Create a new configuration from hostname
+function createConfigFromHostname(hostname, url) {
+  try {
+    console.log("Creating configuration for:", hostname);
+    
+    // Determine environment type based on hostname
+    let serverType = 'production';
+    
+    // Check if this is likely a development server
+    if (!hostname.includes('.') || // localhost
+        /^\d+\.\d+\.\d+\.\d+$/.test(hostname) || // IP address
+        hostname.includes(':')) { // Has port
+      serverType = 'development';
+    }
+    
+    // Create new environment object
+    const newEnvironment = {
+      name: hostname,
+      servers: []
+    };
+    
+    // Add server based on detected type
+    if (serverType === 'development') {
+      newEnvironment.servers.push({ type: 'development', host: hostname });
+      // Add empty production server for future configuration
+      newEnvironment.servers.push({ type: 'production', host: '' });
+    } else {
+      newEnvironment.servers.push({ type: 'production', host: hostname });
+      // Add empty development server for future configuration
+      newEnvironment.servers.push({ type: 'development', host: '' });
+    }
+    
+    console.log("New environment created:", newEnvironment);
+    
+    // Add to environments array
+    environments.push(newEnvironment);
+    
+    // Update UI
+    currentEnvironmentIndex = environments.length - 1;
+    populateEnvironmentList();
+    
+    // Make sure the form is shown and the fields updated
+    document.getElementById('environment-form').classList.remove('hidden');
+    document.getElementById('editor-title').textContent = 'Edit Environment';
+    selectEnvironment(currentEnvironmentIndex);
+    
+    // Then save to storage
+    chrome.storage.local.set({ environments }, function() {
+      showStatus(`New "${hostname}" configuration created`);
+      chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
+    });
+  } catch (error) {
+    console.error("Error creating configuration from hostname:", error);
+    showStatus("Error creating configuration", true);
+  }
+}
+</file>
+
+<file path="src/popup/switcher.html">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Environment Switcher</title>
+  <link rel="stylesheet" href="switcher.css">
+  <script src="switcher.js"></script>
+</head>
+<body>
+  <div id="environment-links">
+    <h1 id="popup-title">Switch Environment</h1>
+    <ul id="link-list">
+      <!-- Links will be populated by JavaScript -->
+    </ul>
+  </div>
+</body>
+</html>
+</file>
+
+<file path="src/options/options.html">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Environment Switcher Options</title>
+  <link rel="stylesheet" href="options.css">
+  <script src="options.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <img src="../../icons/app-icon-48.png" alt="Logo">
+      Browser Environment Switcher
+    </h1>
+    
+    <div class="panel-container">
+      <!-- Left Panel: Environment List -->
+      <div class="environments-panel">
+        <h2>Environments</h2>
+        <div class="environment-list" id="environment-list">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <button id="add-environment-button" class="add-button">+ Add Environment</button>
+      </div>
+      
+      <!-- Right Panel: Environment Editor -->
+      <div class="editor-panel" id="editor-panel">
+        <h2 id="editor-title">Select an environment</h2>
+        <div id="environment-form" class="hidden">
+          <div class="form-group">
+            <label for="project-name">Project Name:</label>
+            <input type="text" id="project-name" name="project-name">
+          </div>
+          
+          <h3>Servers</h3>
+          <div class="form-group">
+            <label for="development-server">Development:</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="development-server" name="development-server">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="staging-server">Staging (optional):</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="staging-server" name="staging-server">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="production-server">Production:</label>
+            <div class="input-prefix-wrapper">
+              <span class="input-prefix">http(s)://</span>
+              <input type="text" id="production-server" name="production-server">
+            </div>
+          </div>
+          
+          <div class="button-container">
+            <button id="save-environment-button">Save</button>
+            <button id="cancel-button" class="secondary-button">Cancel</button>
+            <button id="delete-environment-button" class="delete-button">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="status-message"></div>
+    <div class="global-buttons">
+      <button id="reset-button">Reset to Defaults</button>
+    </div>
+  </div>
+</body>
+</html>
+</file>
+
+<file path="src/popup/switcher.js">
+/**
+ * Popup script for Browser Environment Switcher
+ * 
+ * This script handles the environment switcher popup UI, displaying
+ * available environments and allowing users to switch between them.
+ */
+
+// Debug logging to help diagnose issues
+const DEBUG = true;
+
+/**
+ * Log messages to console when in debug mode
+ * @param {string} message - The message to log
+ * @param {*} data - Optional data to log
+ */
+function log(message, data) {
+  if (!DEBUG) return;
+  
+  if (data) {
+    console.log(message, data);
+  } else {
+    console.log(message);
+  }
+}
+
+// Global variables to track state
+let currentTabId = null;
+
+/**
+ * Initialize the popup when DOM is fully loaded
+ */
+document.addEventListener('DOMContentLoaded', initialize);
+
+/**
+ * Initialize the popup when DOM is fully loaded
+ */
+document.addEventListener('DOMContentLoaded', initialize);
+
+/**
+ * Initialize the popup UI
+ */
+function initialize() {
+  try {
+    console.log("Popup DOM loaded");
+    
+    // Get the current active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (!tabs || !tabs.length) {
+        console.error("No active tab found");
+        document.getElementById("popup-title").textContent = "Error: No active tab";
+        return;
+      }
+      
+      // Store current tab ID
+      currentTabId = tabs[0].id;
+      
+      // Load state for current tab
+      loadStateForTab(currentTabId);
+      
+      // Add tab change listener
+      chrome.tabs.onActivated.addListener(handleTabChange);
+    });
+  } catch (error) {
+    console.error("Error initializing popup:", error);
+    document.getElementById("popup-title").textContent = "Error loading environments";
+  }
+}
+
+/**
+ * Handle tab changes while popup is open
+ */
+function handleTabChange(activeInfo) {
+  console.log("Tab changed to:", activeInfo.tabId);
+  
+  // Update current tab ID
+  currentTabId = activeInfo.tabId;
+  
+  // Load state for new tab
+  loadStateForTab(currentTabId);
+}
+
+/**
+ * Load state for a specific tab
+ */
+function loadStateForTab(tabId) {
+  // Get state from background script
+  console.log("Requesting state from background script for tab:", tabId);
+  chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
+    console.log("State received:", state);
+    
+    if (!state) {
+      console.error("No state received from background script");
+      document.getElementById("popup-title").textContent = "Error loading state";
+      return;
+    }
+    
+    const { matchingServer, currentURL } = state;
+    
+    if (!matchingServer || !currentURL) {
+      console.log("No matching environment found");
+      displayNoEnvironmentMessage();
+      return;
+    }
+    
+    // Set popup title
+    document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
+    
+    // Get servers for this environment
+    chrome.runtime.sendMessage(
+      { action: "getServers", environmentName: matchingServer.name }, 
+      function(environmentServers) {
+        // Display environment server links
+        displayEnvironmentServers(environmentServers, matchingServer, currentURL);
+      }
+    );
+  });
+}
+
+// Cleanup when popup is closed
+window.addEventListener('unload', function() {
+  // Remove tab change listener when popup closes
+  chrome.tabs.onActivated.removeListener(handleTabChange);
+});
+
+/**
+ * Display environment server links
+ */
+function displayEnvironmentServers(servers, currentServer, currentURL) {
+  // Get the link list element
+  const linkList = document.getElementById('link-list');
+  linkList.innerHTML = '';
+  
+  if (!servers || !servers.length) {
+    console.error("No servers received for environment:", currentServer.name);
+    return;
+  }
+  
+  // Create new links for each server
+  for (const server of servers) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    
+    // Properly capitalize the environment type
+    a.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
+    
+    // Create new URL preserving path, query, and hash
+    const url = new URL(currentURL);
+    const newUrl = new URL(`${url.protocol}//${server.host}${url.pathname}${url.search}${url.hash}`);
+    
+    a.href = "#";
+    a.title = newUrl.toString();
+    a.dataset.url = newUrl.toString();
+    a.addEventListener("click", loadEnvironment);
+    
+    // Mark the current environment type as active
+    if (currentServer.type === server.type) {
+      a.classList.add("active");
+      console.log("Marked as active:", server.type);
+    }
+    
+    li.appendChild(a);
+    linkList.appendChild(li);
+  }
+  
+  // Add "Edit Configuration" link at the bottom
+  const editLi = document.createElement('li');
+  const editLink = document.createElement('a');
+  editLink.textContent = "Edit configuration";
+  editLink.href = "#";
+  editLink.className = "edit-config-link";
+  
+  editLink.addEventListener('click', function() {
+    // Store environment name to edit in Chrome storage
+    chrome.storage.local.set({ 
+      pendingConfigAction: {
+        action: "edit",
+        environmentName: currentServer.name,
+        timestamp: Date.now() // Add timestamp to ensure we're working with fresh data
+      }
+    }, function() {
+      // Open options page after data is stored
+      chrome.runtime.openOptionsPage();
+    });
+  });
+  
+  editLi.appendChild(editLink);
+  linkList.appendChild(editLi);
+}
+
+
+/**
+ * Load and display available servers for the current environment
+ * @param {Object} matchingServer - The current server environment
+ * @param {URL} currentURL - The current tab URL
+ */
+function loadEnvironmentServers(matchingServer, currentURL) {
+  log("Loading servers for environment:", matchingServer.name);
+  
+  chrome.runtime.sendMessage(
+    { action: "getServers", environmentName: matchingServer.name }, 
+    function(environmentServers) {
+      if (!environmentServers || environmentServers.length === 0) {
+        handleError(`No servers found for ${matchingServer.name}`);
+        return;
+      }
+      
+      log("Servers received:", environmentServers);
+      
+      // Create links for each server environment
+      populateServerLinks(environmentServers, matchingServer, currentURL);
+    }
+  );
+}
+
+/**
+ * Populate the server links in the popup UI
+ * @param {Array} servers - List of available servers
+ * @param {Object} currentServer - The current server environment
+ * @param {URL} currentURL - The current tab URL
+ */
+function populateServerLinks(servers, currentServer, currentURL) {
+  // Get the link list element
+  const linkList = document.getElementById('link-list');
+  
+  // Clear any existing links
+  while (linkList.firstChild) {
+    linkList.removeChild(linkList.firstChild);
+  }
+  
+  // Create new links for each server
+  servers.forEach(server => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    
+    // Format server type with capitalized first letter
+    a.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
+    
+    // Create the new URL for this server
+    const newUrl = new URL(currentURL);
+    newUrl.hostname = server.host;
+    
+    a.href = "#";
+    a.title = newUrl.toString();
+    a.dataset.url = newUrl.toString();
+    a.addEventListener("click", loadEnvironment);
+    
+    // Mark the current environment as active
+    if (currentServer.type === server.type) {
+      a.classList.add("active");
+    }
+    
+    li.appendChild(a);
+    linkList.appendChild(li);
+  });
+}
+
+
+/**
+ * Load the selected environment when a link is clicked
+ */
+function loadEnvironment(event) {
+  event.preventDefault();
+  
+  try {
+    const targetUrl = this.dataset.url;
+    console.log("Switching to URL:", targetUrl);
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.update(tabs[0].id, { url: targetUrl });
+        window.close(); // Close the popup
+      }
+    });
+  } catch (error) {
+    console.error("Error switching environment:", error);
+  }
+}
+
+/**
+ * Display a message when no matching environment is found
+ */
+function displayNoEnvironmentMessage() {
+  document.getElementById("popup-title").textContent = "No matching environment";
+  
+  // Clear any existing links
+  const linkList = document.getElementById('link-list');
+  while (linkList.firstChild) {
+    linkList.removeChild(linkList.firstChild);
+  }
+  
+  // Add a message
+  const li = document.createElement('li');
+  const message = document.createElement('div');
+  message.textContent = "Current site doesn't match any configured environments.";
+  message.style.padding = "10px";
+  message.style.color = "#666";
+  li.appendChild(message);
+  linkList.appendChild(li);
+}
+
+/**
+ * Handle errors in the popup
+ * @param {string} message - Error message
+ * @param {Error} [error] - Optional Error object
+ */
+function handleError(message, error) {
+  log(`ERROR: ${message}`, error);
+  document.getElementById("popup-title").textContent = "Error";
+  
+  // Clear any existing links
+  const linkList = document.getElementById('link-list');
+  while (linkList.firstChild) {
+    linkList.removeChild(linkList.firstChild);
+  }
+  
+  // Add an error message
+  const li = document.createElement('li');
+  const errorMessage = document.createElement('div');
+  errorMessage.textContent = message;
+  errorMessage.style.padding = "10px";
+  errorMessage.style.color = "#f44336";
+  li.appendChild(errorMessage);
+  linkList.appendChild(li);
+}
+
+
+/**
+ * Display a message when no matching environment is found
+ */
+function displayNoEnvironmentMessage() {
+  // Get the current tab's URL for creating a new configuration
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (!tabs || !tabs.length) return;
+    
+    const currentUrl = new URL(tabs[0].url);
+    const hostname = currentUrl.hostname;
+    
+    document.getElementById("popup-title").textContent = "No matching environment";
+    
+    // Clear any existing links
+    const linkList = document.getElementById('link-list');
+    while (linkList.firstChild) {
+      linkList.removeChild(linkList.firstChild);
+    }
+    
+    // Add a message
+    const messageLi = document.createElement('li');
+    const message = document.createElement('div');
+    message.textContent = "Current site doesn't match any configured environments.";
+    message.style.padding = "10px";
+    message.style.color = "#666";
+    messageLi.appendChild(message);
+    linkList.appendChild(messageLi);
+    
+    // Add "Create Configuration" link
+    const createLi = document.createElement('li');
+    const createLink = document.createElement('a');
+    createLink.textContent = `Create "${hostname}" Configuration`;
+    createLink.href = "#";
+    createLink.style.display = "block";
+    createLink.style.padding = "10px";
+    createLink.style.marginTop = "10px";
+    createLink.style.textAlign = "center";
+    createLink.style.backgroundColor = "#4285f4";
+    createLink.style.color = "white";
+    createLink.style.borderRadius = "4px";
+    createLink.style.textDecoration = "none";
+    
+    createLink.addEventListener('click', function() {
+      // Store configuration data in Chrome storage
+      chrome.storage.local.set({ 
+        pendingConfigAction: {
+          action: "create",
+          hostname: hostname,
+          url: tabs[0].url,
+          timestamp: Date.now() // Add timestamp to ensure we're working with fresh data
+        }
+      }, function() {
+        // Open options page after data is stored
+        chrome.runtime.openOptionsPage();
+      });
+    });
+    
+    createLi.appendChild(createLink);
+    linkList.appendChild(createLi);
+  });
+}
+</file>
+
+<file path="README.md">
+# Browser Environment Switcher
+
+A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
+
+![Extension Demo](screenshots/demo.gif)
+
+## Features
+
+- One-click switching between environments
+- Automatic environment detection
+- Visual indicators for current environment
+- Customizable environment configurations
+- Works across multiple domains/projects
+
+## Screenshots
+
+| Popup Interface | Options Page |
+|----------------|--------------|
+| ![Popup](screenshots/popup.png) | ![Options](screenshots/options.png) |
+
+## Usage
+
+1. Configure your environments in the options page
+2. Browse to any configured site
+3. Click the extension icon to see available environments
+4. Select an environment to switch to it
+
+## Installation
+
+### Chrome
+1. Download the latest release
+2. Open chrome://extensions
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the extension directory
+
+
+# Safari Compatibility Notes
+
+Safari supports web extensions through its Safari Web Extension framework. Here are important compatibility considerations for the Browser Environment Switcher when targeting Safari:
+
+## API Compatibility
+
+Safari supports most Chrome extension APIs through compatibility layers, with a few key differences:
+
+1. **Service Workers**: Safari supports service workers, but there may be subtle differences in behavior. We should test the background.js service worker carefully in Safari.
+
+2. **Storage API**: Safari fully supports `chrome.storage.local`, which is what we're using.
+
+3. **Tabs API**: Safari supports the `chrome.tabs` API, but there may be permission differences.
+
+4. **Action API**: Safari supports `chrome.action` for the extension toolbar button.
+
+## Building Process
+
+To build for Safari:
+
+1. First, ensure the extension works in Chrome
+2. Use the Safari Web Extension Converter tool in Xcode.  From the parent directory of your code run:
+   ```
+   xcrun safari-web-extension-converter ./browser-environment-switcher --app-name "EnvSwitcher" --bundle-identifier "com.desatt.envswitcher"
+   ```
+3. The tool will create a new Xcode project
+4. You'll need to sign the extension with your Apple Developer account
+5. Ensure the Team is properly set, and the identifier bundles need to match for the app and extension (don't let xcode add .extension, that appears to fail)
+6. You can then build and install the extension
+
+
+## Safari-Specific Issues to Watch For
+
+1. **Extension Signing**: Safari requires all extensions to be signed with an Apple Developer account.
+
+2. **Performance**: Test the extension performance in Safari, especially the background script.
+
+3. **Content Security Policy**: Safari may enforce stricter Content Security Policy rules.
+
+4. **Permissions**: Safari's permission model may require adjustments to our host permissions.
+
+5. **UI Appearance**: Safari has different styling guidelines for extension UIs.
+
+## Testing in Safari
+
+Before deploying:
+
+1. Test the environment detection logic
+2. Verify the icon changes correctly
+3. Ensure the popup UI displays and functions properly
+4. Confirm that environment switching works as expected
+
+## Debugging in Safari
+
+To debug Safari extensions:
+
+1. Enable the "Develop" menu in Safari preferences
+2. Use the Web Inspector to debug the extension's background and content scripts
+3. Look for any console errors specific to Safari
+
+## Safari Extension Distribution
+
+To distribute for Safari:
+
+1. Submit the extension to the Apple App Store as a Safari extension
+2. Follow Apple's review guidelines
+3. Users will install via the App Store rather than direct download
+
+Note: For internal use, you can distribute the .app file directly to users.
+</file>
+
+<file path="src/background.js">
+/**
+ * Background Service Worker for Browser Environment Switcher
+ * 
+ * This script manages environment detection, state tracking,
+ * and handles communication between the extension parts.
+ */
+
+// State management for service worker
+const state = {
+  matchingServer: undefined,
+  currentURL: null,
+  tabID: null,
+  environments: []
+};
+
+// Default environment configurations
+const DEFAULT_ENVIRONMENTS = [
+  {
+    name: "Wikipedia",
+    servers: [
+      { type: "development", host: "test.wikipedia.org" },
+      { type: "production", host: "wikipedia.org" }
+    ]
+  },
+  {
+    name: "Mozilla",
+    servers: [
+      { type: "development", host: "developer.allizom.org" },
+      { type: "production", host: "developer.mozilla.org" }
+    ]
+  },
+  {
+    name: "BBC",
+    servers: [
+      { type: "development", host: "www.test.bbc.com" },
+      { type: "production", host: "www.bbc.com" }
+    ]
+  }
+  // Add more environments as needed
+];
+
+/**
+ * Initialize extension with stored environments or defaults
+ */
+function initializeEnvironments() {
+  chrome.storage.local.get('environments', function(data) {
+    if (data.environments) {
+      state.environments = data.environments;
+    } else {
+      state.environments = DEFAULT_ENVIRONMENTS;
+    }
+  });
+}
+
+/**
+ * Finds the matching server environment for a given hostname
+ * @param {string} host - The hostname to check
+ * @returns {Object|undefined} The matching server or undefined
+ */
+function getEnvironmentServer(host) {
+  if (!host) {
+    console.log("Empty host provided to getEnvironmentServer");
+    return undefined;
+  }
+  
+  console.log("Checking for environment match for host:", host);
+  
+  // Split hostname and port if present
+  let hostname = host;
+  let port = "";
+  
+  if (host.includes(":")) {
+    const parts = host.split(":");
+    hostname = parts[0];
+    port = parts[1];
+    console.log("Host contains port. Hostname:", hostname, "Port:", port);
+  }
+  
+  // Remove www. prefix if present
+  const baseHost = hostname.replace(/^www\./, "");
+  
+  // Check against all environments
+  for (const environment of state.environments) {
+    for (const server of environment.servers) {
+      // Parse server host
+      let serverHost = server.host;
+      let serverPort = "";
+      
+      if (server.host.includes(":")) {
+        const parts = server.host.split(":");
+        serverHost = parts[0];
+        serverPort = parts[1];
+        console.log("Server contains port. Server host:", serverHost, "Server port:", serverPort);
+      }
+      
+      // Remove www. prefix from server host if present
+      const baseServerHost = serverHost.replace(/^www\./, "");
+      
+      // Log comparison details for debugging
+      console.log(`Comparing ${baseHost}:${port} with ${baseServerHost}:${serverPort}`);
+      
+      // Case 1: Direct match with port consideration
+      if (baseHost === baseServerHost && 
+          (port === serverPort || (!port && !serverPort))) {
+        console.log("✓ MATCH FOUND: Direct match");
+        return { 
+          name: environment.name, 
+          type: server.type, 
+          host: server.host 
+        };
+      }
+      
+      // Case 2: Host match ignoring port (useful for dev servers with variable ports)
+      if (baseHost === baseServerHost) {
+        console.log("✓ MATCH FOUND: Host match (ignoring port)");
+        return { 
+          name: environment.name, 
+          type: server.type, 
+          host: server.host 
+        };
+      }
+      
+      // Case 3: Subdomain match
+      if (baseHost.endsWith("." + baseServerHost)) {
+        console.log("✓ MATCH FOUND: Subdomain match");
+        return { 
+          name: environment.name, 
+          type: server.type, 
+          host: server.host 
+        };
+      }
+      
+      // Case 4: LexisNexis specific matches
+      if (baseServerHost + ".lexisnexis.com" === baseHost || 
+          baseServerHost + ".lexis-nexis.com" === baseHost) {
+        console.log("✓ MATCH FOUND: LexisNexis domain pattern");
+        return { 
+          name: environment.name, 
+          type: server.type, 
+          host: server.host 
+        };
+      }
+    }
+  }
+  
+  console.log("❌ No environment match found for:", host);
+  return undefined;
+}
+
+/**
+ * Gets all servers for a specific environment
+ * @param {string} environmentName - Name of the environment
+ * @returns {Array} List of servers for the environment
+ */
+function getServers(environmentName) {
+  for (const environment of state.environments) {
+    if (environment.name === environmentName) {
+      const serverList = [];
+      let lastServerType = null;
+      
+      for (const server of environment.servers) {
+        if (server.type !== lastServerType) {
+          serverList.push(server);
+          lastServerType = server.type;
+        }
+      }
+      
+      return serverList;
+    }
+  }
+  return [];
+}
+
+/**
+ * Converts URL strings to URL objects
+ * @param {string} href - URL to convert
+ * @returns {URL} URL object
+ */
+function getLocation(href) {
+  return new URL(href);
+}
+
+/**
+ * Updates the extension icon based on the environment type
+ * @param {number} tabId - The ID of the current tab
+ * @param {Object} matchingServer - The detected environment server
+ */
+function updateExtensionIcon(tabId, matchingServer) {
+  // Always enable the icon
+  chrome.action.enable(tabId);
+  
+  if (matchingServer) {
+    // If we have a match, use the appropriate environment icon
+    chrome.action.setIcon({
+      tabId: tabId,
+      path: {
+        16: `/icons/${matchingServer.type}-16.png`,
+        32: `/icons/${matchingServer.type}-32.png`
+      }
+    });
+    
+    // Update tooltip with current environment
+    const envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
+    chrome.action.setTitle({
+      tabId: tabId,
+      title: `Currently Viewing: ${envName}`
+    });
+  } else {
+    // No match found, show the unmatched icon
+    chrome.action.setIcon({
+      tabId: tabId,
+      path: {
+        16: `/icons/unmatched-16.png`,
+        32: `/icons/unmatched-32.png`
+      }
+    });
+    
+    // Update tooltip for unmatched site
+    chrome.action.setTitle({
+      tabId: tabId,
+      title: `No Environment Match`
+    });
+  }
+}
+
+/**
+ * Checks if the current URL matches any configured environment
+ * @param {number} tabId - The ID of the tab being checked
+ * @param {Object} changeInfo - Information about the change
+ * @param {Object} tab - The tab that was updated
+ */
+function checkForValidUrl(tabId, changeInfo, tab) {
+  // Only process when page is loading and has a valid URL
+  if (changeInfo.status !== "loading" || !tab.url || !tab.url.startsWith("http")) {
+    return;
+  }
+  
+  try {
+    const currentURL = getLocation(tab.url);
+    const matchingServer = getEnvironmentServer(currentURL.hostname);
+    
+    // Update state
+    state.currentURL = currentURL;
+    state.tabID = tabId;
+    state.matchingServer = matchingServer;
+    
+    // Update extension icon
+    updateExtensionIcon(tabId, matchingServer);
+  } catch (error) {
+    console.error("Error checking URL:", error);
+  }
+}
+
+/**
+ * Handles messages from the popup and options pages
+ * @param {Object} message - The message received
+ * @param {Object} sender - Information about the sender
+ * @param {Function} sendResponse - Function to send a response
+ * @returns {boolean} Whether response will be sent asynchronously
+ */
+function handleMessages(message, sender, sendResponse) {
+  switch (message.action) {
+    case "getState":
+      // If a specific tab ID is provided, get state for that tab
+      if (message.tabId) {
+        chrome.tabs.get(message.tabId, function(tab) {
+          if (chrome.runtime.lastError) {
+            console.error("Error getting tab:", chrome.runtime.lastError);
+            sendResponse(null);
+            return;
+          }
+          
+          try {
+            const tabUrl = tab.url;
+            const tabLocation = getLocation(tabUrl);
+            const matchingServer = getEnvironmentServer(tabLocation.hostname);
+            
+            sendResponse({
+              matchingServer: matchingServer,
+              currentURL: tabUrl
+            });
+          } catch (error) {
+            console.error("Error processing tab state:", error);
+            sendResponse(null);
+          }
+        });
+        return true; // Async response
+      } else {
+        // Original behavior for current state
+        sendResponse(state);
+        return true;
+      }
+      
+    case "getServers":
+      const servers = getServers(message.environmentName);
+      sendResponse(servers);
+      return true;
+      
+    case "getEnvironments":
+      sendResponse(state.environments);
+      return true;
+      
+    case "getDefaultEnvironments":
+      sendResponse(DEFAULT_ENVIRONMENTS);
+      return true;
+      
+    case "environmentsUpdated":
+      initializeEnvironments();
+      return false;
+
+    case "createNewConfig":
+      // Store the data temporarily to be used by the options page
+      chrome.storage.local.set({ 
+        newConfigData: {
+          hostname: message.hostname,
+          url: message.url
+        }
+      });
+
+    default:
+      return false;
+  }
+}
+
+// Initialize environment data
+initializeEnvironments();
+
+// Set up event listeners
+chrome.tabs.onUpdated.addListener(checkForValidUrl);
+chrome.runtime.onMessage.addListener(handleMessages);
+</file>
+
+<file path="manifest.json">
+{
+  "name": "Browser Environment Switcher",
+  "manifest_version": 3,
+  "version": "3.0.0",
+  "description": "Switch between development, staging, and production environments easily",
+  
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  
+  "action": {
+    "default_title": "Switch Environment",
+    "default_popup": "src/popup/switcher.html",
+    "default_icon": {
+      "16": "icons/app-icon-16.png",
+      "32": "icons/app-icon-32.png",
+      "48": "icons/app-icon-48.png",
+      "128": "icons/app-icon-128.png"
+    }
+  },
+
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+
+  "icons": {
+    "16": "icons/app-icon-16.png",
+    "32": "icons/app-icon-32.png",
+    "48": "icons/app-icon-48.png",
+    "128": "icons/app-icon-128.png"
+  }
+}
+</file>
+
+</files>
