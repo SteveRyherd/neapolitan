@@ -1,3 +1,4 @@
+<a name="top"></a>
 # Browser Environment Switcher
 
 A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
@@ -108,3 +109,5 @@ To distribute for Safari:
 3. Users will install via the App Store rather than direct download
 
 Note: For internal use, you can distribute the .app file directly to users.
+
+[Back to top](#top)
