@@ -85,6 +85,11 @@
   --z-index-tooltip: 1070;
 }
 
+#popup-title {
+ border-top: 1px solid white;
+ border-bottom: 1px solid white;
+}
+
 /* Utility classes for the Neapolitan stripe */
 .neapolitan-stripe {
   display: flex;

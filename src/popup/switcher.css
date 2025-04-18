@@ -8,6 +8,11 @@ body {
   color: var(--text-color);
 }
 
+body .environment-links {
+  border: 1px solid #666;
+}
+
+
 /* Neapolitan stripe */
 .neapolitan-stripe {
   display: flex;
@@ -26,7 +31,7 @@ body {
 
 /* Environment-specific headers */
 .env-header {
-  font-size: 14px
+  font-size: 14px;
   margin: 0;
   padding: 10px;
   text-align: center;

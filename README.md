@@ -1,6 +1,6 @@
 <a name="top"></a>
 
-![Project Hero](screenshots/hero_resized.png)
+![Project Hero](screenshots/neapolitan_resized.png)
 # Browser Environment Switcher
 
 A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
