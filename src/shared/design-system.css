@@ -6,9 +6,13 @@
 :root {
   /* Base colors - primary source of truth */
   --vanilla-base: #f6e2b3;
+  --vanilla-base-rgb: 246, 226, 179;
   --strawberry-base: #fdaeae;
+  --strawberry-base-rgb: 253, 174, 174;
   --chocolate-base: #b49982;
+  --chocolate-base-rgb: 180, 153, 130;
   --accent-base: #10ece4;
+  --accent-base-rgb: 16, 236, 228;
   
   /* Color variants */
   --vanilla-light: #faf0d1;

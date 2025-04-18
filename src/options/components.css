@@ -38,12 +38,12 @@ h1::after {
   height: 4px;
   background: linear-gradient(
     to right,
-    var(--vanilla-base) 0%,
-    var(--vanilla-base) 33.33%,
-    var(--strawberry-base) 33.33%,
-    var(--strawberry-base) 66.66%,
-    var(--chocolate-base) 66.66%,
-    var(--chocolate-base) 100%
+    rgba(var(--vanilla-base-rgb), 0.5) 0%,
+    rgba(var(--vanilla-base-rgb), 0.5) 33.33%,
+    rgba(var(--strawberry-base-rgb), 0.5) 33.33%,
+    rgba(var(--strawberry-base-rgb), 0.5) 66.66%,
+    rgba(var(--chocolate-base-rgb), 0.5) 66.66%,
+    rgba(var(--chocolate-base-rgb), 0.5) 100%
   );
 }
 
@@ -580,7 +580,15 @@ input[type="text"]:focus {
   text-decoration: underline;
 }
 
-/* Theme-specific overrides */
+/* Light theme overrides for tab */
+html[data-theme="light"] .tab-button.active,
+body.theme-light .tab-button.active {
+  background-color: var(--vanilla-dark);
+  font-weight: var(--font-weight-bold);
+  border-bottom: none;
+}
+
+/* Dark theme overrides */
 html[data-theme="dark"] .container,
 body.theme-dark .container {
   background-color: var(--bg-secondary);

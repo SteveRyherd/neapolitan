@@ -12,6 +12,35 @@ body {
   color: var(--text-primary);
 }
 
+/* Neapolitan stripes */
+.neapolitan-stripe {
+  display: flex;
+  height: 4px;
+  width: 100%;
+}
+
+.neapolitan-stripe > div {
+  height: 100%;
+  width: 33.33%;
+}
+
+/* Top stripe is subtle */
+.neapolitan-stripe-top {
+  opacity: 0.6;
+}
+
+/* Bottom stripe has shadow for depth */
+.neapolitan-stripe-bottom {
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 8px;
+}
+
+html[data-theme="dark"] .neapolitan-stripe-bottom,
+body.theme-dark .neapolitan-stripe-bottom {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
 /* Environment-specific headers */
 .env-header {
   font-size: var(--font-size-md);
@@ -29,7 +58,9 @@ body {
 /* Title */
 #popup-title {
   margin: 0;
-  padding: 2px 6px;
+  padding: 8px 6px;
+  text-align: center;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Environment-specific icon badges */

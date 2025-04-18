@@ -57,14 +57,14 @@ body.theme-dark {
 /* Light theme */
 html[data-theme="light"],
 body.theme-light {
-  /* Base colors */
-  --vanilla-base: #f0f0f0;
+  /* Base colors - with yellow tint for active elements */
+  --vanilla-base: #f8f0d0; /* More yellow tint for light theme */
   --strawberry-base: #ffcece;
   --chocolate-base: #e0d2c9;
   
   /* Color variants */
   --vanilla-light: #ffffff;
-  --vanilla-dark: #e0e0e0;
+  --vanilla-dark: #f5e6b3; /* Stronger yellow for active tab */
   --strawberry-light: #fff5f5;
   --strawberry-dark: #ffc4c4;
   --chocolate-light: #f0e7e0;

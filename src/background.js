@@ -222,8 +222,8 @@ function updateExtensionIcon(tabId, matchingServer) {
       chrome.action.setIcon({
         tabId: tabId,
         path: {
-          16: '/icons/app-icon-16.png',
-          32: '/icons/app-icon-32.png'
+          16: '/icons/unmatched-16.png',
+          32: '/icons/unmatched-32.png'
         }
       });
     }
