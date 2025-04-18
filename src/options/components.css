@@ -572,7 +572,7 @@ input[type="text"]:focus {
 }
 
 .creator-links a {
-  color: var(--chocolate-base);
+  color: #0e4160;
   text-decoration: none;
 }
 

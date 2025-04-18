@@ -267,6 +267,7 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
   editLink.textContent = "Edit configuration";
   editLink.href = "#";
   editLink.className = "edit-config-link";
+  editLink.style.marginTop = "var(--spacing-lg)";
   
   editLink.addEventListener('click', function() {
     // Store action to be processed by options page
@@ -432,6 +433,7 @@ function applyEnvironmentStyling(environmentType) {
       'production': 'Production'
     };
     
-    popupTitle.textContent = `${envNames[environmentType] || 'Switch'} Environment`;
+    // popupTitle.textContent = `${envNames[environmentType] || 'Switch'} Environment`;
+    popupTitle.textContent = `${envNames[environmentType] || 'Switch'}`;
   }
 }

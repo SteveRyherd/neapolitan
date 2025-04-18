@@ -120,6 +120,12 @@ body.env-development {
   background-color: var(--env-development-bg-light);
 }
 
+
+html[data-theme="light"][data-environment="development"] #popup-title,
+body.theme-light.env-development #popup-title {
+  color: var(--text-primary);
+}
+
 html[data-environment="development"] #popup-title,
 body.env-development #popup-title {
   background-color: var(--env-development-bg);
