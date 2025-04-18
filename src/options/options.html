@@ -23,7 +23,18 @@
       <div class="title-text">Neapolitan Domain Switcher</div>
     </h1>
     
-    <div class="panel-container">
+    <!-- Tab Navigation -->
+    <div class="tabs-container">
+      <div class="tab-nav">
+        <button class="tab-button active" data-tab="environments-tab">Environments</button>
+        <button class="tab-button" data-tab="settings-tab">Settings</button>
+        <button class="tab-button" data-tab="credits-tab">Credits</button>
+      </div>
+    </div>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="environments-tab">
+      <div class="panel-container">
       <!-- Left Panel: Environment List -->
       <div class="environments-panel">
         <h2>Environments</h2>
@@ -79,6 +90,192 @@
     <div id="status-message"></div>
     <div class="global-buttons">
       <button id="reset-button">Reset to Defaults</button>
+    </div>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div class="tab-content hidden" id="settings-tab">
+      <h2>General Settings</h2>
+      
+      <div class="settings-section">
+        <h3>Theme Settings</h3>
+        <div class="settings-flex-container">
+          <div class="settings-column">
+            <div class="form-group">
+              <label for="theme-selector">Color Theme:</label>
+              <select id="theme-selector" class="settings-select">
+                <option value="neapolitan">Neapolitan (Default)</option>
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+                <option value="high-contrast">High Contrast</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="settings-column">
+            <div class="preview-container">
+              <h4>Popup Preview:</h4>
+              <div class="popup-preview">
+                <!-- Popup Preview Content -->
+                <div class="preview-header">Switch Environment</div>
+                <div class="preview-stripe">
+                  <div class="stripe-vanilla"></div>
+                  <div class="stripe-strawberry"></div>
+                  <div class="stripe-chocolate"></div>
+                </div>
+                <ul class="preview-list">
+                  <li>
+                    <a class="preview-link">
+                      <span class="preview-badge dev-badge">
+                        <span class="preview-emoji" id="preview-dev-emoji">🍫</span>
+                        <span class="preview-text" id="preview-dev-text">D</span>
+                      </span>
+                      <span>Development</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="preview-link active">
+                      <span class="preview-badge staging-badge">
+                        <span class="preview-emoji" id="preview-staging-emoji">🍓</span>
+                        <span class="preview-text" id="preview-staging-text">S</span>
+                      </span>
+                      <span>Staging</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="preview-link">
+                      <span class="preview-badge prod-badge">
+                        <span class="preview-emoji" id="preview-prod-emoji">🍦</span>
+                        <span class="preview-text" id="preview-prod-text">P</span>
+                      </span>
+                      <span>Production</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Icon Settings</h3>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="show-emoji-icons" name="show-emoji-icons" checked>
+          <label for="show-emoji-icons">Show Emoji Icons</label>
+        </div>
+        
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="icon-badge-notifications" name="icon-badge-notifications" checked>
+          <label for="icon-badge-notifications">Show Environment Badge on Extension Icon</label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Behavior</h3>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="auto-detect-environments" name="auto-detect-environments" checked>
+          <label for="auto-detect-environments">Auto-detect Environments</label>
+        </div>
+        
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="preserve-path-query" name="preserve-path-query" checked>
+          <label for="preserve-path-query">Preserve Path & Query Parameters When Switching</label>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button id="save-settings-button">Save Settings</button>
+        <button id="reset-settings-button" class="secondary-button">Reset to Defaults</button>
+      </div>
+    </div>
+    
+    <!-- Credits Tab (Nutrition Label Style) -->
+    <div class="tab-content hidden" id="credits-tab">
+      <div class="nutrition-label">
+        <div class="nutrition-header">
+          <h1>Extension Facts</h1>
+        </div>
+        
+        <div class="nutrition-serving">
+          <p><strong>Serving Size</strong> 1 Browser</p>
+          <p><strong>Servings Per Container</strong> Unlimited</p>
+        </div>
+        
+        <div class="nutrition-section">
+          <div class="nutrition-row nutrition-header-row">
+            <div><strong>Amount Per Serving</strong></div>
+            <div><strong>% Daily Joy</strong></div>
+          </div>
+          
+          <div class="nutrition-row nutrition-bold-row">
+            <div><strong>Environment Switching</strong> Multiple Flavors</div>
+            <div><strong>100%</strong></div>
+          </div>
+          
+          <div class="nutrition-row">
+            <div>Development 🍫</div>
+            <div>33%</div>
+          </div>
+          
+          <div class="nutrition-row">
+            <div>Staging 🍓</div>
+            <div>33%</div>
+          </div>
+          
+          <div class="nutrition-row">
+            <div>Production 🍦</div>
+            <div>34%</div>
+          </div>
+          
+          <div class="nutrition-row nutrition-bold-row nutrition-divider">
+            <div><strong>Productivity Boost</strong></div>
+            <div><strong>85%</strong></div>
+          </div>
+          
+          <div class="nutrition-row nutrition-divider">
+            <div><strong>Bug Prevention</strong></div>
+            <div><strong>75%</strong></div>
+          </div>
+        </div>
+        
+        <div class="nutrition-ingredients">
+          <p><strong>Ingredients:</strong> Javascript, HTML, CSS, Chrome API, Love, Patience, Coffee</p>
+        </div>
+        
+        <div class="nutrition-info">
+          <p><strong>Created By:</strong> Steve Ryherd</p>
+          <p>
+            <img src="badge@0.25x.png" height="40" alt="Creator" class="creator-avatar">
+            <span class="creator-links">
+              <a href="http://www.steveryherd.com/" target="_blank">Website</a> | 
+              <a href="http://www.github.com/steveryherd/" target="_blank">GitHub</a>
+            </span>
+          </p>
+        </div>
+        
+        <div class="nutrition-info">
+          <p><strong>Special Thanks:</strong> Chrome Extensions Team, Open Source Contributors, Early Adopters</p>
+        </div>
+        
+        <div class="nutrition-license">
+          <p><strong>Licensed Under:</strong> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a></p>
+          <div class="license-badges">
+            <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="CC">
+            <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="BY">
+            <img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="NC">
+            <img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="SA">
+          </div>
+        </div>
+        
+        <div class="nutrition-dedication">
+          <p><strong>Dedication:</strong> To all developers who've experienced the frustration of accidentally making changes in production when they meant to be in development.</p>
+        </div>
+        
+        <div class="nutrition-footer">
+          <p>* Percent Daily Joy values are based on a 2000-line codebase diet. Your values may be higher depending on the size of your project.</p>
+        </div>
+      </div>
     </div>
   </div>
   <footer class="site-footer">

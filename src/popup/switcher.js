@@ -25,6 +25,13 @@ function log(message, data) {
 
 // Global variables to track state
 let currentTabId = null;
+let appSettings = {
+  theme: 'neapolitan',
+  showEmojiIcons: true,
+  iconBadgeNotifications: true,
+  autoDetectEnvironments: true,
+  preservePathQuery: true
+};
 
 /**
  * Initialize the popup when DOM is fully loaded
@@ -83,36 +90,43 @@ function handleTabChange(activeInfo) {
  * Load state for a specific tab
  */
 function loadStateForTab(tabId) {
-  // Get state from background script
-  console.log("Requesting state from background script for tab:", tabId);
-  chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
-    console.log("State received:", state);
-    
-    if (!state) {
-      console.error("No state received from background script");
-      document.getElementById("popup-title").textContent = "Error loading state";
-      return;
+  // Get settings first
+  chrome.storage.local.get('appSettings', function(data) {
+    if (data.appSettings) {
+      appSettings = data.appSettings;
     }
     
-    const { matchingServer, currentURL } = state;
-    
-    if (!matchingServer || !currentURL) {
-      console.log("No matching environment found");
-      displayNoEnvironmentMessage();
-      return;
-    }
-    
-    // Set popup title
-    document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
-    
-    // Get servers for this environment
-    chrome.runtime.sendMessage(
-      { action: "getServers", environmentName: matchingServer.name }, 
-      function(environmentServers) {
-        // Display environment server links
-        displayEnvironmentServers(environmentServers, matchingServer, currentURL);
+    // Then get state from background script
+    console.log("Requesting state from background script for tab:", tabId);
+    chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
+      console.log("State received:", state);
+      
+      if (!state) {
+        console.error("No state received from background script");
+        document.getElementById("popup-title").textContent = "Error loading state";
+        return;
       }
-    );
+      
+      const { matchingServer, currentURL } = state;
+      
+      if (!matchingServer || !currentURL) {
+        console.log("No matching environment found");
+        displayNoEnvironmentMessage();
+        return;
+      }
+      
+      // Set popup title
+      document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
+      
+      // Get servers for this environment
+      chrome.runtime.sendMessage(
+        { action: "getServers", environmentName: matchingServer.name }, 
+        function(environmentServers) {
+          // Display environment server links
+          displayEnvironmentServers(environmentServers, matchingServer, currentURL);
+        }
+      );
+    });
   });
 }
 
@@ -172,25 +186,52 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
         break;
     }
     
-    // Add emoji icon
-    const icon = document.createElement('span');
-    icon.style.fontSize = '12px';
-    icon.style.filter = 'drop-shadow(0 0 1px rgba(0,0,0,0.8))';
-    
-    // Set appropriate emoji for each environment
-    switch(server.type) {
-      case 'development':
-        icon.textContent = '🍫';
-        break;
-      case 'staging':
-        icon.textContent = '🍓';
-        break;
-      case 'production':
-        icon.textContent = '🍦';
-        break;
+    // Only show emoji icons if setting is enabled
+    if (appSettings.showEmojiIcons) {
+      // Add emoji icon
+      const icon = document.createElement('span');
+      icon.style.fontSize = '12px';
+      icon.style.filter = 'drop-shadow(0 0 1px rgba(0,0,0,0.8))';
+      
+      // Set appropriate emoji for each environment
+      switch(server.type) {
+        case 'development':
+          icon.textContent = '🍫';
+          break;
+        case 'staging':
+          icon.textContent = '🍓';
+          break;
+        case 'production':
+          icon.textContent = '🍦';
+          break;
+      }
+      
+      // Badge icon is now appended in the conditional block above
+    } else {
+      // Add text indicator instead
+      const indicator = document.createElement('span');
+      indicator.style.fontSize = '10px';
+      indicator.style.fontWeight = 'bold';
+      
+      // Set appropriate text for each environment
+      switch(server.type) {
+        case 'development':
+          indicator.textContent = 'D';
+          indicator.style.color = '#8a6d3b';
+          break;
+        case 'staging':
+          indicator.textContent = 'S';
+          indicator.style.color = '#b24a4a';
+          break;
+        case 'production':
+          indicator.textContent = 'P';
+          indicator.style.color = '#b29e62';
+          break;
+      }
+      
+      badge.appendChild(indicator);
     }
     
-    badge.appendChild(icon);
     
     // Create name span
     const nameSpan = document.createElement('span');

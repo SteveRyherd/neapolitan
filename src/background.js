@@ -10,7 +10,14 @@ const state = {
   matchingServer: undefined,
   currentURL: null,
   tabID: null,
-  environments: []
+  environments: [],
+  settings: {
+    theme: 'neapolitan',
+    showEmojiIcons: true,
+    iconBadgeNotifications: true,
+    autoDetectEnvironments: true,
+    preservePathQuery: true
+  }
 };
 
 // Default environment configurations
@@ -40,15 +47,23 @@ const DEFAULT_ENVIRONMENTS = [
 ];
 
 /**
- * Initialize extension with stored environments or defaults
+ * Initialize extension with stored environments and settings or defaults
  */
 function initializeEnvironments() {
-  chrome.storage.local.get('environments', function(data) {
+  chrome.storage.local.get(['environments', 'appSettings'], function(data) {
+    // Load environments
     if (data.environments) {
       state.environments = data.environments;
     } else {
       state.environments = DEFAULT_ENVIRONMENTS;
     }
+    
+    // Load settings
+    if (data.appSettings) {
+      state.settings = data.appSettings;
+    }
+    
+    console.log('Extension initialized with settings:', state.settings);
   });
 }
 
@@ -189,27 +204,43 @@ function updateExtensionIcon(tabId, matchingServer) {
   // Always enable the icon
   chrome.action.enable(tabId);
   
+  // Only show environment badges if setting is enabled
+  const showBadge = state.settings.iconBadgeNotifications;
+  
   if (matchingServer) {
     // If we have a match, use the appropriate environment icon
-    chrome.action.setIcon({
-      tabId: tabId,
-      path: {
-        16: `/icons/${matchingServer.type}-16.png`,
-        32: `/icons/${matchingServer.type}-32.png`
-      }
-    });
+    if (showBadge) {
+      chrome.action.setIcon({
+        tabId: tabId,
+        path: {
+          16: `/icons/${matchingServer.type}-16.png`,
+          32: `/icons/${matchingServer.type}-32.png`
+        }
+      });
+    } else {
+      // Use default icon if badges are disabled
+      chrome.action.setIcon({
+        tabId: tabId,
+        path: {
+          16: '/icons/app-icon-16.png',
+          32: '/icons/app-icon-32.png'
+        }
+      });
+    }
     
     // Update tooltip with current environment
     let envName;
+    const showEmoji = state.settings.showEmojiIcons;
+    
     switch(matchingServer.type) {
       case 'development':
-        envName = 'Development (🍫)';
+        envName = showEmoji ? 'Development (🍫)' : 'Development';
         break;
       case 'staging':
-        envName = 'Staging (🍓)';
+        envName = showEmoji ? 'Staging (🍓)' : 'Staging';
         break;
       case 'production':
-        envName = 'Production (🍦)';
+        envName = showEmoji ? 'Production (🍦)' : 'Production';
         break;
       default:
         envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
@@ -320,6 +351,16 @@ function handleMessages(message, sender, sendResponse) {
       
     case "environmentsUpdated":
       initializeEnvironments();
+      return false;
+      
+    case "settingsUpdated":
+      // Update settings in state
+      state.settings = message.settings;
+      
+      // Save to storage (as a backup)
+      chrome.storage.local.set({ appSettings: state.settings });
+      
+      console.log('Settings updated:', state.settings);
       return false;
 
     case "createNewConfig":

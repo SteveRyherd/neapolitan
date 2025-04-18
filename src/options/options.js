@@ -6,6 +6,13 @@ let environments = [];
 let currentEnvironmentIndex = -1;
 let hasUnsavedChanges = false;
 let originalEnvironmentData = null; // Store original data for cancel functionality
+let appSettings = {
+  theme: 'neapolitan',
+  showEmojiIcons: true,
+  iconBadgeNotifications: true,
+  autoDetectEnvironments: true,
+  preservePathQuery: true
+};
 
 
 // Initialize the options page
@@ -21,8 +28,14 @@ function initialize() {
       // Then check for pending actions
       checkPendingConfigActions();
       
+      // Load settings
+      loadSettings();
+      
       // Set up other event listeners
       setupEventListeners();
+      
+      // Set up tab navigation
+      setupTabNavigation();
     });
     
     // Listen for storage changes to catch actions from popup
@@ -43,6 +56,12 @@ function setupEventListeners() {
   document.getElementById('cancel-button').addEventListener('click', cancelEditing);
   document.getElementById('delete-environment-button').addEventListener('click', deleteCurrentEnvironment);
   document.getElementById('reset-button').addEventListener('click', resetToDefaults);
+  
+  // Settings tab event listeners
+  document.getElementById('save-settings-button').addEventListener('click', saveSettings);
+  document.getElementById('reset-settings-button').addEventListener('click', resetSettings);
+  document.getElementById('theme-selector').addEventListener('change', updateThemePreview);
+  document.getElementById('show-emoji-icons').addEventListener('change', updatePopupPreview);
   
   // Add form input change listeners to track unsaved changes
   const formInputs = document.querySelectorAll('#environment-form input');
@@ -390,6 +409,151 @@ chrome.storage.local.get('newConfigData', function(data) {
 
 // Create a new configuration from hostname
 // Create a new configuration from hostname
+// Tab Navigation Setup
+function setupTabNavigation() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // If there are unsaved changes in the environments tab, prompt to save
+      if (hasUnsavedChanges && currentEnvironmentIndex !== -1 && 
+          document.getElementById('environments-tab').classList.contains('active')) {
+        if (confirm('You have unsaved changes. Do you want to save them before switching tabs?')) {
+          saveCurrentEnvironment();
+        } else {
+          hasUnsavedChanges = false;
+        }
+      }
+      
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.add('hidden'));
+      
+      // Add active class to clicked button and corresponding content
+      button.classList.add('active');
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.remove('hidden');
+    });
+  });
+}
+
+// Load settings from storage
+function loadSettings() {
+  chrome.storage.local.get('appSettings', function(data) {
+    if (data.appSettings) {
+      appSettings = data.appSettings;
+    }
+    
+    // Update settings UI
+    document.getElementById('theme-selector').value = appSettings.theme;
+    document.getElementById('show-emoji-icons').checked = appSettings.showEmojiIcons;
+    document.getElementById('icon-badge-notifications').checked = appSettings.iconBadgeNotifications;
+    document.getElementById('auto-detect-environments').checked = appSettings.autoDetectEnvironments;
+    document.getElementById('preserve-path-query').checked = appSettings.preservePathQuery;
+    
+    // Apply current theme
+    applyTheme(appSettings.theme);
+    
+    // Initialize popup preview
+    updatePopupPreview();
+  });
+}
+
+// Save settings to storage
+function saveSettings() {
+  // Get values from UI
+  appSettings.theme = document.getElementById('theme-selector').value;
+  appSettings.showEmojiIcons = document.getElementById('show-emoji-icons').checked;
+  appSettings.iconBadgeNotifications = document.getElementById('icon-badge-notifications').checked;
+  appSettings.autoDetectEnvironments = document.getElementById('auto-detect-environments').checked;
+  appSettings.preservePathQuery = document.getElementById('preserve-path-query').checked;
+  
+  // Save to storage
+  chrome.storage.local.set({ appSettings }, function() {
+    showStatus('Settings saved');
+    // Notify background script
+    chrome.runtime.sendMessage({ action: 'settingsUpdated', settings: appSettings });
+    
+    // Apply theme
+    applyTheme(appSettings.theme);
+  });
+}
+
+// Reset settings to defaults
+function resetSettings() {
+  if (confirm('Are you sure you want to reset all settings to defaults?')) {
+    appSettings = {
+      theme: 'neapolitan',
+      showEmojiIcons: true,
+      iconBadgeNotifications: true,
+      autoDetectEnvironments: true,
+      preservePathQuery: true
+    };
+    
+    // Update UI
+    document.getElementById('theme-selector').value = appSettings.theme;
+    document.getElementById('show-emoji-icons').checked = appSettings.showEmojiIcons;
+    document.getElementById('icon-badge-notifications').checked = appSettings.iconBadgeNotifications;
+    document.getElementById('auto-detect-environments').checked = appSettings.autoDetectEnvironments;
+    document.getElementById('preserve-path-query').checked = appSettings.preservePathQuery;
+    
+    // Save to storage
+    chrome.storage.local.set({ appSettings }, function() {
+      showStatus('Settings reset to defaults');
+      // Notify background script
+      chrome.runtime.sendMessage({ action: 'settingsUpdated', settings: appSettings });
+      
+      // Apply theme
+      applyTheme(appSettings.theme);
+    });
+  }
+}
+
+// Update theme preview when selector changes
+function updateThemePreview() {
+  const selectedTheme = document.getElementById('theme-selector').value;
+  applyTheme(selectedTheme);
+  updatePopupPreview();
+}
+
+// Update popup preview based on settings
+function updatePopupPreview() {
+  const showEmoji = document.getElementById('show-emoji-icons').checked;
+  const popupPreview = document.querySelector('.popup-preview');
+  
+  if (showEmoji) {
+    popupPreview.classList.remove('emoji-disabled');
+  } else {
+    popupPreview.classList.add('emoji-disabled');
+  }
+  
+  // Apply theme colors to the preview
+  const currentTheme = document.getElementById('theme-selector').value;
+  popupPreview.className = popupPreview.className.replace(/theme-\w+/g, '').trim();
+  popupPreview.classList.add(`theme-${currentTheme}`);
+  
+  // Apply active state to the staging environment for demonstration
+  const links = document.querySelectorAll('.preview-link');
+  links.forEach(link => {
+    link.classList.remove('active');
+  });
+  links[1].classList.add('active'); // Make staging active
+}
+
+// Apply selected theme
+function applyTheme(theme) {
+  const body = document.body;
+  
+  // Remove all theme classes
+  body.classList.remove('theme-neapolitan', 'theme-dark', 'theme-light', 'theme-high-contrast');
+  
+  // Add selected theme class
+  body.classList.add(`theme-${theme}`);
+  
+  // Could also update other theme-related elements here
+}
+
 function createConfigFromHostname(hostname, url) {
   try {
     console.log("Creating configuration for:", hostname);
