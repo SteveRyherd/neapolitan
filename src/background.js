@@ -200,7 +200,21 @@ function updateExtensionIcon(tabId, matchingServer) {
     });
     
     // Update tooltip with current environment
-    const envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
+    let envName;
+    switch(matchingServer.type) {
+      case 'development':
+        envName = 'Development (🍫)';
+        break;
+      case 'staging':
+        envName = 'Staging (🍓)';
+        break;
+      case 'production':
+        envName = 'Production (🍦)';
+        break;
+      default:
+        envName = matchingServer.type.charAt(0).toUpperCase() + matchingServer.type.slice(1);
+    }
+    
     chrome.action.setTitle({
       tabId: tabId,
       title: `Currently Viewing: ${envName}`

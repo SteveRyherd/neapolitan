@@ -1,88 +1,235 @@
+/* Base styles */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: #f5f5f5;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--vanilla-light); /* Default background */
   width: 220px;
   margin: 0;
   padding: 0;
+  color: var(--text-color);
 }
 
-h1 {
-  font-size: 14px;
-  background: #f8f8f8;
+/* Neapolitan stripe */
+.neapolitan-stripe {
+  display: flex;
+  height: 4px;
+  width: 100%;
+}
+
+.neapolitan-stripe div {
+  height: 100%;
+  width: 33.33%;
+}
+
+.stripe-vanilla { background-color: var(--vanilla-color); }
+.stripe-strawberry { background-color: var(--strawberry-color); }
+.stripe-chocolate { background-color: var(--chocolate-color); }
+
+/* Environment-specific headers */
+.env-header {
+  font-size: 14px
   margin: 0;
   padding: 10px;
   text-align: center;
-  border-top: 1px solid #e0e0e0;
-  color: #333;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-ul, li {
+.env-staging .env-header {
+  background-color: var(--strawberry-color);
+}
+
+.env-development .env-header {
+  background-color: var(--chocolate-color);
+  color: white;
+}
+
+.env-production .env-header {
+  background-color: var(--vanilla-color);
+}
+
+/* Icon badges */
+.icon-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.dev-icon-badge {
+  background-color: white;
+}
+
+.staging-icon-badge {
+  background-color: var(--strawberry-color);
+}
+
+.prod-icon-badge {
+  background-color: var(--vanilla-color);
+}
+
+/* Emoji styling */
+.emoji-icon {
+  font-size: 12px;
+  filter: drop-shadow(0 0 1px rgba(0,0,0,0.8));
+}
+
+/* Environment backgrounds */
+.env-development {
+  background-color: var(--chocolate-light);
+}
+
+.env-staging {
+  background-color: var(--strawberry-light);
+}
+
+.env-production {
+  background-color: var(--vanilla-light);
+}
+
+/* Link lists */
+ul#link-list {
+  padding: 10px 0;
+  margin: 0;
+}
+
+ul#link-list li {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
 
-ul#link-list {
-  padding: 10px 0;
-  margin: 0;
-  display: block;
-}
-
 ul#link-list a { 
-  display: block; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 15px;
   text-decoration: none; 
   cursor: pointer;
-  color: #333;
-  transition: background-color 0.2s ease;
+  color: var(--text-color);
+  transition: all 0.2s ease;
   border-radius: 4px;
   margin: 2px 8px;
-}
-
-ul#link-list a.active { 
-  background: #4285f4;
-  color: white; 
+  background-color: rgba(255,255,255,0.6);
+  border-left: 4px solid transparent;
 }
 
 ul#link-list a:hover { 
-  background-color: #e0e0e0; 
-  color: #000;  
+  background-color: rgba(255,255,255,0.8);
+  transform: translateY(-1px);
 }
 
-ul#link-list a.active:hover { 
-  background-color: #2b70e2; 
-  color: white;  
-}
 
-/* Create Configuration button style */
-.create-config-button {
-  display: block;
-  padding: 10px;
-  margin: 8px;
-  text-align: center;
-  background-color: #4285f4;
+
+
+
+
+
+/* Environment-specific active links */
+.env-development ul#link-list a.active { 
+  background-color: var(--chocolate-dark);
   color: white;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background-color 0.2s;
+  border-left: 4px solid #8d7260;
 }
 
-.create-config-button:hover {
-  background-color: #2b70e2;
+.env-staging ul#link-list a.active {
+  background-color: var(--strawberry-dark);
+  border-left: 4px solid #ff9a9a;
 }
 
-/* Edit Configuration link style */
+.env-production ul#link-list a.active { 
+  background-color: var(--vanilla-dark);
+  border-left: 4px solid #e6d090;
+}
+
+/* Edit configuration link */
 .edit-config-link {
   display: block;
-  text-align: right;
+  text-align: center;
   font-size: 12px;
   padding: 5px 10px;
-  color: #4285f4;
+  color: var(--text-color);
   text-decoration: none;
   margin-top: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.env-staging .edit-config-link {
+  color: black;
 }
 
 .edit-config-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Paper texture overlay - add this class to body */
+.texture-overlay {
+  position: relative;
+}
+
+.texture-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../images/paper-texture.png');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 10;
+}
+
+
+
+/* Keep your existing CSS rules and add/modify these */
+
+
+
+/* Make active links match their environment color */
+.env-development ul#link-list a.active { 
+  background-color: var(--chocolate-dark);
+  color: white;
+  border-left: 4px solid #8d7260;
+}
+
+.env-staging ul#link-list a.active { 
+  background-color: var(--strawberry-dark);
+  border-left: 4px solid #ff9a9a;
+}
+
+.env-production ul#link-list a.active { 
+  background-color: var(--vanilla-dark);
+  border-left: 4px solid #e6d090;
+}
+
+/* Enhanced link styles */
+ul#link-list a {
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.edit-config-link {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  padding: 5px 10px;
+  color: var(--text-color);
+  text-decoration: none;
+  margin-top: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.edit-config-link:hover {
+  opacity: 1;
   text-decoration: underline;
 }

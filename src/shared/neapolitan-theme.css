@@ -1,0 +1,115 @@
+/* src/neapolitan-theme.css */
+:root {
+  /* Primary Neapolitan colors */
+  --vanilla-color: #f6e2b3;
+  --strawberry-color: #fdaeae;
+  --chocolate-color: #b49982;
+  --text-color: #5a4738;
+  --accent-color: #10ece4;
+  
+  /* Secondary colors */
+  --vanilla-light: #faf0d1;
+  --vanilla-dark: #ecd494;
+  --strawberry-light: #fff1f1;
+  --strawberry-dark: #ffb8b8;
+  --chocolate-light: #c5b0a1;
+  --chocolate-dark: #a3877a;
+  
+  /* Font family */
+  --main-font: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Spacing and sizing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-round: 50%;
+  
+  /* Box shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Neapolitan stripe at top */
+.neapolitan-stripe {
+  display: flex;
+  height: 4px;
+  width: 100%;
+}
+
+.neapolitan-stripe > div {
+  height: 100%;
+  width: 33.33%;
+}
+
+.stripe-vanilla { background-color: var(--vanilla-color); }
+.stripe-strawberry { background-color: var(--strawberry-color); }
+.stripe-chocolate { background-color: var(--chocolate-color); }
+
+
+#popup-title {
+ margin: 0px;
+ padding: 2px 6px;
+}
+
+/* Environment-specific styles */
+.env-staging {
+  background-color: var(--strawberry-light);
+}
+
+.env-staging #popup-title {
+  background-color: var(--strawberry-color);
+  color: var(--text-color);
+}
+
+.env-development {
+  background-color: var(--chocolate-light);
+}
+
+.env-development #popup-title {
+  background-color: var(--chocolate-color);
+  color: white;
+}
+
+.env-production {
+  background-color: var(--vanilla-light);
+}
+
+.env-production #popup-title {
+  background-color: var(--vanilla-color);
+  color: var(--text-color);
+}
+
+/* Popup & links styling */
+.icon-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+
+button {
+    background-color: var(--chocolate-color);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}

@@ -2,15 +2,25 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Environment Switcher Options</title>
+  <title>Neapolitan Domain Switcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/options.css">
   <link rel="stylesheet" href="options.css">
   <script src="options.js"></script>
+  <style>
+    body {
+      background: url(wallpaper.png) no-repeat center center fixed;
+      background-size: cover;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>
-      <img src="../../icons/app-icon-48.png" alt="Logo">
-      Browser Environment Switcher
+
+    <h1 class="header">
+      <img src="badge@0.25x.png" height="100" alt="Logo" class="left-logo">
+      <img src="logo@0.25x.png" height="100" alt="Neapolitan Logo">
+      <div class="title-text">Neapolitan Domain Switcher</div>
     </h1>
     
     <div class="panel-container">
@@ -71,5 +81,55 @@
       <button id="reset-button">Reset to Defaults</button>
     </div>
   </div>
+  <footer class="site-footer">
+    <p class="love-message">Made with ❤️ by Steve Ryherd</p>
+    <div class="footer-links">
+      <a href="http://www.github.com/steveryherd/neapolitan" target="_blank">GitHub Repository</a>
+      <span class="divider">|</span>
+      <a href="http://www.steveryherd.com/" target="_blank">Steve's Website</a>
+    </div>
+    <p class="copyright">© 2023 Steve Ryherd. MIT License</p>
+    <style>
+      .site-footer {
+        position: static;
+        width: 100%;
+        text-align: center;
+        padding: 15px 0;
+        margin-top: 20px;
+      }
+      .site-footer p, .site-footer a {
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      .love-message {
+        font-weight: 500;
+      }
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0;
+      }
+      .footer-links a {
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
+      .footer-links a:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+      .divider {
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+      }
+      .copyright {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+    </style>
+  </footer>
 </body>
 </html>

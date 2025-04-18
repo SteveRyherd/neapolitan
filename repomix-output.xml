@@ -43,6 +43,12 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.obsidian/
+  app.json
+  appearance.json
+  core-plugins.json
+  graph.json
+  workspace.json
 icons/
   generate-icons.sh
 src/
@@ -63,6 +69,244 @@ README.md
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path=".obsidian/app.json">
+{}
+</file>
+
+<file path=".obsidian/appearance.json">
+{}
+</file>
+
+<file path=".obsidian/core-plugins.json">
+{
+  "file-explorer": true,
+  "global-search": true,
+  "switcher": true,
+  "graph": true,
+  "backlink": true,
+  "canvas": true,
+  "outgoing-link": true,
+  "tag-pane": true,
+  "properties": false,
+  "page-preview": true,
+  "daily-notes": true,
+  "templates": true,
+  "note-composer": true,
+  "command-palette": true,
+  "slash-command": false,
+  "editor-status": true,
+  "bookmarks": true,
+  "markdown-importer": false,
+  "zk-prefixer": false,
+  "random-note": false,
+  "outline": true,
+  "word-count": true,
+  "slides": false,
+  "audio-recorder": false,
+  "workspaces": false,
+  "file-recovery": true,
+  "publish": false,
+  "sync": true,
+  "webviewer": false
+}
+</file>
+
+<file path=".obsidian/graph.json">
+{
+  "collapse-filter": true,
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": true,
+  "colorGroups": [],
+  "collapse-display": true,
+  "showArrow": false,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1,
+  "collapse-forces": true,
+  "centerStrength": 0.518713248970312,
+  "repelStrength": 10,
+  "linkStrength": 1,
+  "linkDistance": 250,
+  "scale": 1,
+  "close": false
+}
+</file>
+
+<file path=".obsidian/workspace.json">
+{
+  "main": {
+    "id": "b08b29c2ebda46ad",
+    "type": "split",
+    "children": [
+      {
+        "id": "2ba12334232f0d43",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e2fb0d6c62ee0514",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ce9c63254d559229",
+    "type": "split",
+    "children": [
+      {
+        "id": "496b7e7942b231c2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5652ba492697e2bf",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "9a50e7f19fa2abe5",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "5d13b34939e66785",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e379dc968de7bd5a",
+    "type": "split",
+    "children": [
+      {
+        "id": "d369d5bcbc0528a9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3d32ff7526622b8e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "0a6483bac3b5a9ba",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "a49152ecbca04f1a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "1d1c4208366cee99",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "e2fb0d6c62ee0514",
+  "lastOpenFiles": [
+    "README.md"
+  ]
+}
+</file>
 
 <file path=".gitignore">
 # Dependencies
@@ -1387,114 +1631,6 @@ function displayNoEnvironmentMessage() {
 }
 </file>
 
-<file path="README.md">
-# Browser Environment Switcher
-
-A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
-
-![Extension Demo](screenshots/demo.gif)
-
-## Features
-
-- One-click switching between environments
-- Automatic environment detection
-- Visual indicators for current environment
-- Customizable environment configurations
-- Works across multiple domains/projects
-
-## Screenshots
-
-| Popup Interface | Options Page |
-|----------------|--------------|
-| ![Popup](screenshots/popup.png) | ![Options](screenshots/options.png) |
-
-## Usage
-
-1. Configure your environments in the options page
-2. Browse to any configured site
-3. Click the extension icon to see available environments
-4. Select an environment to switch to it
-
-## Installation
-
-### Chrome
-1. Download the latest release
-2. Open chrome://extensions
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the extension directory
-
-
-# Safari Compatibility Notes
-
-Safari supports web extensions through its Safari Web Extension framework. Here are important compatibility considerations for the Browser Environment Switcher when targeting Safari:
-
-## API Compatibility
-
-Safari supports most Chrome extension APIs through compatibility layers, with a few key differences:
-
-1. **Service Workers**: Safari supports service workers, but there may be subtle differences in behavior. We should test the background.js service worker carefully in Safari.
-
-2. **Storage API**: Safari fully supports `chrome.storage.local`, which is what we're using.
-
-3. **Tabs API**: Safari supports the `chrome.tabs` API, but there may be permission differences.
-
-4. **Action API**: Safari supports `chrome.action` for the extension toolbar button.
-
-## Building Process
-
-To build for Safari:
-
-1. First, ensure the extension works in Chrome
-2. Use the Safari Web Extension Converter tool in Xcode.  From the parent directory of your code run:
-   ```
-   xcrun safari-web-extension-converter ./browser-environment-switcher --app-name "EnvSwitcher" --bundle-identifier "com.desatt.envswitcher"
-   ```
-3. The tool will create a new Xcode project
-4. You'll need to sign the extension with your Apple Developer account
-5. Ensure the Team is properly set, and the identifier bundles need to match for the app and extension (don't let xcode add .extension, that appears to fail)
-6. You can then build and install the extension
-
-
-## Safari-Specific Issues to Watch For
-
-1. **Extension Signing**: Safari requires all extensions to be signed with an Apple Developer account.
-
-2. **Performance**: Test the extension performance in Safari, especially the background script.
-
-3. **Content Security Policy**: Safari may enforce stricter Content Security Policy rules.
-
-4. **Permissions**: Safari's permission model may require adjustments to our host permissions.
-
-5. **UI Appearance**: Safari has different styling guidelines for extension UIs.
-
-## Testing in Safari
-
-Before deploying:
-
-1. Test the environment detection logic
-2. Verify the icon changes correctly
-3. Ensure the popup UI displays and functions properly
-4. Confirm that environment switching works as expected
-
-## Debugging in Safari
-
-To debug Safari extensions:
-
-1. Enable the "Develop" menu in Safari preferences
-2. Use the Web Inspector to debug the extension's background and content scripts
-3. Look for any console errors specific to Safari
-
-## Safari Extension Distribution
-
-To distribute for Safari:
-
-1. Submit the extension to the Apple App Store as a Safari extension
-2. Follow Apple's review guidelines
-3. Users will install via the App Store rather than direct download
-
-Note: For internal use, you can distribute the .app file directly to users.
-</file>
-
 <file path="src/background.js">
 /**
  * Background Service Worker for Browser Environment Switcher
@@ -1826,6 +1962,124 @@ initializeEnvironments();
 // Set up event listeners
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 chrome.runtime.onMessage.addListener(handleMessages);
+</file>
+
+<file path="README.md">
+<a name="top"></a>
+
+![Hugo Project Hero](screenshots/hero_resized.png)
+# Browser Environment Switcher
+
+A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
+
+![Extension Demo](screenshots/demo.gif)
+
+## Features
+
+- One-click switching between environments
+- Automatic environment detection
+- Visual indicators for current environment
+- Customizable environment configurations
+- Works across multiple domains/projects
+
+## Screenshots
+
+| Popup Interface | Options Page |
+|----------------|--------------|
+| ![Popup](screenshots/popup.png) | ![Options](screenshots/options.png) |
+
+
+---
+
+## Usage
+
+1. Configure your environments in the options page
+2. Browse to any configured site
+3. Click the extension icon to see available environments
+4. Select an environment to switch to it
+
+## Installation
+
+### Chrome
+1. Download the latest release
+2. Open chrome://extensions
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the extension directory
+
+
+---
+
+# Safari Compatibility Notes
+
+Safari supports web extensions through its Safari Web Extension framework. Here are important compatibility considerations for the Browser Environment Switcher when targeting Safari:
+
+## API Compatibility
+
+Safari supports most Chrome extension APIs through compatibility layers, with a few key differences:
+
+1. **Service Workers**: Safari supports service workers, but there may be subtle differences in behavior. We should test the background.js service worker carefully in Safari.
+
+2. **Storage API**: Safari fully supports `chrome.storage.local`, which is what we're using.
+
+3. **Tabs API**: Safari supports the `chrome.tabs` API, but there may be permission differences.
+
+4. **Action API**: Safari supports `chrome.action` for the extension toolbar button.
+
+## Building Process
+
+To build for Safari:
+
+1. First, ensure the extension works in Chrome
+2. Use the Safari Web Extension Converter tool in Xcode.  From the parent directory of your code run:
+   ```
+   xcrun safari-web-extension-converter ./browser-environment-switcher --app-name "EnvSwitcher" --bundle-identifier "com.desatt.envswitcher"
+   ```
+3. The tool will create a new Xcode project
+4. You'll need to sign the extension with your Apple Developer account
+5. Ensure the Team is properly set, and the identifier bundles need to match for the app and extension (don't let xcode add .extension, that appears to fail)
+6. You can then build and install the extension
+
+
+## Safari-Specific Issues to Watch For
+
+1. **Extension Signing**: Safari requires all extensions to be signed with an Apple Developer account.
+
+2. **Performance**: Test the extension performance in Safari, especially the background script.
+
+3. **Content Security Policy**: Safari may enforce stricter Content Security Policy rules.
+
+4. **Permissions**: Safari's permission model may require adjustments to our host permissions.
+
+5. **UI Appearance**: Safari has different styling guidelines for extension UIs.
+
+## Testing in Safari
+
+Before deploying:
+
+1. Test the environment detection logic
+2. Verify the icon changes correctly
+3. Ensure the popup UI displays and functions properly
+4. Confirm that environment switching works as expected
+
+## Debugging in Safari
+
+To debug Safari extensions:
+
+1. Enable the "Develop" menu in Safari preferences
+2. Use the Web Inspector to debug the extension's background and content scripts
+3. Look for any console errors specific to Safari
+
+## Safari Extension Distribution
+
+To distribute for Safari:
+
+1. Submit the extension to the Apple App Store as a Safari extension
+2. Follow Apple's review guidelines
+3. Users will install via the App Store rather than direct download
+
+Note: For internal use, you can distribute the .app file directly to users.
+
+[Back to top](#top)
 </file>
 
 <file path="manifest.json">

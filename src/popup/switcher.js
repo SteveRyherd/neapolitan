@@ -122,10 +122,11 @@ window.addEventListener('unload', function() {
   chrome.tabs.onActivated.removeListener(handleTabChange);
 });
 
-/**
- * Display environment server links
- */
+
 function displayEnvironmentServers(servers, currentServer, currentURL) {
+  // Apply environment styling based on current server
+  applyEnvironmentStyling(currentServer.type, currentServer);
+  
   // Get the link list element
   const linkList = document.getElementById('link-list');
   linkList.innerHTML = '';
@@ -140,8 +141,67 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     const li = document.createElement('li');
     const a = document.createElement('a');
     
-    // Properly capitalize the environment type
-    a.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
+    // Create a container div for the icon and text
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'link-content';
+    contentDiv.style.display = 'flex';
+    contentDiv.style.alignItems = 'center';
+    contentDiv.style.gap = '8px';
+    
+    // Create badge span
+    const badge = document.createElement('span');
+    badge.className = 'icon-badge';
+    badge.style.width = '20px';
+    badge.style.height = '20px';
+    badge.style.borderRadius = '50%';
+    badge.style.display = 'inline-flex';
+    badge.style.alignItems = 'center';
+    badge.style.justifyContent = 'center';
+    badge.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+    
+    // Set badge background based on environment
+    switch(server.type) {
+      case 'development':
+        badge.style.backgroundColor = 'white';
+        break;
+      case 'staging':
+        badge.style.backgroundColor = '#fdaeae'; // Strawberry
+        break;
+      case 'production':
+        badge.style.backgroundColor = '#f6e2b3'; // Vanilla
+        break;
+    }
+    
+    // Add emoji icon
+    const icon = document.createElement('span');
+    icon.style.fontSize = '12px';
+    icon.style.filter = 'drop-shadow(0 0 1px rgba(0,0,0,0.8))';
+    
+    // Set appropriate emoji for each environment
+    switch(server.type) {
+      case 'development':
+        icon.textContent = '🍫';
+        break;
+      case 'staging':
+        icon.textContent = '🍓';
+        break;
+      case 'production':
+        icon.textContent = '🍦';
+        break;
+    }
+    
+    badge.appendChild(icon);
+    
+    // Create name span
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
+    
+    // Add badge and name to link content div
+    contentDiv.appendChild(badge);
+    contentDiv.appendChild(nameSpan);
+    
+    // Add content div to link
+    a.appendChild(contentDiv);
     
     // Create new URL preserving path, query, and hash
     const url = new URL(currentURL);
@@ -155,30 +215,34 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     // Mark the current environment type as active
     if (currentServer.type === server.type) {
       a.classList.add("active");
-      console.log("Marked as active:", server.type);
     }
     
     li.appendChild(a);
     linkList.appendChild(li);
   }
   
-  // Add "Edit Configuration" link at the bottom
+  // Keep your existing "Edit Configuration" link code here
   const editLi = document.createElement('li');
   const editLink = document.createElement('a');
   editLink.textContent = "Edit configuration";
   editLink.href = "#";
   editLink.className = "edit-config-link";
+    editLink.style.marginTop = '10px';
+  
+  // Add environment-specific color for the edit link
+  if (currentServer.type === 'staging') {
+    editLink.style.color = 'black';
+  }
   
   editLink.addEventListener('click', function() {
-    // Store environment name to edit in Chrome storage
+    // Your existing code to open options page
     chrome.storage.local.set({ 
       pendingConfigAction: {
         action: "edit",
         environmentName: currentServer.name,
-        timestamp: Date.now() // Add timestamp to ensure we're working with fresh data
+        timestamp: Date.now()
       }
     }, function() {
-      // Open options page after data is stored
       chrome.runtime.openOptionsPage();
     });
   });
@@ -355,13 +419,14 @@ function displayNoEnvironmentMessage() {
     // Add "Create Configuration" link
     const createLi = document.createElement('li');
     const createLink = document.createElement('a');
-    createLink.textContent = `Create "${hostname}" Configuration`;
+    // createLink.textContent = `Create "${hostname}" Configuration`;
+    createLink.textContent = `Create Configuration`;
     createLink.href = "#";
     createLink.style.display = "block";
     createLink.style.padding = "10px";
     createLink.style.marginTop = "10px";
     createLink.style.textAlign = "center";
-    createLink.style.backgroundColor = "#4285f4";
+    createLink.style.backgroundColor = "#b49982";
     createLink.style.color = "white";
     createLink.style.borderRadius = "4px";
     createLink.style.textDecoration = "none";
@@ -387,4 +452,35 @@ function displayNoEnvironmentMessage() {
 }
 
 
-
+/**
+ * Apply environment-specific styling
+ * @param {string} environmentType - Type of environment (development, staging, production)
+ * @param {Object} currentServer - The current server object
+ */
+function applyEnvironmentStyling(environmentType, currentServer) {
+  const body = document.body;
+  
+  // Remove existing environment classes
+  body.classList.remove('env-development', 'env-staging', 'env-production');
+  
+  // Add appropriate environment class
+  body.classList.add(`env-${environmentType}`);
+  
+  // Update the title/header with environment name
+  const popupTitle = document.getElementById('popup-title');
+  if (popupTitle) {
+    // Store the original text content to preserve it
+    if (!popupTitle.dataset.originalText) {
+      popupTitle.dataset.originalText = popupTitle.textContent;
+    }
+    
+    // Set environment-specific title
+    const envNames = {
+      'development': 'Development',
+      'staging': 'Staging',
+      'production': 'Production'
+    };
+    
+    popupTitle.textContent = `${envNames[environmentType] || 'Switch'} Environment`;
+  }
+}
