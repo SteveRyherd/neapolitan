@@ -1,0 +1,190 @@
+/* components.css for popup
+ * Component styles using variables from design-system.css
+ */
+
+/* Base styles */
+body {
+  font-family: var(--font-family);
+  background-color: var(--vanilla-light);
+  width: 220px;
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+/* Environment-specific headers */
+.env-header {
+  font-size: var(--font-size-md);
+  margin: 0;
+  padding: var(--spacing-md);
+  text-align: center;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Title */
+#popup-title {
+  margin: 0;
+  padding: 2px 6px;
+}
+
+/* Environment-specific icon badges */
+.dev-icon-badge {
+  background-color: white;
+}
+
+.staging-icon-badge {
+  background-color: var(--strawberry-base);
+}
+
+.prod-icon-badge {
+  background-color: var(--vanilla-base);
+}
+
+/* Emoji styling */
+.emoji-icon {
+  font-size: var(--font-size-sm);
+  filter: drop-shadow(0 0 1px rgba(0,0,0,0.8));
+}
+
+/* Link lists */
+ul#link-list {
+  padding: var(--spacing-md) 0;
+  margin: 0;
+}
+
+ul#link-list li {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+ul#link-list a { 
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  text-decoration: none; 
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  border-radius: var(--radius-sm);
+  margin: 2px 8px;
+  background-color: rgba(255,255,255,0.6);
+  border-left: 4px solid transparent;
+}
+
+/* Dark mode link overrides */
+html[data-theme="dark"] ul#link-list a,
+body.theme-dark ul#link-list a {
+  background-color: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+ul#link-list a:hover { 
+  background-color: rgba(255,255,255,0.8);
+  transform: translateY(-1px);
+}
+
+html[data-theme="dark"] ul#link-list a:hover,
+body.theme-dark ul#link-list a:hover {
+  background-color: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+  border-left: 4px solid rgba(255,255,255,0.3);
+}
+
+/* Environment-specific active links */
+.env-development ul#link-list a.active { 
+  background-color: var(--chocolate-dark);
+  color: var(--text-light);
+  border-left: 4px solid var(--env-development-accent);
+}
+
+.env-staging ul#link-list a.active {
+  background-color: var(--strawberry-dark);
+  border-left: 4px solid var(--env-staging-accent);
+}
+
+.env-production ul#link-list a.active { 
+  background-color: var(--vanilla-dark);
+  border-left: 4px solid var(--env-production-accent);
+}
+
+/* Dark mode environment-specific active links */
+html[data-theme="dark"] .env-development ul#link-list a.active,
+body.theme-dark .env-development ul#link-list a.active {
+  background-color: var(--chocolate-base);
+  color: #000000;
+  border-left: 4px solid var(--chocolate-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+html[data-theme="dark"] .env-staging ul#link-list a.active,
+body.theme-dark .env-staging ul#link-list a.active {
+  background-color: var(--strawberry-base);
+  color: #000000;
+  border-left: 4px solid var(--strawberry-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+html[data-theme="dark"] .env-production ul#link-list a.active,
+body.theme-dark .env-production ul#link-list a.active {
+  background-color: var(--vanilla-base);
+  color: #000000;
+  border-left: 4px solid var(--vanilla-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Edit configuration link */
+.edit-config-link {
+  display: block;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-top: var(--spacing-md);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.env-staging .edit-config-link {
+  color: var(--text-dark);
+}
+
+.edit-config-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+html[data-theme="dark"] .edit-config-link,
+body.theme-dark .edit-config-link {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] .edit-config-link:hover,
+body.theme-dark .edit-config-link:hover {
+  color: var(--text-primary);
+}
+
+/* Paper texture overlay */
+.texture-overlay {
+  position: relative;
+}
+
+.texture-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../images/paper-texture.png');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: var(--z-index-base);
+}

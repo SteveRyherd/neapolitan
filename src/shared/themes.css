@@ -1,0 +1,149 @@
+/* themes.css
+ * Theme definitions for Neapolitan Domain Switcher
+ * Uses CSS variables from design-system.css
+ */
+
+/* Default theme (Neapolitan) is defined in :root in design-system.css */
+
+/* Dark theme - Redesigned for better contrast and visual appeal */
+html[data-theme="dark"],
+body.theme-dark {
+  /* Base colors - more saturated for dark mode */
+  --vanilla-base: #ffdb70;  /* Brighter yellow for dark backgrounds */
+  --strawberry-base: #ff7a7a; /* Brighter pink/red for dark backgrounds */
+  --chocolate-base: #c49a6c; /* Brighter brown for dark backgrounds */
+  
+  /* Color variants */
+  --vanilla-light: #2c2c2c; /* Dark background with yellow tint */
+  --vanilla-dark: #ffcd45;
+  --strawberry-light: #2a2222; /* Dark background with red tint */
+  --strawberry-dark: #ff6b6b;
+  --chocolate-light: #2a2520; /* Dark background with brown tint */
+  --chocolate-dark: #a67c52;
+  
+  /* Semantic colors */
+  --text-primary: #ffffff; /* White text for maximum contrast */
+  --text-light: #ffffff;
+  --text-dark: #e0e0e0;
+  --text-muted: #b0b0b0;
+  
+  /* Background colors */
+  --bg-primary: #1e1e1e; /* Main dark background */
+  --bg-secondary: #2d2d2d; /* Slightly lighter for cards, containers */
+  --bg-tertiary: #383838; /* For elevated components */
+  
+  /* Environment-specific semantic colors - better contrast */
+  --env-development-bg: var(--chocolate-base);
+  --env-development-bg-light: #2a2520;
+  --env-development-text: #000000; /* Black text for contrast on bright surface */
+  --env-development-accent: #d4b48c;
+  
+  --env-staging-bg: var(--strawberry-base);
+  --env-staging-bg-light: #2a2222;
+  --env-staging-text: #000000; /* Black text for contrast on bright surface */
+  --env-staging-accent: #ff9e9e;
+  
+  --env-production-bg: var(--vanilla-base);
+  --env-production-bg-light: #2c2c2c;
+  --env-production-text: #000000; /* Black text for contrast on bright surface */
+  --env-production-accent: #ffe394;
+  
+  /* Increased shadow intensity for better depth perception */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Light theme */
+html[data-theme="light"],
+body.theme-light {
+  /* Base colors */
+  --vanilla-base: #f0f0f0;
+  --strawberry-base: #ffcece;
+  --chocolate-base: #e0d2c9;
+  
+  /* Color variants */
+  --vanilla-light: #ffffff;
+  --vanilla-dark: #e0e0e0;
+  --strawberry-light: #fff5f5;
+  --strawberry-dark: #ffc4c4;
+  --chocolate-light: #f0e7e0;
+  --chocolate-dark: #ccc0b8;
+  
+  /* Semantic colors */
+  --text-primary: #333333;
+  --text-light: #ffffff;
+  --text-dark: #000000;
+  --text-muted: #666666;
+  
+  /* Background colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9f9f9;
+  --bg-tertiary: #f0f0f0;
+}
+
+/* High contrast theme */
+html[data-theme="high-contrast"],
+body.theme-high-contrast {
+  /* Base colors */
+  --vanilla-base: #f8e71c;
+  --strawberry-base: #ff3b30;
+  --chocolate-base: #8a6d3b;
+  
+  /* Color variants */
+  --vanilla-light: #ffffff;
+  --vanilla-dark: #f8e71c;
+  --strawberry-light: #ffd0cd;
+  --strawberry-dark: #ff3b30;
+  --chocolate-light: #c0a583;
+  --chocolate-dark: #5d4827;
+  
+  /* Semantic colors */
+  --text-primary: #000000;
+  --text-light: #ffffff;
+  --text-dark: #000000;
+  --text-muted: #444444;
+  
+  /* Background colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f8f8;
+  
+  /* Specific high contrast overrides */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Environment-specific styling that works across themes */
+html[data-environment="development"],
+body.env-development {
+  background-color: var(--env-development-bg-light);
+}
+
+html[data-environment="development"] #popup-title,
+body.env-development #popup-title {
+  background-color: var(--env-development-bg);
+  color: var(--env-development-text);
+}
+
+html[data-environment="staging"],
+body.env-staging {
+  background-color: var(--env-staging-bg-light);
+}
+
+html[data-environment="staging"] #popup-title,
+body.env-staging #popup-title {
+  background-color: var(--env-staging-bg);
+  color: var(--env-staging-text);
+}
+
+html[data-environment="production"],
+body.env-production {
+  background-color: var(--env-production-bg-light);
+}
+
+html[data-environment="production"] #popup-title,
+body.env-production #popup-title {
+  background-color: var(--env-production-bg);
+  color: var(--env-production-text);
+}

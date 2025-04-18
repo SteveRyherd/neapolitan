@@ -33,10 +33,8 @@ let appSettings = {
   preservePathQuery: true
 };
 
-/**
- * Initialize the popup when DOM is fully loaded
- */
-document.addEventListener('DOMContentLoaded', initialize);
+// Import the ThemeManager module
+let ThemeManager;
 
 /**
  * Initialize the popup when DOM is fully loaded
@@ -46,9 +44,28 @@ document.addEventListener('DOMContentLoaded', initialize);
 /**
  * Initialize the popup UI
  */
-function initialize() {
+async function initialize() {
   try {
     console.log("Popup DOM loaded");
+    
+    // Initialize ThemeManager
+    // We need to import the module dynamically since module imports are not supported in content scripts
+    try {
+      const module = await import('../shared/theme-manager.js');
+      ThemeManager = module.default;
+      await ThemeManager.initialize();
+      appSettings = ThemeManager.getSettings();
+      
+      log("Theme manager initialized with settings:", appSettings);
+    } catch (error) {
+      console.error("Error initializing theme manager:", error);
+      // Fall back to storage API
+      chrome.storage.local.get('appSettings', function(data) {
+        if (data.appSettings) {
+          appSettings = data.appSettings;
+        }
+      });
+    }
     
     // Get the current active tab
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -90,43 +107,36 @@ function handleTabChange(activeInfo) {
  * Load state for a specific tab
  */
 function loadStateForTab(tabId) {
-  // Get settings first
-  chrome.storage.local.get('appSettings', function(data) {
-    if (data.appSettings) {
-      appSettings = data.appSettings;
+  // Then get state from background script
+  console.log("Requesting state from background script for tab:", tabId);
+  chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
+    console.log("State received:", state);
+    
+    if (!state) {
+      console.error("No state received from background script");
+      document.getElementById("popup-title").textContent = "Error loading state";
+      return;
     }
     
-    // Then get state from background script
-    console.log("Requesting state from background script for tab:", tabId);
-    chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
-      console.log("State received:", state);
-      
-      if (!state) {
-        console.error("No state received from background script");
-        document.getElementById("popup-title").textContent = "Error loading state";
-        return;
+    const { matchingServer, currentURL } = state;
+    
+    if (!matchingServer || !currentURL) {
+      console.log("No matching environment found");
+      displayNoEnvironmentMessage();
+      return;
+    }
+    
+    // Set popup title
+    document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
+    
+    // Get servers for this environment
+    chrome.runtime.sendMessage(
+      { action: "getServers", environmentName: matchingServer.name }, 
+      function(environmentServers) {
+        // Display environment server links
+        displayEnvironmentServers(environmentServers, matchingServer, currentURL);
       }
-      
-      const { matchingServer, currentURL } = state;
-      
-      if (!matchingServer || !currentURL) {
-        console.log("No matching environment found");
-        displayNoEnvironmentMessage();
-        return;
-      }
-      
-      // Set popup title
-      document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
-      
-      // Get servers for this environment
-      chrome.runtime.sendMessage(
-        { action: "getServers", environmentName: matchingServer.name }, 
-        function(environmentServers) {
-          // Display environment server links
-          displayEnvironmentServers(environmentServers, matchingServer, currentURL);
-        }
-      );
-    });
+    );
   });
 }
 
@@ -136,10 +146,15 @@ window.addEventListener('unload', function() {
   chrome.tabs.onActivated.removeListener(handleTabChange);
 });
 
-
+/**
+ * Display environment servers in the popup
+ * @param {Array} servers - Available servers for the environment
+ * @param {Object} currentServer - The current server environment
+ * @param {string} currentURL - The current tab URL
+ */
 function displayEnvironmentServers(servers, currentServer, currentURL) {
   // Apply environment styling based on current server
-  applyEnvironmentStyling(currentServer.type, currentServer);
+  applyEnvironmentStyling(currentServer.type);
   
   // Get the link list element
   const linkList = document.getElementById('link-list');
@@ -165,73 +180,57 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     // Create badge span
     const badge = document.createElement('span');
     badge.className = 'icon-badge';
-    badge.style.width = '20px';
-    badge.style.height = '20px';
-    badge.style.borderRadius = '50%';
-    badge.style.display = 'inline-flex';
-    badge.style.alignItems = 'center';
-    badge.style.justifyContent = 'center';
-    badge.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
-    
-    // Set badge background based on environment
-    switch(server.type) {
-      case 'development':
-        badge.style.backgroundColor = 'white';
-        break;
-      case 'staging':
-        badge.style.backgroundColor = '#fdaeae'; // Strawberry
-        break;
-      case 'production':
-        badge.style.backgroundColor = '#f6e2b3'; // Vanilla
-        break;
-    }
     
     // Only show emoji icons if setting is enabled
     if (appSettings.showEmojiIcons) {
       // Add emoji icon
       const icon = document.createElement('span');
-      icon.style.fontSize = '12px';
-      icon.style.filter = 'drop-shadow(0 0 1px rgba(0,0,0,0.8))';
+      icon.className = 'emoji-icon';
       
       // Set appropriate emoji for each environment
       switch(server.type) {
         case 'development':
+          badge.classList.add('dev-icon-badge');
           icon.textContent = '🍫';
           break;
         case 'staging':
+          badge.classList.add('staging-icon-badge');
           icon.textContent = '🍓';
           break;
         case 'production':
+          badge.classList.add('prod-icon-badge');
           icon.textContent = '🍦';
           break;
       }
       
-      // Badge icon is now appended in the conditional block above
+      badge.appendChild(icon);
     } else {
       // Add text indicator instead
       const indicator = document.createElement('span');
-      indicator.style.fontSize = '10px';
-      indicator.style.fontWeight = 'bold';
+      indicator.style.fontSize = 'var(--font-size-xs)';
+      indicator.style.fontWeight = 'var(--font-weight-bold)';
       
       // Set appropriate text for each environment
       switch(server.type) {
         case 'development':
+          badge.classList.add('dev-icon-badge');
           indicator.textContent = 'D';
-          indicator.style.color = '#8a6d3b';
+          indicator.style.color = 'var(--env-development-accent)';
           break;
         case 'staging':
+          badge.classList.add('staging-icon-badge');
           indicator.textContent = 'S';
-          indicator.style.color = '#b24a4a';
+          indicator.style.color = 'var(--env-staging-accent)';
           break;
         case 'production':
+          badge.classList.add('prod-icon-badge');
           indicator.textContent = 'P';
-          indicator.style.color = '#b29e62';
+          indicator.style.color = 'var(--env-production-accent)';
           break;
       }
       
       badge.appendChild(indicator);
     }
-    
     
     // Create name span
     const nameSpan = document.createElement('span');
@@ -262,21 +261,15 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     linkList.appendChild(li);
   }
   
-  // Keep your existing "Edit Configuration" link code here
+  // Add "Edit Configuration" link
   const editLi = document.createElement('li');
   const editLink = document.createElement('a');
   editLink.textContent = "Edit configuration";
   editLink.href = "#";
   editLink.className = "edit-config-link";
-    editLink.style.marginTop = '10px';
-  
-  // Add environment-specific color for the edit link
-  if (currentServer.type === 'staging') {
-    editLink.style.color = 'black';
-  }
   
   editLink.addEventListener('click', function() {
-    // Your existing code to open options page
+    // Store action to be processed by options page
     chrome.storage.local.set({ 
       pendingConfigAction: {
         action: "edit",
@@ -292,76 +285,9 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
   linkList.appendChild(editLi);
 }
 
-
-/**
- * Load and display available servers for the current environment
- * @param {Object} matchingServer - The current server environment
- * @param {URL} currentURL - The current tab URL
- */
-function loadEnvironmentServers(matchingServer, currentURL) {
-  log("Loading servers for environment:", matchingServer.name);
-  
-  chrome.runtime.sendMessage(
-    { action: "getServers", environmentName: matchingServer.name }, 
-    function(environmentServers) {
-      if (!environmentServers || environmentServers.length === 0) {
-        handleError(`No servers found for ${matchingServer.name}`);
-        return;
-      }
-      
-      log("Servers received:", environmentServers);
-      
-      // Create links for each server environment
-      populateServerLinks(environmentServers, matchingServer, currentURL);
-    }
-  );
-}
-
-/**
- * Populate the server links in the popup UI
- * @param {Array} servers - List of available servers
- * @param {Object} currentServer - The current server environment
- * @param {URL} currentURL - The current tab URL
- */
-function populateServerLinks(servers, currentServer, currentURL) {
-  // Get the link list element
-  const linkList = document.getElementById('link-list');
-  
-  // Clear any existing links
-  while (linkList.firstChild) {
-    linkList.removeChild(linkList.firstChild);
-  }
-  
-  // Create new links for each server
-  servers.forEach(server => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    
-    // Format server type with capitalized first letter
-    a.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
-    
-    // Create the new URL for this server
-    const newUrl = new URL(currentURL);
-    newUrl.hostname = server.host;
-    
-    a.href = "#";
-    a.title = newUrl.toString();
-    a.dataset.url = newUrl.toString();
-    a.addEventListener("click", loadEnvironment);
-    
-    // Mark the current environment as active
-    if (currentServer.type === server.type) {
-      a.classList.add("active");
-    }
-    
-    li.appendChild(a);
-    linkList.appendChild(li);
-  });
-}
-
-
 /**
  * Load the selected environment when a link is clicked
+ * @param {Event} event - Click event
  */
 function loadEnvironment(event) {
   event.preventDefault();
@@ -380,54 +306,6 @@ function loadEnvironment(event) {
     console.error("Error switching environment:", error);
   }
 }
-
-/**
- * Display a message when no matching environment is found
- */
-function displayNoEnvironmentMessage() {
-  document.getElementById("popup-title").textContent = "No matching environment";
-  
-  // Clear any existing links
-  const linkList = document.getElementById('link-list');
-  while (linkList.firstChild) {
-    linkList.removeChild(linkList.firstChild);
-  }
-  
-  // Add a message
-  const li = document.createElement('li');
-  const message = document.createElement('div');
-  message.textContent = "Current site doesn't match any configured environments.";
-  message.style.padding = "10px";
-  message.style.color = "#666";
-  li.appendChild(message);
-  linkList.appendChild(li);
-}
-
-/**
- * Handle errors in the popup
- * @param {string} message - Error message
- * @param {Error} [error] - Optional Error object
- */
-function handleError(message, error) {
-  log(`ERROR: ${message}`, error);
-  document.getElementById("popup-title").textContent = "Error";
-  
-  // Clear any existing links
-  const linkList = document.getElementById('link-list');
-  while (linkList.firstChild) {
-    linkList.removeChild(linkList.firstChild);
-  }
-  
-  // Add an error message
-  const li = document.createElement('li');
-  const errorMessage = document.createElement('div');
-  errorMessage.textContent = message;
-  errorMessage.style.padding = "10px";
-  errorMessage.style.color = "#f44336";
-  li.appendChild(errorMessage);
-  linkList.appendChild(li);
-}
-
 
 /**
  * Display a message when no matching environment is found
@@ -452,24 +330,24 @@ function displayNoEnvironmentMessage() {
     const messageLi = document.createElement('li');
     const message = document.createElement('div');
     message.textContent = "Current site doesn't match any configured environments.";
-    message.style.padding = "10px";
-    message.style.color = "#666";
+    message.style.padding = "var(--spacing-md)";
+    message.style.color = "var(--text-muted)";
     messageLi.appendChild(message);
     linkList.appendChild(messageLi);
     
     // Add "Create Configuration" link
     const createLi = document.createElement('li');
     const createLink = document.createElement('a');
-    // createLink.textContent = `Create "${hostname}" Configuration`;
     createLink.textContent = `Create Configuration`;
     createLink.href = "#";
+    createLink.className = "edit-config-link";
     createLink.style.display = "block";
-    createLink.style.padding = "10px";
-    createLink.style.marginTop = "10px";
+    createLink.style.padding = "var(--spacing-md)";
+    createLink.style.marginTop = "var(--spacing-md)";
     createLink.style.textAlign = "center";
-    createLink.style.backgroundColor = "#b49982";
-    createLink.style.color = "white";
-    createLink.style.borderRadius = "4px";
+    createLink.style.backgroundColor = "var(--chocolate-base)";
+    createLink.style.color = "var(--text-light)";
+    createLink.style.borderRadius = "var(--radius-sm)";
     createLink.style.textDecoration = "none";
     
     createLink.addEventListener('click', function() {
@@ -479,7 +357,7 @@ function displayNoEnvironmentMessage() {
           action: "create",
           hostname: hostname,
           url: tabs[0].url,
-          timestamp: Date.now() // Add timestamp to ensure we're working with fresh data
+          timestamp: Date.now()
         }
       }, function() {
         // Open options page after data is stored
@@ -492,20 +370,52 @@ function displayNoEnvironmentMessage() {
   });
 }
 
+/**
+ * Handle errors in the popup
+ * @param {string} message - Error message
+ * @param {Error} [error] - Optional Error object
+ */
+function handleError(message, error) {
+  log(`ERROR: ${message}`, error);
+  document.getElementById("popup-title").textContent = "Error";
+  
+  // Clear any existing links
+  const linkList = document.getElementById('link-list');
+  while (linkList.firstChild) {
+    linkList.removeChild(linkList.firstChild);
+  }
+  
+  // Add an error message
+  const li = document.createElement('li');
+  const errorMessage = document.createElement('div');
+  errorMessage.textContent = message;
+  errorMessage.style.padding = "var(--spacing-md)";
+  errorMessage.style.color = "#f44336";
+  li.appendChild(errorMessage);
+  linkList.appendChild(li);
+}
 
 /**
  * Apply environment-specific styling
  * @param {string} environmentType - Type of environment (development, staging, production)
- * @param {Object} currentServer - The current server object
  */
-function applyEnvironmentStyling(environmentType, currentServer) {
-  const body = document.body;
-  
-  // Remove existing environment classes
-  body.classList.remove('env-development', 'env-staging', 'env-production');
-  
-  // Add appropriate environment class
-  body.classList.add(`env-${environmentType}`);
+function applyEnvironmentStyling(environmentType) {
+  // Use ThemeManager if available
+  if (ThemeManager) {
+    ThemeManager.applyEnvironmentStyling(environmentType);
+  } else {
+    // Fallback if ThemeManager isn't available
+    const body = document.body;
+    
+    // Remove existing environment classes
+    body.classList.remove('env-development', 'env-staging', 'env-production');
+    
+    // Add appropriate environment class
+    body.classList.add(`env-${environmentType}`);
+    
+    // Also set data attribute on html element
+    document.documentElement.setAttribute('data-environment', environmentType);
+  }
   
   // Update the title/header with environment name
   const popupTitle = document.getElementById('popup-title');

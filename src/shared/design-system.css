@@ -1,0 +1,125 @@
+/* design-system.css
+ * Core design system for Neapolitan Domain Switcher
+ * Single source of truth for design tokens
+ */
+
+:root {
+  /* Base colors - primary source of truth */
+  --vanilla-base: #f6e2b3;
+  --strawberry-base: #fdaeae;
+  --chocolate-base: #b49982;
+  --accent-base: #10ece4;
+  
+  /* Color variants */
+  --vanilla-light: #faf0d1;
+  --vanilla-dark: #ecd494;
+  --strawberry-light: #fff1f1;
+  --strawberry-dark: #ffb8b8;
+  --chocolate-light: #c5b0a1;
+  --chocolate-dark: #a3877a;
+  
+  /* Semantic colors - reference base colors */
+  --text-primary: #5a4738;
+  --text-light: #ffffff;
+  --text-dark: #333333;
+  --text-muted: #777777;
+  
+  /* Environment-specific semantic colors */
+  --env-development-bg: var(--chocolate-base);
+  --env-development-bg-light: var(--chocolate-light);
+  --env-development-text: var(--text-light);
+  --env-development-accent: #8d7260;
+  
+  --env-staging-bg: var(--strawberry-base);
+  --env-staging-bg-light: var(--strawberry-light);
+  --env-staging-text: var(--text-primary);
+  --env-staging-accent: #ff9a9a;
+  
+  --env-production-bg: var(--vanilla-base);
+  --env-production-bg-light: var(--vanilla-light);
+  --env-production-text: var(--text-primary);
+  --env-production-accent: #e6d090;
+  
+  /* Typography */
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-xxl: 24px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-round: 50%;
+  
+  /* Box shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  /* Z-index layers */
+  --z-index-base: 1;
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+}
+
+/* Utility classes for the Neapolitan stripe */
+.neapolitan-stripe {
+  display: flex;
+  height: 4px;
+  width: 100%;
+}
+
+.neapolitan-stripe > div {
+  height: 100%;
+  width: 33.33%;
+}
+
+.stripe-vanilla { background-color: var(--vanilla-base); }
+.stripe-strawberry { background-color: var(--strawberry-base); }
+.stripe-chocolate { background-color: var(--chocolate-base); }
+
+/* Environment badge and icon styles */
+.icon-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reset styles */
+button {
+  background-color: var(--chocolate-base);
+  color: var(--text-light);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: var(--chocolate-dark);
+}
