@@ -47,7 +47,7 @@
         "windows": "Alt+X",
         "linux": "Alt+X"
       },
-      "description": "Switch to development environment (The Classic)"
+      "description": "Switch to development environment"
     },
     "switch-to-staging": {
       "suggested_key": {
@@ -55,7 +55,7 @@
         "windows": "Alt+S",
         "linux": "Alt+S"
       },
-      "description": "Switch to staging environment (Common to all schemes)"
+      "description": "Switch to staging environment"
     },
     "switch-to-production": {
       "suggested_key": {
@@ -63,19 +63,7 @@
         "windows": "Alt+W",
         "linux": "Alt+W"
       },
-      "description": "Switch to production environment (The Classic)"
-    },
-    "alt-c-development": {
-      "description": "Switch to development environment (Neapolitan)"
-    },
-    "alt-v-production": {
-      "description": "Switch to production environment (Neapolitan)"
-    },
-    "alt-d-development": {
-      "description": "Switch to development environment (Banana Split)"
-    },
-    "alt-p-production": {
-      "description": "Switch to production environment (Banana Split)"
+      "description": "Switch to production environment"
     },
     "_execute_action": {
       "description": "Open the environment switcher popup"

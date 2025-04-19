@@ -735,6 +735,18 @@ body.theme-dark .chrome-link:hover {
   min-width: 55px;
 }
 
+/* Mac-specific shortcut key styling */
+.mac-shortcut {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Helvetica Neue", sans-serif;
+  min-width: 60px;
+  padding: 2px var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.mac-shortcut .mac-option-symbol {
+  font-size: calc(var(--font-size-sm) + 2px);
+}
+
 .shortcuts-customize {
   font-size: var(--font-size-sm);
   color: var(--text-muted);

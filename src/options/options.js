@@ -13,6 +13,71 @@ let ThemeManager;
 // Wait for DOM content to load
 document.addEventListener('DOMContentLoaded', initialize);
 
+// OS detection for keyboard shortcuts
+function detectOS() {
+  const platform = navigator.platform.toLowerCase();
+  if (platform.includes('mac')) {
+    return 'mac';
+  } else if (platform.includes('win')) {
+    return 'windows';
+  } else {
+    return 'linux'; // Default to Linux for other OS
+  }
+}
+
+// Update shortcut key labels based on OS
+function updateShortcutKeyLabels() {
+  const os = detectOS();
+  const shortcutKeys = document.querySelectorAll('.shortcut-key');
+  
+  if (os === 'mac') {
+    // For Mac, use Option symbol (⌥)
+    shortcutKeys.forEach(key => {
+      const text = key.textContent;
+      key.textContent = text.replace('Alt+', '⌥ ');
+      // Add a class for additional styling if needed
+      key.classList.add('mac-shortcut');
+    });
+    
+    // Update the explanation text and instructions
+    updateMacSpecificText();
+  }
+}
+
+// Update explanation text to reflect Mac-specific terminology
+function updateMacSpecificText() {
+  // Update shortcut explanation
+  const shortcutsExplanation = document.querySelector('.shortcuts-explanation');
+  if (shortcutsExplanation) {
+    // Replace all instances of 'Alt+' with the Option symbol
+    const content = shortcutsExplanation.innerHTML;
+    const updatedContent = content
+      .replace(/Alt\+/g, '⌥ ')
+      .replace(/chrome:\/\/extensions\/shortcuts/g, 'chrome://extensions/shortcuts (on Chrome) or Safari > Settings > Extensions > Extension Name > Shortcuts');
+    
+    shortcutsExplanation.innerHTML = updatedContent;
+  }
+  
+  // Update the instruction text
+  const instructions = document.querySelector('.shortcuts-explanation ol');
+  if (instructions) {
+    const firstLiElement = instructions.querySelector('li:first-child');
+    if (firstLiElement) {
+      firstLiElement.innerHTML = 'On Chrome: Type <code>chrome://extensions/shortcuts</code> in your browser\'s address bar<br>' +
+                               'On Safari: Go to Safari > Settings > Extensions > Select this extension > Shortcuts';
+    }
+  }
+  
+  // Update note box to include Safari instructions
+  const noteBox = document.querySelector('.shortcuts-note-box');
+  if (noteBox) {
+    const noteText = noteBox.querySelector('p');
+    if (noteText) {
+      noteText.innerHTML = '<strong>Note:</strong> Chrome doesn\'t allow extensions to create direct links to <code>chrome://</code> URLs for security reasons. In Safari, you can access extension shortcuts through the Settings menu.';
+    }
+  }
+}
+
 // Initialize the options page
 async function initialize() {
   try {
@@ -48,6 +113,9 @@ async function initialize() {
       
       // Set up tab navigation
       setupTabNavigation();
+      
+      // Update keyboard shortcut labels based on OS
+      updateShortcutKeyLabels();
     });
     
     // Listen for storage changes to catch actions from popup
