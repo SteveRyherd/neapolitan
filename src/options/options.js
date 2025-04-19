@@ -141,7 +141,8 @@ function setupEventListeners() {
   document.getElementById('theme-selector').addEventListener('change', autoSaveSettings);
   document.getElementById('show-emoji-icons').addEventListener('change', autoSaveSettings);
   document.getElementById('icon-badge-notifications').addEventListener('change', autoSaveSettings);
-  // Behavior settings event listeners removed as requested
+  document.getElementById('follow-system-theme').addEventListener('change', autoSaveSettings);
+  // Auto-detect and preserve are handled elsewhere
   document.getElementById('theme-selector').addEventListener('change', updateThemePreview);
   document.getElementById('show-emoji-icons').addEventListener('change', updatePopupPreview);
   
@@ -466,9 +467,11 @@ function loadSettings() {
     
     // Update settings UI
     document.getElementById('theme-selector').value = settings.theme;
+    document.getElementById('follow-system-theme').checked = settings.followSystemTheme;
     document.getElementById('show-emoji-icons').checked = settings.showEmojiIcons;
     document.getElementById('icon-badge-notifications').checked = settings.iconBadgeNotifications;
-    // Behavior settings removed as requested
+    
+    // Theme selector is always enabled
     
     // Initialize popup preview
     updatePopupPreview();
@@ -502,9 +505,11 @@ function saveSettings() {
   // Get values from UI
   const newSettings = {
     theme: document.getElementById('theme-selector').value,
+    followSystemTheme: document.getElementById('follow-system-theme').checked,
     showEmojiIcons: document.getElementById('show-emoji-icons').checked,
-    iconBadgeNotifications: document.getElementById('icon-badge-notifications').checked
-    // Behavior settings removed as requested
+    iconBadgeNotifications: document.getElementById('icon-badge-notifications').checked,
+    autoDetectEnvironments: true,
+    preservePathQuery: true
   };
   
   if (ThemeManager) {
@@ -533,6 +538,20 @@ function saveSettings() {
 
 // New function for auto-saving settings
 function autoSaveSettings() {
+  // Special handling for system theme toggle
+  if (event && event.target.id === 'follow-system-theme') {
+    const followSystem = event.target.checked;
+    
+    // If enabling system theme preference and system is in dark mode, immediately apply dark theme
+    if (followSystem && ThemeManager) {
+      const systemTheme = ThemeManager.detectSystemTheme();
+      if (systemTheme === 'dark') {
+        document.getElementById('theme-selector').value = 'dark';
+      }
+      // If system is in light mode, keep the current theme
+    }
+  }
+  
   // Call saveSettings which will get all current values from the UI
   saveSettings();
 }

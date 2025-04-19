@@ -651,7 +651,10 @@ body.theme-dark .chrome-link:hover {
 /* Apply this style in the .keyboard-shortcuts-info */
 .keyboard-shortcuts-info {
   margin-top: var(--spacing-xl);
-  padding: var(--spacing-lg);
+  padding-top: .001em;
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
   border-left: 3px solid var(--strawberry-base);
@@ -997,6 +1000,11 @@ body.theme-dark .nutrition-bold-row strong {
 
 html[data-theme="dark"] .creator-links a,
 body.theme-dark .creator-links a {
+  color: var(--chocolate-base);
+}
+
+html[data-theme="dark"] .nutrition-label a,
+body.theme-dark .nutrition-label a {
   color: var(--chocolate-base);
 }
 

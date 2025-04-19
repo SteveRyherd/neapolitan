@@ -13,9 +13,11 @@ const state = {
   environments: [],
   settings: {
     theme: 'neapolitan',
+    followSystemTheme: true,
     showEmojiIcons: true,
-    iconBadgeNotifications: true
-    // Behavior settings removed as requested
+    iconBadgeNotifications: true,
+    autoDetectEnvironments: true,
+    preservePathQuery: true
   }
 };
 

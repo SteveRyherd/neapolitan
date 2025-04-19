@@ -9,9 +9,11 @@ const ThemeManager = (function() {
   // Default settings
   const DEFAULT_SETTINGS = {
     theme: 'neapolitan',
+    followSystemTheme: true, // Follow system theme by default
     showEmojiIcons: true,
-    iconBadgeNotifications: true
-    // Behavior settings removed as requested
+    iconBadgeNotifications: true,
+    autoDetectEnvironments: true,
+    preservePathQuery: true
   };
   
   // Current settings
@@ -28,8 +30,21 @@ const ThemeManager = (function() {
           settings = {...data.appSettings};
         }
         
+        // Check if we should follow system dark mode
+        if (settings.followSystemTheme) {
+          const systemTheme = detectSystemTheme();
+          // Only override with dark theme if system is in dark mode
+          if (systemTheme === 'dark') {
+            settings.theme = 'dark';
+          }
+          // If system is in light mode, keep user's theme preference
+        }
+        
         // Apply theme from settings
         applyTheme(settings.theme);
+        
+        // Setup listener for system theme changes
+        setupSystemThemeListener();
         
         resolve(settings);
       });
@@ -122,6 +137,53 @@ const ThemeManager = (function() {
     return {...settings};
   }
   
+  /**
+   * Detect system theme preference
+   * @returns {string} 'dark' or 'light' based on system preference
+   */
+  function detectSystemTheme() {
+    return window.matchMedia && 
+           window.matchMedia('(prefers-color-scheme: dark)').matches ? 
+           'dark' : 'light';
+  }
+
+  /**
+   * Set up listener for system theme changes
+   */
+  function setupSystemThemeListener() {
+    if (!window.matchMedia) return;
+    
+    const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const listener = (e) => {
+      if (settings.followSystemTheme) {
+        // Only switch to dark mode when system is in dark mode
+        if (e.matches) {
+          applyTheme('dark');
+        } else {
+          // When system switches to light mode, restore user's preferred theme
+          // We need to get the current settings from storage to get the user's preference
+          chrome.storage.local.get('appSettings', function(data) {
+            if (data.appSettings && data.appSettings.theme && data.appSettings.theme !== 'dark') {
+              applyTheme(data.appSettings.theme);
+            } else {
+              // Default to neapolitan if no user preference is stored
+              applyTheme('neapolitan');
+            }
+          });
+        }
+      }
+    };
+    
+    // Modern browsers
+    if (colorSchemeQuery.addEventListener) {
+      colorSchemeQuery.addEventListener('change', listener);
+    } 
+    // Safari prior to 14
+    else if (colorSchemeQuery.addListener) {
+      colorSchemeQuery.addListener(listener);
+    }
+  }
+
   // Public API
   return {
     initialize,
@@ -129,7 +191,8 @@ const ThemeManager = (function() {
     applyEnvironmentStyling,
     saveSettings,
     resetSettings,
-    getSettings
+    getSettings,
+    detectSystemTheme
   };
 })();
 
