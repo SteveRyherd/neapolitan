@@ -315,89 +315,97 @@
     
     <!-- Credits Tab (Nutrition Label Style) -->
     <div class="tab-content hidden" id="credits-tab">
-      <div class="nutrition-label">
+      <div class="nutrition-label-wide">
         <div class="nutrition-header">
           <h1>Extension Facts</h1>
         </div>
         
-        <div class="nutrition-serving">
-          <p><strong>Serving Size</strong> 1 Browser</p>
-          <p><strong>Servings Per Container</strong> Unlimited</p>
-        </div>
-        
-        <div class="nutrition-section">
-          <div class="nutrition-row nutrition-header-row">
-            <div><strong>Amount Per Serving</strong></div>
-            <div><strong>% Daily Joy</strong></div>
+        <div class="nutrition-columns">
+          <!-- Left Column -->
+          <div class="nutrition-column nutrition-column-left">
+            <div class="nutrition-serving">
+              <p><strong>Serving Size</strong> 1 Browser</p>
+              <p><strong>Servings Per Container</strong> Unlimited</p>
+            </div>
+            
+            <div class="nutrition-section">
+              <div class="nutrition-row nutrition-header-row">
+                <div><strong>Amount Per Serving</strong></div>
+                <div><strong>% Daily Joy</strong></div>
+              </div>
+              
+              <div class="nutrition-row nutrition-bold-row">
+                <div><strong>Environment Switching</strong> Multiple Flavors</div>
+                <div><strong>100%</strong></div>
+              </div>
+              
+              <div class="nutrition-row">
+                <div>Development 🍫</div>
+                <div>33%</div>
+              </div>
+              
+              <div class="nutrition-row">
+                <div>Staging 🍓</div>
+                <div>33%</div>
+              </div>
+              
+              <div class="nutrition-row">
+                <div>Production 🍦</div>
+                <div>34%</div>
+              </div>
+              
+              <div class="nutrition-row nutrition-bold-row nutrition-divider">
+                <div><strong>Productivity Boost</strong></div>
+                <div><strong>85%</strong></div>
+              </div>
+              
+              <div class="nutrition-row nutrition-divider">
+                <div><strong>Bug Prevention</strong></div>
+                <div><strong>75%</strong></div>
+              </div>
+            </div>
+            
+            <div class="nutrition-ingredients">
+              <p><strong>Ingredients:</strong> Javascript, HTML, CSS, Chrome API, Love, Patience, Coffee</p>
+            </div>
           </div>
           
-          <div class="nutrition-row nutrition-bold-row">
-            <div><strong>Environment Switching</strong> Multiple Flavors</div>
-            <div><strong>100%</strong></div>
+          <!-- Right Column -->
+          <div class="nutrition-column nutrition-column-right">
+            <div class="nutrition-info">
+              <p><strong>Created By:</strong> Steve Ryherd</p>
+              <p>
+                <img src="badge@0.25x.png" height="40" alt="Creator" class="creator-avatar">
+                <span class="creator-links">
+                  <a href="http://www.steveryherd.com/" target="_blank">Website</a> | 
+                  <a href="http://www.github.com/steveryherd/" target="_blank">GitHub</a>
+                </span>
+              </p>
+            </div>
+            
+            <div class="nutrition-info">
+              <p><strong>Special Thanks:</strong> Chrome Extensions Team, Open Source Contributors, Early Adopters</p>
+            </div>
+            
+            <div class="nutrition-license">
+              <p><strong>Licensed Under:</strong> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a></p>
+              <div class="license-badges">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="CC">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="BY">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="NC">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="SA">
+              </div>
+            </div>
+            
+            <div class="nutrition-dedication">
+              <p><strong>Dedication:</strong> <em>To all developers who've experienced the frustration of accidentally making changes in production when they meant to be in development.</em></p>
+            </div>
+            
+            <div class="nutrition-footer">
+              <p>* Lite Mode does not actually contain fewer calories. It is a metaphorical representation of a lighter theme.</p>
+              <p>† Percent Daily Joy values are based on a 2000-line codebase diet. Your values may be higher depending on the size of your project.</p>
+            </div>
           </div>
-          
-          <div class="nutrition-row">
-            <div>Development 🍫</div>
-            <div>33%</div>
-          </div>
-          
-          <div class="nutrition-row">
-            <div>Staging 🍓</div>
-            <div>33%</div>
-          </div>
-          
-          <div class="nutrition-row">
-            <div>Production 🍦</div>
-            <div>34%</div>
-          </div>
-          
-          <div class="nutrition-row nutrition-bold-row nutrition-divider">
-            <div><strong>Productivity Boost</strong></div>
-            <div><strong>85%</strong></div>
-          </div>
-          
-          <div class="nutrition-row nutrition-divider">
-            <div><strong>Bug Prevention</strong></div>
-            <div><strong>75%</strong></div>
-          </div>
-        </div>
-        
-        <div class="nutrition-ingredients">
-          <p><strong>Ingredients:</strong> Javascript, HTML, CSS, Chrome API, Love, Patience, Coffee</p>
-        </div>
-        
-        <div class="nutrition-info">
-          <p><strong>Created By:</strong> Steve Ryherd</p>
-          <p>
-            <img src="badge@0.25x.png" height="40" alt="Creator" class="creator-avatar">
-            <span class="creator-links">
-              <a href="http://www.steveryherd.com/" target="_blank">Website</a> | 
-              <a href="http://www.github.com/steveryherd/" target="_blank">GitHub</a>
-            </span>
-          </p>
-        </div>
-        
-        <div class="nutrition-info">
-          <p><strong>Special Thanks:</strong> Chrome Extensions Team, Open Source Contributors, Early Adopters</p>
-        </div>
-        
-        <div class="nutrition-license">
-          <p><strong>Licensed Under:</strong> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a></p>
-          <div class="license-badges">
-            <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="CC">
-            <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="BY">
-            <img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="NC">
-            <img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="SA">
-          </div>
-        </div>
-        
-        <div class="nutrition-dedication">
-          <p><strong>Dedication:</strong> To all developers who've experienced the frustration of accidentally making changes in production when they meant to be in development.</p>
-        </div>
-        
-        <div class="nutrition-footer">
-          <p>* Lite Mode does not actually contain fewer calories.  It is a metaphorical representation of a lighter theme.</p>
-          <p>† Percent Daily Joy values are based on a 2000-line codebase diet. Your values may be higher depending on the size of your project.</p>
         </div>
       </div>
     </div>

@@ -456,13 +456,13 @@ input[type="text"]:focus {
   display: inline;
 }
 
-/* Credits Tab (Nutrition Label Style) */
-.nutrition-label {
+/* Wide-format nutrition label */
+.nutrition-label-wide {
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  max-width: 500px;
+  max-width: 840px;
   margin: 0 auto;
   border: 2px solid #000;
-  padding: 10px 15px;
+  padding: 15px 20px;
   background-color: #fff;
   color: #000;
   font-size: 14px;
@@ -470,7 +470,7 @@ input[type="text"]:focus {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.nutrition-label .nutrition-header h1 {
+.nutrition-label-wide .nutrition-header h1 {
   font-size: 28px;
   font-weight: 900;
   margin: 0 0 5px 0;
@@ -481,67 +481,155 @@ input[type="text"]:focus {
   display: block; /* Override the flex display */
 }
 
-.nutrition-label h1::after {
+.nutrition-label-wide h1::after {
   display: none; /* Remove the gradient border */
 }
 
-.nutrition-serving {
+.nutrition-columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.nutrition-column {
+  flex: 1;
+}
+
+.nutrition-column-left {
+  border-right: 1px solid #000;
+  padding-right: 20px;
+}
+
+.nutrition-column-right {
+  padding-left: 10px;
+}
+
+.nutrition-label-wide .nutrition-serving {
   padding: 5px 0;
   font-size: 14px;
   border-bottom: 1px solid #000;
 }
 
-.nutrition-serving p {
+.nutrition-label-wide .nutrition-serving p {
   margin: 3px 0;
 }
 
-.nutrition-section {
+.nutrition-label-wide .nutrition-section {
   padding: 5px 0;
-  border-bottom: 5px solid #000;
+  border-bottom: 1px solid #000;
 }
 
-.nutrition-row {
+.nutrition-label-wide .nutrition-row {
   display: flex;
   justify-content: space-between;
   padding: 3px 0;
 }
 
-.nutrition-header-row {
-  border-bottom: 3px solid #000;
+.nutrition-label-wide .nutrition-header-row {
+  border-bottom: 1px solid #000;
   padding-bottom: 4px;
   margin-bottom: 4px;
+  font-weight: bold;
 }
 
-.nutrition-bold-row {
+.nutrition-label-wide .nutrition-bold-row {
+  font-weight: bold;
   font-size: 15px;
 }
 
-.nutrition-divider {
+.nutrition-label-wide .nutrition-divider {
   border-top: 1px solid #000;
   padding-top: 4px;
   margin-top: 4px;
 }
 
-.nutrition-ingredients {
+.nutrition-label-wide .nutrition-ingredients {
   padding: 8px 0;
   border-bottom: 1px solid #000;
   font-size: 13px;
 }
 
-.nutrition-info {
+.nutrition-label-wide .nutrition-info {
   padding: 8px 0;
   border-bottom: 1px solid #000;
 }
 
-.nutrition-info p {
+.nutrition-label-wide .nutrition-info p {
   margin: 5px 0;
 }
 
-.nutrition-license {
+.nutrition-label-wide .nutrition-license {
   padding: 8px 0;
   border-bottom: 1px solid #000;
 }
 
+.nutrition-label-wide .nutrition-dedication {
+  padding: 8px 0;
+  border-bottom: 1px solid #000;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.nutrition-label-wide .nutrition-footer {
+  padding: 8px 0 0 0;
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
+}
+
+.nutrition-label-wide em {
+  font-style: italic;
+}
+
+/* Dark mode wide nutrition label */
+html[data-theme="dark"] .nutrition-label-wide,
+body.theme-dark .nutrition-label-wide {
+  background-color: #2d2d2d;
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .nutrition-label-wide .nutrition-header h1,
+body.theme-dark .nutrition-label-wide .nutrition-header h1 {
+  color: var(--vanilla-base);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .nutrition-label-wide .nutrition-column-left,
+body.theme-dark .nutrition-label-wide .nutrition-column-left {
+  border-right-color: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .nutrition-label-wide .nutrition-section,
+body.theme-dark .nutrition-label-wide .nutrition-section,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-header-row,
+body.theme-dark .nutrition-label-wide .nutrition-header-row,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-divider,
+body.theme-dark .nutrition-label-wide .nutrition-divider,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-serving,
+body.theme-dark .nutrition-label-wide .nutrition-serving,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-ingredients,
+body.theme-dark .nutrition-label-wide .nutrition-ingredients,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-info,
+body.theme-dark .nutrition-label-wide .nutrition-info,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-license,
+body.theme-dark .nutrition-label-wide .nutrition-license,
+html[data-theme="dark"] .nutrition-label-wide .nutrition-dedication,
+body.theme-dark .nutrition-label-wide .nutrition-dedication {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .nutrition-label-wide strong,
+body.theme-dark .nutrition-label-wide strong {
+  color: var(--vanilla-base);
+}
+
+html[data-theme="dark"] .nutrition-label-wide a,
+body.theme-dark .nutrition-label-wide a {
+  color: var(--chocolate-base);
+}
+
+/* License badges styling */
 .license-badges {
   display: flex;
   margin-top: 10px;
@@ -550,20 +638,6 @@ input[type="text"]:focus {
 
 .license-badges img {
   height: 22px;
-}
-
-.nutrition-dedication {
-  padding: 8px 0;
-  border-bottom: 1px solid #000;
-  font-style: italic;
-  font-size: 13px;
-}
-
-.nutrition-footer {
-  padding: 8px 0 0 0;
-  font-size: 10px;
-  color: #666;
-  font-style: italic;
 }
 
 /* Keyboard Shortcuts Tab Styling */
