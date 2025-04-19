@@ -205,8 +205,8 @@ function updateExtensionIcon(tabId, matchingServer) {
   // Always enable the icon
   chrome.action.enable(tabId);
   
-  // Only show environment badges if setting is enabled
-  const showBadge = state.settings.iconBadgeNotifications;
+  // Always show environment badges
+  const showBadge = true;
   
   if (matchingServer) {
     // If we have a match, use the appropriate environment icon

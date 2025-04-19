@@ -140,7 +140,6 @@ function setupEventListeners() {
   // Auto-save for all settings
   document.getElementById('theme-selector').addEventListener('change', autoSaveSettings);
   document.getElementById('show-emoji-icons').addEventListener('change', autoSaveSettings);
-  document.getElementById('icon-badge-notifications').addEventListener('change', autoSaveSettings);
   document.getElementById('follow-system-theme').addEventListener('change', autoSaveSettings);
   // Auto-detect and preserve are handled elsewhere
   document.getElementById('theme-selector').addEventListener('change', updateThemePreview);
@@ -469,7 +468,6 @@ function loadSettings() {
     document.getElementById('theme-selector').value = settings.theme;
     document.getElementById('follow-system-theme').checked = settings.followSystemTheme;
     document.getElementById('show-emoji-icons').checked = settings.showEmojiIcons;
-    document.getElementById('icon-badge-notifications').checked = settings.iconBadgeNotifications;
     
     // Theme selector is always enabled
     
@@ -507,7 +505,7 @@ function saveSettings() {
     theme: document.getElementById('theme-selector').value,
     followSystemTheme: document.getElementById('follow-system-theme').checked,
     showEmojiIcons: document.getElementById('show-emoji-icons').checked,
-    iconBadgeNotifications: document.getElementById('icon-badge-notifications').checked,
+    iconBadgeNotifications: true, // Always enabled
     autoDetectEnvironments: true,
     preservePathQuery: true
   };
