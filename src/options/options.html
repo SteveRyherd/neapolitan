@@ -31,8 +31,146 @@
       <div class="tab-nav">
         <button class="tab-button active" data-tab="environments-tab">Environments</button>
         <button class="tab-button" data-tab="settings-tab">Settings</button>
+        <button class="tab-button" data-tab="shortcuts-tab">Keyboard Shortcuts</button>
         <button class="tab-button" data-tab="credits-tab">Credits</button>
       </div>
+    
+    <!-- Keyboard Shortcuts Tab -->
+    <div class="tab-content hidden" id="shortcuts-tab">
+      <h2>Keyboard Shortcuts</h2>
+      
+      <div class="shortcuts-explanation">
+        <p>Keyboard shortcuts can significantly speed up your workflow when switching between environments. Chrome extensions can suggest shortcuts, but <strong>cannot automatically set them</strong> for security reasons.</p>
+        
+        <p>To configure keyboard shortcuts for this extension:</p>
+        <ol>
+          <li>Type <code>chrome://extensions/shortcuts</code> in your browser's address bar</li>
+          <li>Find "Neapolitan Domain Switcher" in the list</li>
+          <li>Click the pencil icon next to any command to set or change its shortcut</li>
+          <li>Press your desired key combination</li>
+          <li>Click "OK" to save</li>
+        </ol>
+        
+        <div class="shortcuts-note-box">
+          <p><strong>Note:</strong> Chrome doesn't allow extensions to create direct links to <code>chrome://</code> URLs for security reasons. You'll need to manually type the address in your browser.</p>
+        </div>
+      </div>
+      
+      <div class="keyboard-shortcuts-info">
+        <h3>Recommended Shortcut Schemes</h3>
+        <p class="shortcuts-intro">Here are four shortcut schemes we recommend:</p>
+        
+        <div class="shortcut-schemes">
+          <div class="shortcut-scheme">
+            <h4><img src="../../icons/cone2_neapolitan.png" width="32" height="32" alt="Ice cream cone" class="scheme-icon"> The Classic - 3 Stacked Scoops (Recommended)</h4>
+            <p class="scheme-description">Keys on left side in a straight line, rows relate to environment level</p>
+            <table class="shortcuts-table">
+              <tr>
+                <th>Shortcut</th>
+                <th>Mnemonic</th>
+                <th>Action</th>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+X</span></td>
+                <td>X like <strong>X</strong>code</td>
+                <td>Switch to Development</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+S</span></td>
+                <td>S like <strong>S</strong>taging</td>
+                <td>Switch to Staging</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+W</span></td>
+                <td>W like <strong>W</strong>ebsite</td>
+                <td>Switch to Production</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="shortcut-scheme">
+            <h4><img src="../../icons/tub_neapolitan.png" width="32" height="32" alt="Ice cream cone" class="scheme-icon"> Neapolitan</h4>
+            <p class="scheme-description">Uses the same keys as copy, cut, paste</p>
+            <table class="shortcuts-table">
+              <tr>
+                <th>Shortcut</th>
+                <th>Mnemonic</th>
+                <th>Action</th>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+C</span></td>
+                <td>C for <strong>C</strong>hocolate/<strong>C</strong>ode</td>
+                <td>Switch to Development</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+S</span></td>
+                <td>S for <strong>S</strong>trawberry/<strong>S</strong>taging</td>
+                <td>Switch to Staging</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+V</span></td>
+                <td>V for <strong>V</strong>anilla/<strong>V</strong>erified</td>
+                <td>Switch to Production</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="shortcut-scheme">
+            <h4><img src="../../icons/flight_neapolitan.png" width="32" height="32" alt="Ice cream cone" class="scheme-icon">Easy as 1, 2, 3</h4>
+            <p class="scheme-description">Number keys represent the natural development progression</p>
+            <table class="shortcuts-table">
+              <tr>
+                <th>Shortcut</th>
+                <th>Mnemonic</th>
+                <th>Action</th>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+1</span></td>
+                <td>1st environment</td>
+                <td>Switch to Development</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+2</span></td>
+                <td>2nd environment</td>
+                <td>Switch to Staging</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+3</span></td>
+                <td>3rd environment</td>
+                <td>Switch to Production</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="shortcut-scheme">
+            <h4><img src="../../icons/bananasplit_neapolitan.png" width="32" height="32" alt="Ice cream cone" class="scheme-icon">Banana Split</h4>
+            <p class="scheme-description">Direct initials, but discouraged as keys are far apart</p>
+            <table class="shortcuts-table">
+              <tr>
+                <th>Shortcut</th>
+                <th>Mnemonic</th>
+                <th>Action</th>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+D</span></td>
+                <td>D for <strong>D</strong>evelopment</td>
+                <td>Switch to Development</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+S</span></td>
+                <td>S for <strong>S</strong>taging</td>
+                <td>Switch to Staging</td>
+              </tr>
+              <tr>
+                <td><span class="shortcut-key">Alt+P</span></td>
+                <td>P for <strong>P</strong>roduction</td>
+                <td>Switch to Production</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
     
     <!-- Tab Content -->

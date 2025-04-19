@@ -383,3 +383,108 @@ initializeEnvironments();
 // Set up event listeners
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 chrome.runtime.onMessage.addListener(handleMessages);
+
+/**
+ * Handles keyboard shortcuts for environment switching
+ * @param {string} command - The command being executed
+ */
+chrome.commands.onCommand.addListener(function(command) {
+  console.log('Command triggered:', command);
+  
+  // Get the current active tab
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (!tabs || !tabs.length) {
+      console.error('No active tab found');
+      return;
+    }
+    
+    const currentTab = tabs[0];
+    const currentUrl = currentTab.url;
+    
+    // Skip if not an http(s) URL
+    if (!currentUrl || !currentUrl.startsWith('http')) {
+      console.log('Not a valid http URL, skipping shortcut');
+      return;
+    }
+    
+    try {
+      const tabLocation = getLocation(currentUrl);
+      const matchingServer = getEnvironmentServer(tabLocation.hostname);
+      
+      if (!matchingServer) {
+        console.log('No matching environment found for current URL');
+        return;
+      }
+      
+      // Get all servers for this environment
+      const servers = getServers(matchingServer.name);
+      
+      if (!servers || !servers.length) {
+        console.log('No servers found for environment:', matchingServer.name);
+        return;
+      }
+      
+      let targetServerType = null;
+      
+      // Determine which environment to switch to based on the command
+      switch (command) {
+        case 'switch-to-development':
+        case 'switch-to-environment-1':
+          targetServerType = 'development';
+          break;
+        case 'switch-to-staging':
+        case 'switch-to-environment-2':
+          targetServerType = 'staging';
+          break;
+        case 'switch-to-production':
+        case 'switch-to-environment-3':
+          targetServerType = 'production';
+          break;
+        // Additional commands for alternative shortcut schemes
+        case 'alt-d-development': // For the "Banana Split" scheme
+          targetServerType = 'development';
+          break;
+        case 'alt-p-production': // For the "Banana Split" scheme
+          targetServerType = 'production';
+          break;
+        case 'alt-c-development': // For the "Neapolitan" scheme
+          targetServerType = 'development';
+          break;
+        case 'alt-v-production': // For the "Neapolitan" scheme
+          targetServerType = 'production';
+          break;
+        case '_execute_action':
+          // This command is handled by Chrome to open the popup
+          return;
+        default:
+          console.log('Unknown command:', command);
+          return;
+      }
+      
+      // Find the target server
+      const targetServer = servers.find(server => server.type === targetServerType);
+      
+      if (!targetServer) {
+        console.log(`No ${targetServerType} server defined for this environment`);
+        return;
+      }
+      
+      // If it's already the current environment, do nothing
+      if (matchingServer.type === targetServerType) {
+        console.log(`Already on ${targetServerType} environment`);
+        return;
+      }
+      
+      // Create the new URL
+      const url = new URL(currentUrl);
+      const newUrl = new URL(`${url.protocol}//${targetServer.host}${url.pathname}${url.search}${url.hash}`);
+      
+      console.log(`Switching to ${targetServerType} environment: ${newUrl.toString()}`);
+      
+      // Navigate to the new URL
+      chrome.tabs.update(currentTab.id, { url: newUrl.toString() });
+    } catch (error) {
+      console.error('Error processing keyboard shortcut:', error);
+    }
+  });
+});
