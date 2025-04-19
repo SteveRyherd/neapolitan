@@ -70,9 +70,12 @@ function setupEventListeners() {
   document.getElementById('delete-environment-button').addEventListener('click', deleteCurrentEnvironment);
   document.getElementById('reset-button').addEventListener('click', resetToDefaults);
   
-  // Settings tab event listeners
-  document.getElementById('save-settings-button').addEventListener('click', saveSettings);
-  document.getElementById('reset-settings-button').addEventListener('click', resetSettings);
+  // Auto-save for all settings
+  document.getElementById('theme-selector').addEventListener('change', autoSaveSettings);
+  document.getElementById('show-emoji-icons').addEventListener('change', autoSaveSettings);
+  document.getElementById('icon-badge-notifications').addEventListener('change', autoSaveSettings);
+  document.getElementById('auto-detect-environments').addEventListener('change', autoSaveSettings);
+  document.getElementById('preserve-path-query').addEventListener('change', autoSaveSettings);
   document.getElementById('theme-selector').addEventListener('change', updateThemePreview);
   document.getElementById('show-emoji-icons').addEventListener('change', updatePopupPreview);
   
@@ -454,7 +457,7 @@ function loadSettings() {
   }
 }
 
-// Save settings to storage
+// Save settings to storage - now called automatically when settings change
 function saveSettings() {
   // Get values from UI
   const newSettings = {
@@ -469,13 +472,13 @@ function saveSettings() {
     // Use ThemeManager if available
     ThemeManager.saveSettings(newSettings)
       .then(() => {
-        showStatus('Settings saved');
+        showStatus('Settings saved automatically');
         updatePopupPreview();
       });
   } else {
     // Fallback to legacy settings saving
     chrome.storage.local.set({ appSettings: newSettings }, function() {
-      showStatus('Settings saved');
+      showStatus('Settings saved automatically');
       // Notify background script
       chrome.runtime.sendMessage({ action: 'settingsUpdated', settings: newSettings });
       
@@ -486,54 +489,13 @@ function saveSettings() {
   }
 }
 
-// Reset settings to defaults
-function resetSettings() {
-  if (confirm('Are you sure you want to reset all settings to defaults?')) {
-    if (ThemeManager) {
-      // Use ThemeManager if available
-      ThemeManager.resetSettings()
-        .then(() => {
-          const settings = ThemeManager.getSettings();
-          
-          // Update UI
-          document.getElementById('theme-selector').value = settings.theme;
-          document.getElementById('show-emoji-icons').checked = settings.showEmojiIcons;
-          document.getElementById('icon-badge-notifications').checked = settings.iconBadgeNotifications;
-          document.getElementById('auto-detect-environments').checked = settings.autoDetectEnvironments;
-          document.getElementById('preserve-path-query').checked = settings.preservePathQuery;
-          
-          showStatus('Settings reset to defaults');
-          updatePopupPreview();
-        });
-    } else {
-      // Fallback to legacy settings reset
-      const defaultSettings = {
-        theme: 'neapolitan',
-        showEmojiIcons: true,
-        iconBadgeNotifications: true,
-        autoDetectEnvironments: true,
-        preservePathQuery: true
-      };
-      
-      // Update UI
-      document.getElementById('theme-selector').value = defaultSettings.theme;
-      document.getElementById('show-emoji-icons').checked = defaultSettings.showEmojiIcons;
-      document.getElementById('icon-badge-notifications').checked = defaultSettings.iconBadgeNotifications;
-      document.getElementById('auto-detect-environments').checked = defaultSettings.autoDetectEnvironments;
-      document.getElementById('preserve-path-query').checked = defaultSettings.preservePathQuery;
-      
-      // Save to storage
-      chrome.storage.local.set({ appSettings: defaultSettings }, function() {
-        showStatus('Settings reset to defaults');
-        // Notify background script
-        chrome.runtime.sendMessage({ action: 'settingsUpdated', settings: defaultSettings });
-        
-        // Apply theme
-        applyTheme(defaultSettings.theme);
-        updatePopupPreview();
-      });
-    }
-  }
+// Reset settings functionality removed as per requirements
+// Settings are now saved automatically when changed
+
+// New function for auto-saving settings
+function autoSaveSettings() {
+  // Call saveSettings which will get all current values from the UI
+  saveSettings();
 }
 
 // Update theme preview when selector changes
@@ -547,6 +509,7 @@ function updateThemePreview() {
   }
   
   updatePopupPreview();
+  // Theme preview already triggers autoSaveSettings via the change event
 }
 
 // Update popup preview based on settings
