@@ -68,7 +68,6 @@ function setupEventListeners() {
   document.getElementById('save-environment-button').addEventListener('click', saveCurrentEnvironment);
   document.getElementById('cancel-button').addEventListener('click', cancelEditing);
   document.getElementById('delete-environment-button').addEventListener('click', deleteCurrentEnvironment);
-  document.getElementById('reset-button').addEventListener('click', resetToDefaults);
   
   // Auto-save for all settings
   document.getElementById('theme-selector').addEventListener('change', autoSaveSettings);
@@ -362,29 +361,6 @@ function deleteCurrentEnvironment() {
   }
 }
 
-// Reset to default environments
-function resetToDefaults() {
-  if (confirm('Are you sure you want to reset to default environments? All custom environments will be lost.')) {
-    chrome.runtime.sendMessage({ action: 'getDefaultEnvironments' }, function(defaultEnvironments) {
-      environments = defaultEnvironments;
-      
-      // Save to storage
-      chrome.storage.local.set({ environments }, function() {
-        // Reset state
-        currentEnvironmentIndex = -1;
-        hasUnsavedChanges = false;
-        
-        // Update UI
-        populateEnvironmentList();
-        document.getElementById('environment-form').classList.add('hidden');
-        document.getElementById('editor-title').textContent = 'Select an environment';
-        
-        showStatus('Reset to defaults');
-        chrome.runtime.sendMessage({ action: 'environmentsUpdated' });
-      });
-    });
-  }
-}
 
 // Tab Navigation Setup
 function setupTabNavigation() {
