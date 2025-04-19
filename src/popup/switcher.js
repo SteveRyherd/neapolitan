@@ -215,17 +215,17 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
         case 'development':
           badge.classList.add('dev-icon-badge');
           indicator.textContent = 'D';
-          indicator.style.color = 'var(--env-development-accent)';
+          indicator.style.color = '#000000'; /* Use black text for better visibility */
           break;
         case 'staging':
           badge.classList.add('staging-icon-badge');
           indicator.textContent = 'S';
-          indicator.style.color = 'var(--env-staging-accent)';
+          indicator.style.color = '#000000'; /* Use black text for better visibility */
           break;
         case 'production':
           badge.classList.add('prod-icon-badge');
           indicator.textContent = 'P';
-          indicator.style.color = 'var(--env-production-accent)';
+          indicator.style.color = '#000000'; /* Use black text for better visibility */
           break;
       }
       

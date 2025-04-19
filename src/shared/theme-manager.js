@@ -10,9 +10,8 @@ const ThemeManager = (function() {
   const DEFAULT_SETTINGS = {
     theme: 'neapolitan',
     showEmojiIcons: true,
-    iconBadgeNotifications: true,
-    autoDetectEnvironments: true,
-    preservePathQuery: true
+    iconBadgeNotifications: true
+    // Behavior settings removed as requested
   };
   
   // Current settings

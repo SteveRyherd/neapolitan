@@ -14,9 +14,8 @@ const state = {
   settings: {
     theme: 'neapolitan',
     showEmojiIcons: true,
-    iconBadgeNotifications: true,
-    autoDetectEnvironments: true,
-    preservePathQuery: true
+    iconBadgeNotifications: true
+    // Behavior settings removed as requested
   }
 };
 

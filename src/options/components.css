@@ -444,6 +444,7 @@ input[type="text"]:focus {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   display: none;
+  color: #000000; /* Always use dark text color for better visibility */
 }
 
 /* When emoji icons are disabled */
@@ -997,6 +998,60 @@ body.theme-dark .nutrition-bold-row strong {
 html[data-theme="dark"] .creator-links a,
 body.theme-dark .creator-links a {
   color: var(--chocolate-base);
+}
+
+/* Dark mode popup preview overrides */
+html[data-theme="dark"] .popup-preview,
+body.theme-dark .popup-preview {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .preview-header,
+body.theme-dark .preview-header {
+  background-color: var(--vanilla-base);
+  color: #000000;
+}
+
+html[data-theme="dark"] .preview-link,
+body.theme-dark .preview-link {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .preview-link:hover,
+body.theme-dark .preview-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .preview-link.active,
+body.theme-dark .preview-link.active {
+  background-color: var(--strawberry-base);
+  color: #000000;
+  border-left-color: var(--strawberry-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+html[data-theme="dark"] .preview-badge.dev-badge,
+body.theme-dark .preview-badge.dev-badge {
+  background-color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .preview-badge.staging-badge,
+body.theme-dark .preview-badge.staging-badge {
+  background-color: var(--strawberry-base);
+}
+
+html[data-theme="dark"] .preview-badge.prod-badge,
+body.theme-dark .preview-badge.prod-badge {
+  background-color: var(--vanilla-base);
+}
+
+html[data-theme="dark"] .preview-text,
+body.theme-dark .preview-text {
+  color: #000000;
 }
 
 /* Site footer */

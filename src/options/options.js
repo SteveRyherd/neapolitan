@@ -141,8 +141,7 @@ function setupEventListeners() {
   document.getElementById('theme-selector').addEventListener('change', autoSaveSettings);
   document.getElementById('show-emoji-icons').addEventListener('change', autoSaveSettings);
   document.getElementById('icon-badge-notifications').addEventListener('change', autoSaveSettings);
-  document.getElementById('auto-detect-environments').addEventListener('change', autoSaveSettings);
-  document.getElementById('preserve-path-query').addEventListener('change', autoSaveSettings);
+  // Behavior settings event listeners removed as requested
   document.getElementById('theme-selector').addEventListener('change', updateThemePreview);
   document.getElementById('show-emoji-icons').addEventListener('change', updatePopupPreview);
   
@@ -469,8 +468,7 @@ function loadSettings() {
     document.getElementById('theme-selector').value = settings.theme;
     document.getElementById('show-emoji-icons').checked = settings.showEmojiIcons;
     document.getElementById('icon-badge-notifications').checked = settings.iconBadgeNotifications;
-    document.getElementById('auto-detect-environments').checked = settings.autoDetectEnvironments;
-    document.getElementById('preserve-path-query').checked = settings.preservePathQuery;
+    // Behavior settings removed as requested
     
     // Initialize popup preview
     updatePopupPreview();
@@ -480,17 +478,15 @@ function loadSettings() {
       const appSettings = data.appSettings || {
         theme: 'neapolitan',
         showEmojiIcons: true,
-        iconBadgeNotifications: true,
-        autoDetectEnvironments: true,
-        preservePathQuery: true
+        iconBadgeNotifications: true
+        // Behavior settings removed as requested
       };
       
       // Update settings UI
       document.getElementById('theme-selector').value = appSettings.theme;
       document.getElementById('show-emoji-icons').checked = appSettings.showEmojiIcons;
       document.getElementById('icon-badge-notifications').checked = appSettings.iconBadgeNotifications;
-      document.getElementById('auto-detect-environments').checked = appSettings.autoDetectEnvironments;
-      document.getElementById('preserve-path-query').checked = appSettings.preservePathQuery;
+      // Behavior settings removed as requested
       
       // Apply current theme
       applyTheme(appSettings.theme);
@@ -507,9 +503,8 @@ function saveSettings() {
   const newSettings = {
     theme: document.getElementById('theme-selector').value,
     showEmojiIcons: document.getElementById('show-emoji-icons').checked,
-    iconBadgeNotifications: document.getElementById('icon-badge-notifications').checked,
-    autoDetectEnvironments: document.getElementById('auto-detect-environments').checked,
-    preservePathQuery: document.getElementById('preserve-path-query').checked
+    iconBadgeNotifications: document.getElementById('icon-badge-notifications').checked
+    // Behavior settings removed as requested
   };
   
   if (ThemeManager) {
