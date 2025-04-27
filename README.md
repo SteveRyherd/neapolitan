@@ -1,21 +1,21 @@
 <a name="top"></a>
 
 ![Project Hero](screenshots/hero.png)
-# Browser Environment Switcher
+# Neapolitan - Browser Environment Switcher
 
 A browser extension that makes it easy to switch between development, staging, and production environments while maintaining your current path.
-
-![Extension Demo](screenshots/demo.gif)
 
 ## Features
 
 - One-click switching between environments
-- Automatic environment detection
+- Fully customizable [Keyboard Shortcuts](KEYBOARD_SHORTCUTS.md) to switch between environments
 - Visual indicators for current environment
 - Customizable environment configurations
 - Works across multiple domains/projects
 
 ## Screenshots
+
+![Extension Demo](screenshots/demo.gif)
 
 | Popup Interface | Options Page |
 |----------------|--------------|
