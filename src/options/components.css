@@ -569,8 +569,8 @@ input[type="text"]:focus {
 .nutrition-label-wide .nutrition-footer {
   padding: 8px 0 0 0;
   font-size: 10px;
-  color: #666;
-  font-style: italic;
+  color: #fff;
+  font-style: normal;
 }
 
 .nutrition-label-wide em {
@@ -588,7 +588,7 @@ body.theme-dark .nutrition-label-wide {
 html[data-theme="dark"] .nutrition-label-wide .nutrition-header h1,
 body.theme-dark .nutrition-label-wide .nutrition-header h1 {
   color: var(--vanilla-base);
-  border-bottom-color: rgba(255, 255, 255, 0.3);
+  border-bottom-color: #fff;
 }
 
 html[data-theme="dark"] .nutrition-label-wide .nutrition-column-left,
