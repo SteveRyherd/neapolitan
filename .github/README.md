@@ -15,12 +15,14 @@ A browser extension that makes it easy to switch between development, staging, a
 
 ## Screenshots
 
-![Extension Demo](screenshots/demo.gif)
-
 | Popup Interface | Options Page |
 |----------------|--------------|
 | ![Popup](screenshots/popup.png) | ![Options](screenshots/options.png) |
 
+
+## Quick Demo
+
+![Extension Demo](screenshots/demo.gif)
 
 ---
 
