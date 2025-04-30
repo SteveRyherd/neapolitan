@@ -13,6 +13,7 @@ const state = {
   environments: [],
   settings: {
     theme: 'neapolitan',
+    userPreferredTheme: 'neapolitan', // Track user's actual preference separately
     followSystemTheme: true,
     showEmojiIcons: true,
     iconBadgeNotifications: true,
@@ -62,6 +63,11 @@ function initializeEnvironments() {
     // Load settings
     if (data.appSettings) {
       state.settings = data.appSettings;
+      
+      // Make sure userPreferredTheme exists (for backwards compatibility)
+      if (!state.settings.userPreferredTheme) {
+        state.settings.userPreferredTheme = state.settings.theme || 'neapolitan';
+      }
     }
     
     console.log('Extension initialized with settings:', state.settings);
@@ -276,8 +282,8 @@ function updateExtensionIcon(tabId, matchingServer) {
  * @param {Object} tab - The tab that was updated
  */
 function checkForValidUrl(tabId, changeInfo, tab) {
-  // Only process when page is loading and has a valid URL
-  if (changeInfo.status !== "loading" || !tab.url || !tab.url.startsWith("http")) {
+  // Check for both http and https when matching URLs
+  if (changeInfo.status !== "loading" || !tab.url || !(tab.url.startsWith("http://") || tab.url.startsWith("https://"))) {
     return;
   }
   
@@ -403,8 +409,8 @@ chrome.commands.onCommand.addListener(function(command) {
     const currentUrl = currentTab.url;
     
     // Skip if not an http(s) URL
-    if (!currentUrl || !currentUrl.startsWith('http')) {
-      console.log('Not a valid http URL, skipping shortcut');
+    if (!currentUrl || !(currentUrl.startsWith('http://') || currentUrl.startsWith('https://'))) {
+      console.log('Not a valid http(s) URL, skipping shortcut');
       return;
     }
     
@@ -478,7 +484,12 @@ chrome.commands.onCommand.addListener(function(command) {
       
       // Create the new URL
       const url = new URL(currentUrl);
-      const newUrl = new URL(`${url.protocol}//${targetServer.host}${url.pathname}${url.search}${url.hash}`);
+      
+      // Always use HTTP and let server redirect as needed
+      const newUrl = new URL(`http://${targetServer.host}${url.pathname}${url.search}${url.hash}`);
+      
+      // Log the transformation for debugging
+      console.log(`URL transformation: ${currentUrl} → ${newUrl.toString()}`);
       
       console.log(`Switching to ${targetServerType} environment: ${newUrl.toString()}`);
       

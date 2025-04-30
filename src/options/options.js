@@ -345,7 +345,6 @@ function saveCurrentEnvironment() {
   // Clear existing servers
   environments[currentEnvironmentIndex].servers = [];
   
-  // Add Development server if provided
   if (devInput.value.trim()) {
     environments[currentEnvironmentIndex].servers.push({
       type: 'development',
@@ -353,7 +352,6 @@ function saveCurrentEnvironment() {
     });
   }
   
-  // Add Staging server if provided
   if (stagingInput.value.trim()) {
     environments[currentEnvironmentIndex].servers.push({
       type: 'staging',
@@ -361,7 +359,6 @@ function saveCurrentEnvironment() {
     });
   }
   
-  // Add Production server if provided
   if (prodInput.value.trim()) {
     environments[currentEnvironmentIndex].servers.push({
       type: 'production',
@@ -464,8 +461,9 @@ function loadSettings() {
     // Use ThemeManager if available
     const settings = ThemeManager.getSettings();
     
-    // Update settings UI
-    document.getElementById('theme-selector').value = settings.theme;
+    // Update settings UI - use userPreferredTheme for the dropdown
+    // This ensures the dropdown shows what the user selected, not what's currently applied
+    document.getElementById('theme-selector').value = settings.userPreferredTheme || settings.theme;
     document.getElementById('follow-system-theme').checked = settings.followSystemTheme;
     document.getElementById('show-emoji-icons').checked = settings.showEmojiIcons;
     
@@ -540,18 +538,48 @@ function autoSaveSettings() {
   if (event && event.target.id === 'follow-system-theme') {
     const followSystem = event.target.checked;
     
-    // If enabling system theme preference and system is in dark mode, immediately apply dark theme
+    // If enabling system theme preference and system is in dark mode, apply dark theme
+    // visually but don't change the theme selector value
     if (followSystem && ThemeManager) {
       const systemTheme = ThemeManager.detectSystemTheme();
       if (systemTheme === 'dark') {
-        document.getElementById('theme-selector').value = 'dark';
+        // Apply dark theme without changing the UI dropdown selection
+        // This keeps the user's preference intact
+        ThemeManager.applyTheme('dark', false);
       }
       // If system is in light mode, keep the current theme
     }
   }
   
-  // Call saveSettings which will get all current values from the UI
-  saveSettings();
+  // Get current UI values for saving
+  const newSettings = {
+    theme: document.getElementById('theme-selector').value,
+    followSystemTheme: document.getElementById('follow-system-theme').checked,
+    showEmojiIcons: document.getElementById('show-emoji-icons').checked,
+    iconBadgeNotifications: true, // Always enabled
+    autoDetectEnvironments: true,
+    preservePathQuery: true
+  };
+  
+  // Call saveSettings which will save the values
+  if (ThemeManager) {
+    ThemeManager.saveSettings(newSettings)
+      .then(() => {
+        showStatus('Settings saved automatically');
+        updatePopupPreview();
+      });
+  } else {
+    // Fallback to legacy settings saving
+    chrome.storage.local.set({ appSettings: newSettings }, function() {
+      showStatus('Settings saved automatically');
+      // Notify background script
+      chrome.runtime.sendMessage({ action: 'settingsUpdated', settings: newSettings });
+      
+      // Apply theme
+      applyTheme(newSettings.theme);
+      updatePopupPreview();
+    });
+  }
 }
 
 // Update theme preview when selector changes
@@ -559,7 +587,8 @@ function updateThemePreview() {
   const selectedTheme = document.getElementById('theme-selector').value;
   
   if (ThemeManager) {
-    ThemeManager.applyTheme(selectedTheme);
+    // When user manually changes the theme, update both active theme and preference
+    ThemeManager.applyTheme(selectedTheme, true);
   } else {
     applyTheme(selectedTheme);
   }

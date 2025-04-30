@@ -9,6 +9,7 @@ const ThemeManager = (function() {
   // Default settings
   const DEFAULT_SETTINGS = {
     theme: 'neapolitan',
+    userPreferredTheme: 'neapolitan', // Track user's actual preference separately
     followSystemTheme: true, // Follow system theme by default
     showEmojiIcons: true,
     iconBadgeNotifications: true,
@@ -28,16 +29,24 @@ const ThemeManager = (function() {
       chrome.storage.local.get('appSettings', function(data) {
         if (data.appSettings) {
           settings = {...data.appSettings};
+          
+          // Make sure userPreferredTheme exists (for backwards compatibility)
+          if (!settings.userPreferredTheme) {
+            settings.userPreferredTheme = settings.theme || 'neapolitan';
+          }
         }
         
         // Check if we should follow system dark mode
         if (settings.followSystemTheme) {
           const systemTheme = detectSystemTheme();
-          // Only override with dark theme if system is in dark mode
+          // Only override active theme if system is in dark mode
           if (systemTheme === 'dark') {
-            settings.theme = 'dark';
+            // Apply dark theme but DON'T change the user's preferred theme
+            applyTheme('dark', false);
+          } else {
+            // System is in light mode, use user's preferred theme
+            applyTheme(settings.userPreferredTheme, false);
           }
-          // If system is in light mode, keep user's theme preference
         }
         
         // Apply theme from settings
@@ -54,8 +63,9 @@ const ThemeManager = (function() {
   /**
    * Apply theme to document
    * @param {string} themeName - Name of the theme to apply
+   * @param {boolean} updateUserPreference - Whether to update the user's preference (default: true)
    */
-  function applyTheme(themeName) {
+  function applyTheme(themeName, updateUserPreference = true) {
     // Remove existing theme classes from body
     document.body.classList.remove(
       'theme-neapolitan', 
@@ -72,6 +82,11 @@ const ThemeManager = (function() {
     
     // Update settings
     settings.theme = themeName;
+    
+    // Only update user preference if explicitly requested
+    if (updateUserPreference) {
+      settings.userPreferredTheme = themeName;
+    }
   }
   
   /**
@@ -101,7 +116,15 @@ const ThemeManager = (function() {
   function saveSettings(newSettings) {
     return new Promise((resolve) => {
       // Update settings
-      settings = {...settings, ...newSettings};
+      const updatedSettings = {...settings, ...newSettings};
+      
+      // If changing theme, also update userPreferredTheme
+      if (newSettings.theme) {
+        updatedSettings.userPreferredTheme = newSettings.theme;
+      }
+      
+      // Save the complete settings
+      settings = updatedSettings;
       
       // Save to storage
       chrome.storage.local.set({ appSettings: settings }, function() {
@@ -158,18 +181,11 @@ const ThemeManager = (function() {
       if (settings.followSystemTheme) {
         // Only switch to dark mode when system is in dark mode
         if (e.matches) {
-          applyTheme('dark');
+          // System switched to dark mode
+          applyTheme('dark', false); // Apply dark theme WITHOUT changing user preference
         } else {
-          // When system switches to light mode, restore user's preferred theme
-          // We need to get the current settings from storage to get the user's preference
-          chrome.storage.local.get('appSettings', function(data) {
-            if (data.appSettings && data.appSettings.theme && data.appSettings.theme !== 'dark') {
-              applyTheme(data.appSettings.theme);
-            } else {
-              // Default to neapolitan if no user preference is stored
-              applyTheme('neapolitan');
-            }
-          });
+          // System switched to light mode, restore user's preferred theme
+          applyTheme(settings.userPreferredTheme, false);
         }
       }
     };

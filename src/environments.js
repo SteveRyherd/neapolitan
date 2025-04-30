@@ -29,6 +29,14 @@ export const DEFAULT_ENVIRONMENTS = [
       { type: "staging", host: "certcsweb" },
       { type: "production", host: "facebook.com" }
     ]
+  },
+  {
+    name: "Wikipedia",
+    servers: [
+      { type: "development", host: "localhost:6969" },
+      { type: "staging", host: "test.wikipedia.org" },
+      { type: "production", host: "wikipedia.org" }
+    ]
   }
   // Add more environments as needed
 ];

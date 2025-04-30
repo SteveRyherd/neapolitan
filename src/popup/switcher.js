@@ -245,7 +245,9 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     
     // Create new URL preserving path, query, and hash
     const url = new URL(currentURL);
-    const newUrl = new URL(`${url.protocol}//${server.host}${url.pathname}${url.search}${url.hash}`);
+    
+    // Always use HTTP protocol and let server redirect if needed
+    const newUrl = new URL(`http://${server.host}${url.pathname}${url.search}${url.hash}`);
     
     a.href = "#";
     a.title = newUrl.toString();

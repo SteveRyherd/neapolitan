@@ -155,15 +155,56 @@ input[type="text"]:focus {
   align-items: center;
 }
 
-.input-prefix {
-  padding: 8px 10px;
-  background-color: #f0f0f0;
+/* Protocol Toggle Styles */
+.protocol-toggle {
+  display: flex;
   border: 1px solid #ddd;
   border-right: none;
   border-radius: 4px 0 0 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.protocol-toggle input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.protocol-toggle label {
+  display: inline-block;
+  padding: 8px 10px;
+  background-color: #f0f0f0;
   color: #666;
   font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  margin: 0;
+  border-right: 1px solid #ddd;
+  transition: all 0.2s ease;
 }
+
+.protocol-toggle label:last-of-type {
+  border-right: none;
+}
+
+.protocol-toggle input[type="radio"]:checked + label {
+  background-color: var(--chocolate-color);
+  color: white;
+  font-weight: 500;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.protocol-toggle input[type="radio"]:focus + label {
+  outline: 2px solid var(--strawberry-color);
+  outline-offset: -2px;
+}
+
+.protocol-toggle input[type="radio"]:hover:not(:checked) + label {
+  background-color: #e0e0e0;
+}
+
 
 .input-prefix + input[type="text"] {
   border-radius: 0 4px 4px 0;
