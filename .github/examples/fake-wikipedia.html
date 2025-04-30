@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandbox - Definitely Real Wikipedia</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: sans-serif;
+      line-height: 1.5;
+      color: #222;
+      background-color: #fff;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    /* Header styles */
+    #header {
+      height: 80px;
+      position: relative;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #a7d7f9;
+      padding: 0 16px;
+    }
+    
+    .environment-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 5px;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+      font-size: 14px;
+    }
+    
+    /* Environment-specific styling */
+    body.env-development .environment-indicator {
+      background-color: #b49982; /* Chocolate */
+    }
+    
+    body.env-staging .environment-indicator {
+      background-color: #fdaeae; /* Strawberry */
+    }
+    
+    body.env-production .environment-indicator {
+      background-color: #f6e2b3; /* Vanilla */
+      color: #333;
+    }
+    
+    .logo {
+      font-family: "Linux Libertine", Georgia, Times, serif;
+      font-size: 1.6em;
+      text-decoration: none;
+      line-height: 80px;
+      display: inline-block;
+      color: #000;
+      font-weight: normal;
+    }
+    
+    .logo b {
+      font-weight: bold;
+    }
+    
+    /* Navigation */
+    #sidebar {
+      width: 176px;
+      float: left;
+      padding: 16px;
+      font-size: 0.9em;
+      background: #f8f9fa;
+      border-right: 1px solid #a7d7f9;
+      height: calc(100vh - 80px);
+    }
+    
+    #sidebar h3 {
+      font-size: 0.75em;
+      color: #54595d;
+      text-transform: uppercase;
+      margin: 0.5em 0;
+      padding-bottom: 0.17em;
+      border-bottom: 1px solid #c8ccd1;
+    }
+    
+    #sidebar ul {
+      list-style: none;
+      margin: 0 0 1em 0;
+    }
+    
+    #sidebar li {
+      padding: 0.25em 0;
+    }
+    
+    #sidebar a {
+      color: #0645ad;
+      text-decoration: none;
+    }
+    
+    #sidebar a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Main content */
+    #content {
+      margin-left: 176px;
+      padding: 16px 24px;
+      background-color: #fff;
+      border-left: 1px solid #a7d7f9;
+      min-height: calc(100vh - 80px);
+    }
+    
+    #content h1 {
+      font-family: "Linux Libertine", Georgia, Times, serif;
+      font-size: 1.8em;
+      border-bottom: 1px solid #a2a9b1;
+      margin-bottom: 0.6em;
+      padding-bottom: 0.2em;
+    }
+    
+    #content h2 {
+      font-size: 1.5em;
+      margin: 1em 0 0.5em;
+      border-bottom: 1px solid #a2a9b1;
+      padding-bottom: 0.2em;
+    }
+    
+    #content p {
+      margin: 0.5em 0 1em;
+    }
+    
+    pre {
+      font-family: monospace;
+      background-color: #f8f9fa;
+      border: 1px solid #eaecf0;
+      padding: 1em;
+      margin: 1em 0;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    
+    .notice {
+      background-color: #ffecec;
+      border: 1px solid #ffbaba;
+      padding: 0.5em;
+      margin: 1em 0;
+    }
+    
+    .dev-note {
+      background-color: #ffffcc;
+      border: 1px solid #ffcc00;
+      padding: 0.5em;
+      margin: 1em 0;
+      font-family: monospace;
+    }
+    
+    .edit-btn {
+      color: #0645ad;
+      font-size: 0.8em;
+      text-decoration: none;
+      margin-left: 0.5em;
+    }
+    
+    .warning {
+      color: #d33;
+      font-weight: bold;
+    }
+    
+    .infobox {
+      float: right;
+      clear: right;
+      width: 22em;
+      margin: 0 0 1em 1em;
+      background-color: #f8f9fa;
+      border: 1px solid #a2a9b1;
+      border-spacing: 3px;
+      padding: 0.2em;
+      font-size: 0.9em;
+    }
+    
+    .infobox th {
+      vertical-align: top;
+      text-align: left;
+      background-color: #eaecf0;
+      padding: 0.2em 0.4em;
+    }
+    
+    .infobox td {
+      vertical-align: top;
+      padding: 0.2em 0.4em;
+    }
+
+    /* Animations and fun effects */
+    @keyframes glitch {
+      0% { transform: translate(0) }
+      20% { transform: translate(-2px, 2px) }
+      40% { transform: translate(-2px, -2px) }
+      60% { transform: translate(2px, 2px) }
+      80% { transform: translate(2px, -2px) }
+      100% { transform: translate(0) }
+    }
+    
+    .glitch:hover {
+      animation: glitch 0.3s linear infinite;
+      display: inline-block;
+    }
+    
+    .under-construction {
+      display: inline-block;
+      padding: 3px 6px;
+      background: repeating-linear-gradient(
+        45deg,
+        yellow,
+        yellow 10px,
+        black 10px,
+        black 20px
+      );
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 0 #000;
+    }
+    
+    /* Detect environment by hostname */
+    #environment-script {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="environment-script">
+    <script>
+      // Simple environment detection
+      function detectEnvironment() {
+        const hostname = window.location.hostname;
+        
+        if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+          document.body.classList.add('env-development');
+          document.querySelector('.environment-indicator').textContent = 'DEVELOPMENT ENVIRONMENT - May explode at any moment';
+        } else if (hostname.includes('test.wikipedia.org')) {
+          document.body.classList.add('env-staging');
+          document.querySelector('.environment-indicator').textContent = 'TEST ENVIRONMENT - Slightly less likely to explode';
+        } else {
+          document.body.classList.add('env-production');
+          document.querySelector('.environment-indicator').textContent = 'PRODUCTION - Please don\'t break anything';
+        }
+      }
+      
+      // Run on page load
+      window.addEventListener('DOMContentLoaded', detectEnvironment);
+    </script>
+  </div>
+
+  <header id="header">
+    <div class="environment-indicator">ENVIRONMENT STATUS LOADING...</div>
+    <a href="#" class="logo"><b>Wiki</b>pedia<sup style="font-size: 0.5em">🥴</sup></a>
+  </header>
+  
+  <div id="sidebar">
+    <h3>Navigation</h3>
+    <ul>
+      <li><a href="#">Main Page</a></li>
+      <li><a href="#">Contents</a></li>
+      <li><a href="#">Random Article</a></li>
+      <li><a href="#" class="glitch">About Wikipedia</a></li>
+      <li><a href="#">Contact Us</a></li>
+    </ul>
+    
+    <h3>Contribute</h3>
+    <ul>
+      <li><a href="#">Help</a></li>
+      <li><a href="#">Community portal</a></li>
+      <li><a href="#">Recent changes</a></li>
+      <li><a href="#">Upload file</a></li>
+    </ul>
+    
+    <h3>Developer Tools</h3>
+    <ul>
+      <li><a href="#">Debug Console</a></li>
+      <li><a href="#">Reset Database</a></li>
+      <li><a href="#">Simulate 500 Error</a></li>
+      <li><a href="#">Toggle Dark Mode <span class="warning">[BROKEN]</span></a></li>
+    </ul>
+  </div>
+  
+  <div id="content">
+    <h1>Sandbox <a href="#" class="edit-btn">[edit]</a></h1>
+    
+    <div class="notice">
+      This page exists for testing purposes. Feel free to experiment here, but please avoid adding inappropriate content. Administrators may clean this page periodically.
+    </div>
+    
+    <div class="infobox">
+      <table>
+        <tbody>
+          <tr>
+            <th colspan="2" style="text-align: center; font-size: 125%;">Wiki Sandbox</th>
+          </tr>
+          <tr>
+            <th>Purpose</th>
+            <td>Breaking things safely</td>
+          </tr>
+          <tr>
+            <th>Maintained by</th>
+            <td>Overworked interns</td>
+          </tr>
+          <tr>
+            <th>Last cleaned</th>
+            <td><span style="color: red;">427 days ago</span></td>
+          </tr>
+          <tr>
+            <th>Current state</th>
+            <td><span class="under-construction">UNDER CONSTRUCTION</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <p>Welcome to the <b>Wikipedia Sandbox</b>, a page designed for testing and experimenting with Wiki syntax without breaking any real articles. This page is periodically cleaned, so don't expect your contributions to remain permanently.</p>
+    
+    <div class="dev-note">
+      TODO: Fix the metadata on this page. Also, why is CSS loading so slowly?
+      ISSUE #4271: Random text sometimes disappears when viewed on mobile
+      @sarah please review this section when you get a chance
+    </div>
+    
+    <h2>Testing Headings <a href="#" class="edit-btn">[edit]</a></h2>
+    <p>This is a paragraph of text that exists purely to demonstrate what paragraphs look like on Wikipedia. Did you know that the sandbox was introduced in 2013 after a series of unfortunate incidents involving new editors trying to test their skills on important articles like "United States Presidential Election" and "List of Largest Mammals"?</p>
+    
+    <p>According to our completely made-up statistics, <span class="glitch">42%</span> of all Wikipedia edits in the development environment are just developers typing "test test test" over and over. Another 38% are variations of "hello world," and the remaining 20% are people accidentally pasting their passwords.</p>
+    
+    <h2>Lorem Ipsum (Developer Edition) <a href="#" class="edit-btn">[edit]</a></h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. <span class="warning">[CITATION NEEDED]</span> Nullam ac tortor vitae purus faucibus ornare suspendisse. Lorem mollis aliquam ut porttitor leo a. Amet consectetur adipiscing elit pellentesque habitant morbi tristique senectus et.</p>
+    
+    <pre>
+function updatePage() {
+  // TODO: Implement this function
+  // FIXME: This crashes in IE6
+  console.log("Pretending to update the page");
+  return false; // Why? Who knows!
+}
+    </pre>
+    
+    <p>Nullam eget felis eget nunc lobortis mattis. Ut tortor pretium viverra suspendisse potenti nullam ac tortor. Egestas egestas fringilla phasellus faucibus. Proin sagittis nisl rhoncus mattis. Eget nullam non nisi est sit amet facilisis. Sem integer vitae justo eget magna fermentum.</p>
+    
+    <h2>Example Table <a href="#" class="edit-btn">[edit]</a></h2>
+    <table style="width: 80%; border-collapse: collapse; margin: 1em 0;">
+      <tr style="background-color: #eaecf0;">
+        <th style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Environment</th>
+        <th style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">URL</th>
+        <th style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Status</th>
+        <th style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Last Deployment</th>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Development</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">localhost/wiki/Sandbox</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;"><span style="color: green;">Functioning-ish</span></td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Every 5 minutes, apparently</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Test</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">test.wikipedia.org/wiki/Sandbox</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;"><span style="color: orange;">Mostly Working</span></td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Tuesday, maybe?</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">Production</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">wikipedia.org/wiki/Sandbox</td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;"><span style="color: blue;">Surprisingly Stable</span></td>
+        <td style="border: 1px solid #a2a9b1; padding: 0.2em 0.4em;">When Dave feels like it</td>
+      </tr>
+    </table>
+    
+    <h2>Known Issues <a href="#" class="edit-btn">[edit]</a></h2>
+    <ul>
+      <li>Sometimes the database just decides to take a nap.</li>
+      <li>The search function occasionally returns results from an alternate universe where everything is made of cheese.</li>
+      <li>If you edit more than 5 articles in 10 minutes, the server will send you a passive-aggressive email.</li>
+      <li>Mobile version sometimes transforms all text into annoying emojis.</li>
+      <li>On Tuesdays, all images are replaced with pictures of cats. We're working on it.</li>
+      <li>If you type "Beetlejuice" three times in the search bar, something horrible happens.</li>
+    </ul>
+    
+    <div class="dev-note">
+      // NOTE: Remove this section before pushing to production
+      // HACK: The CSS for this page was written at 3am and should be completely redone
+      // BUG: Sometimes this page randomly turns upside-down in Chrome
+    </div>
+    
+    <h2>References <a href="#" class="edit-btn">[edit]</a></h2>
+    <ol style="font-size: 0.9em; margin-left: 2em;">
+      <li>Smith, J. (2023). "Why Development Environments Always Break at the Worst Time". <i>Journal of Developer Frustration</i>, 42(1), 127-134.</li>
+      <li>Brown, A. et al. (2022). "A Comprehensive Guide to Lorem Ipsum: Why It's Still Used Despite Making No Sense". <i>Typography Monthly</i>, 18(3), 55-72.</li>
+      <li>Johnson, M. (2021). <i>The Wikipedia Development Process: A Comedy in Three Acts</i>. Publisher That Definitely Exists Press.</li>
+      <li>Error 404: Reference Not Found</li>
+      <li>This reference will be added later, we promise.</li>
+    </ol>
+
+  </div>
+
+  <script>
+    // Run environment detection
+    const hostname = window.location.hostname;
+    
+    if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+      document.body.classList.add('env-development');
+      document.querySelector('.environment-indicator').textContent = 'DEVELOPMENT ENVIRONMENT - May explode at any moment';
+    } else if (hostname.includes('test.wikipedia.org')) {
+      document.body.classList.add('env-staging');
+      document.querySelector('.environment-indicator').textContent = 'TEST ENVIRONMENT - Slightly less likely to explode';
+    } else {
+      document.body.classList.add('env-production');
+      document.querySelector('.environment-indicator').textContent = 'PRODUCTION - Please don\'t break anything';
+    }
+  </script>
+</body>
+</html>
