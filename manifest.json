@@ -47,7 +47,7 @@
         "windows": "Alt+X",
         "linux": "Alt+X"
       },
-      "description": "Switch to development environment"
+      "description": "Switch to 1: development environment"
     },
     "switch-to-staging": {
       "suggested_key": {
@@ -55,7 +55,7 @@
         "windows": "Alt+S",
         "linux": "Alt+S"
       },
-      "description": "Switch to staging environment"
+      "description": "Switch to 2: staging environment"
     },
     "switch-to-production": {
       "suggested_key": {
@@ -63,7 +63,7 @@
         "windows": "Alt+W",
         "linux": "Alt+W"
       },
-      "description": "Switch to production environment"
+      "description": "Switch to 3: production environment"
     },
     "_execute_action": {
       "description": "Open the environment switcher popup"
