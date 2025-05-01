@@ -30,9 +30,8 @@ cp -r src "$BUILD_DIR/"
 # Copy icons
 cp -r icons "$BUILD_DIR/"
 
-# Copy CHANGELOG.md and README files
-cp CHANGELOG.md "$BUILD_DIR/"
-cp .github/README.md "$BUILD_DIR/"
+# Documentation files are not needed in the extension package
+# They're only useful for the repository
 
 # Remove any unwanted files (like .DS_Store)
 find "$BUILD_DIR" -name ".DS_Store" -delete
