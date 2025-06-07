@@ -600,7 +600,7 @@ function updateThemePreview() {
 // Update popup preview based on settings
 function updatePopupPreview() {
   const showEmoji = document.getElementById('show-emoji-icons').checked;
-  const popupPreview = document.querySelector('.popup-preview');
+  const popupPreview = document.getElementById('environment-links');
   
   if (showEmoji) {
     popupPreview.classList.remove('emoji-disabled');
@@ -623,7 +623,7 @@ function updatePopupPreview() {
   popupPreview.classList.add(`theme-${currentTheme}`);
   
   // Apply active state to the staging environment for demonstration
-  const links = document.querySelectorAll('.preview-link');
+  const links = document.querySelectorAll('#link-list a');
   links.forEach(link => {
     link.classList.remove('active');
   });
