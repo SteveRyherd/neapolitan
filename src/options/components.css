@@ -376,6 +376,11 @@ input[type="text"]:focus {
   font-weight: var(--font-weight-medium);
 }
 
+/* Remove main header styling from popup title */
+.preview-container #popup-title::after {
+  display: none;
+}
+
 
 .neapolitan-stripe {
   display: flex;
