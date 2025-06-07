@@ -263,38 +263,43 @@
           <div class="settings-column">
             <div class="preview-container">
               <h4>Popup Preview:</h4>
-              <div class="popup-preview">
+              <div id="environment-links" class="environment-links">
                 <!-- Popup Preview Content -->
-                <div class="preview-header">Switch Environment</div>
-                <div class="preview-stripe">
-                  <div class="stripe-vanilla"></div>
-                  <div class="stripe-strawberry"></div>
+                <div class="neapolitan-stripe neapolitan-stripe-top">
                   <div class="stripe-chocolate"></div>
+                  <div class="stripe-strawberry"></div>
+                  <div class="stripe-vanilla"></div>
                 </div>
-                <ul class="preview-list">
+                <h1 id="popup-title">Switch Environment</h1>
+                <div class="neapolitan-stripe neapolitan-stripe-bottom">
+                  <div class="stripe-chocolate"></div>
+                  <div class="stripe-strawberry"></div>
+                  <div class="stripe-vanilla"></div>
+                </div>
+                <ul id="link-list">
                   <li>
-                    <a class="preview-link">
-                      <span class="preview-badge dev-badge">
-                        <span class="preview-emoji" id="preview-dev-emoji">🍫</span>
-                        <span class="preview-text" id="preview-dev-text">D</span>
+                    <a>
+                      <span class="icon-badge dev-icon-badge">
+                        <span class="emoji-icon" id="preview-dev-emoji">🍫</span>
+                        <span class="icon-text" id="preview-dev-text">D</span>
                       </span>
                       <span>Development</span>
                     </a>
                   </li>
                   <li>
-                    <a class="preview-link active">
-                      <span class="preview-badge staging-badge">
-                        <span class="preview-emoji" id="preview-staging-emoji">🍓</span>
-                        <span class="preview-text" id="preview-staging-text">S</span>
+                    <a class="active">
+                      <span class="icon-badge staging-icon-badge">
+                        <span class="emoji-icon" id="preview-staging-emoji">🍓</span>
+                        <span class="icon-text" id="preview-staging-text">S</span>
                       </span>
                       <span>Staging</span>
                     </a>
                   </li>
                   <li>
-                    <a class="preview-link">
-                      <span class="preview-badge prod-badge">
-                        <span class="preview-emoji" id="preview-prod-emoji">🍦</span>
-                        <span class="preview-text" id="preview-prod-text">P</span>
+                    <a>
+                      <span class="icon-badge prod-icon-badge">
+                        <span class="emoji-icon" id="preview-prod-emoji">🍦</span>
+                        <span class="icon-text" id="preview-prod-text">P</span>
                       </span>
                       <span>Production</span>
                     </a>
