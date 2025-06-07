@@ -19,7 +19,7 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-h1 {
+h1.header {
   font-size: var(--font-size-xxl);
   display: flex;
   align-items: center;
@@ -29,7 +29,7 @@ h1 {
   padding-bottom: 12px;
 }
 
-h1::after {
+h1.header::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -47,7 +47,7 @@ h1::after {
   );
 }
 
-h1 img {
+h1.header img {
   margin-right: var(--spacing-md);
 }
 
@@ -374,6 +374,8 @@ input[type="text"]:focus {
   padding: var(--spacing-md);
   text-align: center;
   font-weight: var(--font-weight-medium);
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* Remove main header styling from popup title */
