@@ -249,7 +249,8 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
     // Always use HTTP protocol and let server redirect if needed
     const newUrl = new URL(`http://${server.host}${url.pathname}${url.search}${url.hash}`);
     
-    a.href = "#";
+    // CHANGED: Set actual URL instead of "#" to support Ctrl+click
+    a.href = newUrl.toString();
     a.title = newUrl.toString();
     a.dataset.url = newUrl.toString();
     a.addEventListener("click", loadEnvironment);
@@ -293,6 +294,17 @@ function displayEnvironmentServers(servers, currentServer, currentURL) {
  * @param {Event} event - Click event
  */
 function loadEnvironment(event) {
+  // CHANGED: Check for modifier keys that should open in new tab
+  const isModifierClick = event.ctrlKey || event.metaKey || event.button === 1;
+  
+  // If modifier keys are pressed, let browser handle naturally
+  if (isModifierClick) {
+    // Don't prevent default - let browser open in new tab
+    window.close(); // Still close the popup
+    return;
+  }
+  
+  // Normal click - prevent default and handle manually
   event.preventDefault();
   
   try {
