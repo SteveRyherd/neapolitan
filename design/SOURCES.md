@@ -23,7 +23,11 @@ Currently lives in this repo. **Public mirror:** see the [`design-assets-v1` Git
 
 ### Icon-generation pipeline (`design/source/icon-generator/`)
 
-Holds `generate-icons.sh` (an ImageMagick script) plus the base PNGs it consumes (`app-icon.png`, `development.png`, `staging.png`, `production.png`). This was the original pipeline for generating per-environment icons in multiple sizes. The extension currently uses a single static badge instead, but the pipeline is preserved here for future per-environment icon work.
+Holds `generate-icons.sh` (an ImageMagick script) plus the base PNGs it consumes (`app-icon.png`, `development.png`, `staging.png`, `production.png`).
+
+The script's per-environment outputs **are actively used at runtime** — `src/background.js` calls `chrome.action.setIcon({ path: { 16: "/icons/${type}-16.png", 32: "/icons/${type}-32.png" } })` when the current tab's URL matches a configured environment. The shipped output PNGs live in `/icons/` (`development-16.png`, `development-32.png`, `staging-16.png`, `staging-32.png`, `production-16.png`, `production-32.png`); only those six files are required at runtime.
+
+To regenerate after editing a source PNG: run `generate-icons.sh` from its own directory (it writes outputs there), then copy the six `*-16.png` / `*-32.png` files into `/icons/`. The script also produces an `app-icon-*` family from `app-icon.png`; those outputs aren't loaded by the current `manifest.json` (which uses `badge@*` instead) so they don't need to be copied anywhere.
 
 ## For maintainers
 
