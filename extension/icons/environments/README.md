@@ -24,4 +24,4 @@ where `iconSet` defaults to `default` (read from `state.settings.iconSet`) and `
 
 ## Do not "clean up" this folder
 
-These files look orphaned to static reference scans because they're loaded via template strings, not literal paths. Anyone tidying the repo should leave this directory alone. See `design/SOURCES.md` for the broader rationale.
+These files look orphaned to static reference scans because they're loaded via template strings, not literal paths. Anyone tidying the repo should leave this directory alone. Source PSDs and the icon-generation pipeline live outside the repo (in the maintainer's iCloud design archive); the shipped PNGs in this directory are the only artifacts the extension needs at runtime.

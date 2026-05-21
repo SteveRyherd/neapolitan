@@ -4,7 +4,8 @@
 # Creates a clean build directory with only the necessary files
 
 # Set variables
-VERSION=$(grep -o '"version": "[^"]*"' manifest.json | cut -d'"' -f4)
+SRC_DIR="extension"
+VERSION=$(grep -o '"version": "[^"]*"' "$SRC_DIR/manifest.json" | cut -d'"' -f4)
 BUILD_DIR="build/chrome"
 ZIP_NAME="neapolitan-$VERSION.zip"
 
@@ -22,13 +23,13 @@ mkdir -p "$BUILD_DIR"
 echo "Copying files to build directory..."
 
 # Copy manifest.json
-cp manifest.json "$BUILD_DIR/"
+cp "$SRC_DIR/manifest.json" "$BUILD_DIR/"
 
 # Copy src directory
-cp -r src "$BUILD_DIR/"
+cp -r "$SRC_DIR/src" "$BUILD_DIR/"
 
 # Copy icons
-cp -r icons "$BUILD_DIR/"
+cp -r "$SRC_DIR/icons" "$BUILD_DIR/"
 
 # Documentation files are not needed in the extension package
 # They're only useful for the repository

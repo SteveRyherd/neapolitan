@@ -18,7 +18,7 @@ To configure keyboard shortcuts for this extension:
 
 Here are four shortcut schemes we recommend:
 
-### <img src="icons/cone2_neapolitan.png" width="32" height="32" alt="Ice cream cone"> The Classic - 3 Stacked Scoops (Recommended)
+### <img src="../extension/icons/cone2_neapolitan.png" width="32" height="32" alt="Ice cream cone"> The Classic - 3 Stacked Scoops (Recommended)
 
 *Keys on left side in a straight line, rows relate to environment level*
 
@@ -28,7 +28,7 @@ Here are four shortcut schemes we recommend:
 | ⌥ S | S like **S**taging | Switch to Staging |
 | ⌥ X | X like **X**code | Switch to Development |
 
-### <img src="icons/tub_neapolitan.png" width="32" height="32" alt="Ice cream tub"> Neapolitan
+### <img src="../extension/icons/tub_neapolitan.png" width="32" height="32" alt="Ice cream tub"> Neapolitan
 
 *Uses the same keys as copy, paste, save. Chocolate, Strawberry, Vanilla.*
 
@@ -38,7 +38,7 @@ Here are four shortcut schemes we recommend:
 | ⌥ S | S for **S**trawberry/**S**taging | Switch to Staging |
 | ⌥ V | V for **V**anilla/**V**erified | Switch to Production |
 
-### <img src="icons/flight_neapolitan.png" width="32" height="32" alt="Flight icon"> Easy as 1, 2, 3
+### <img src="../extension/icons/flight_neapolitan.png" width="32" height="32" alt="Flight icon"> Easy as 1, 2, 3
 
 *Number keys represent the natural development progression*
 
@@ -48,7 +48,7 @@ Here are four shortcut schemes we recommend:
 | ⌥ 2 | 2nd environment | Switch to Staging |
 | ⌥ 3 | 3rd environment | Switch to Production |
 
-### <img src="icons/bananasplit_neapolitan.png" width="32" height="32" alt="Banana split"> Banana Split
+### <img src="../extension/icons/bananasplit_neapolitan.png" width="32" height="32" alt="Banana split"> Banana Split
 
 *Direct initials, but discouraged as keys are far apart*
 

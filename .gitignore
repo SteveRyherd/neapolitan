@@ -29,3 +29,7 @@ Thumbs.db
 # Staging area for files pending review/deletion
 _trash/
 
+# Design assets live in iCloud; /design is a symlink to
+# ~/Library/Mobile Documents/com~apple~CloudDocs/Design/neapolitan
+/design
+

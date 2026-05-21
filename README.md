@@ -66,14 +66,14 @@ Then in Chrome: `chrome://extensions` → enable Developer mode → "Load unpack
 
 ```
 .
-├── manifest.json              Extension manifest (MV3)
-├── src/
-│   ├── background.js          Service worker
-│   ├── popup/                 Popup UI
-│   └── options/               Options page
-├── icons/                     Extension icons (all sizes)
+├── extension/                 The browser extension itself (load this in Chrome)
+│   ├── manifest.json          Extension manifest (MV3)
+│   ├── src/
+│   │   ├── background.js      Service worker
+│   │   ├── popup/             Popup UI
+│   │   └── options/           Options page
+│   └── icons/                 Extension icons (all sizes)
 ├── docs/                      Landing page (neapolitan.page) — Cloudflare Pages
-├── design/                    Source design files (PSDs)
 ├── .github/
 │   ├── README.md              GitHub-rendered project doc
 │   ├── KEYBOARD_SHORTCUTS.md  Shortcut scheme reference
@@ -85,6 +85,8 @@ Then in Chrome: `chrome://extensions` → enable Developer mode → "Load unpack
 ├── PRIVACY.md
 └── LICENSE
 ```
+
+To load the extension unpacked in Chrome, point `chrome://extensions` → "Load unpacked" at the `extension/` directory.
 
 ## Contributing
 
