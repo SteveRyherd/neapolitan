@@ -3,7 +3,9 @@
   "manifest_version": 3,
   "version": "1.0.1",
   "description": "Switch between development, staging, and production environments easily",
-  
+  "author": "Steve Ryherd",
+  "homepage_url": "https://neapolitan.page",
+
   "background": {
     "service_worker": "src/background.js"
   },
