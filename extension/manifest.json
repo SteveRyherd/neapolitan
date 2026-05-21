@@ -43,7 +43,7 @@
   },
   
   "commands": {
-    "switch-to-development": {
+    "switch-1-development": {
       "suggested_key": {
         "mac": "Alt+X",
         "windows": "Alt+X",
@@ -51,7 +51,7 @@
       },
       "description": "Switch to 1: development environment"
     },
-    "switch-to-staging": {
+    "switch-2-staging": {
       "suggested_key": {
         "mac": "Alt+S",
         "windows": "Alt+S",
@@ -59,7 +59,7 @@
       },
       "description": "Switch to 2: staging environment"
     },
-    "switch-to-production": {
+    "switch-3-production": {
       "suggested_key": {
         "mac": "Alt+W",
         "windows": "Alt+W",

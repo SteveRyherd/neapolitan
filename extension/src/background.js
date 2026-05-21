@@ -437,16 +437,22 @@ chrome.commands.onCommand.addListener(function(command) {
       
       let targetServerType = null;
       
-      // Determine which environment to switch to based on the command
+      // Determine which environment to switch to based on the command.
+      // Current keys are `switch-N-...` so they sort 1/2/3 in chrome://extensions/shortcuts;
+      // older `switch-to-...` / `switch-to-environment-N` names are kept so users with
+      // shortcuts bound under prior versions continue to work.
       switch (command) {
+        case 'switch-1-development':
         case 'switch-to-development':
         case 'switch-to-environment-1':
           targetServerType = 'development';
           break;
+        case 'switch-2-staging':
         case 'switch-to-staging':
         case 'switch-to-environment-2':
           targetServerType = 'staging';
           break;
+        case 'switch-3-production':
         case 'switch-to-production':
         case 'switch-to-environment-3':
           targetServerType = 'production';
