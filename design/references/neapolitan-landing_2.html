@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neapolitan — Compare environments at the same page, in a keystroke</title>
+  <meta name="description" content="A browser extension that jumps between development, staging, and production at the same path — instantly. Compare environments side-by-side without retyping URLs." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Neapolitan — Domain Switcher" />
+  <meta property="og:description" content="Compare any page across dev, staging, and production in a single keystroke." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://neapolitan.page" />
+  <!-- og:image goes here once you have the social card image -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      /* Neapolitan brand palette */
+      --cream: #FAF3E3;
+      --cream-card: #FFF9EC;
+      --vanilla-warm: #F4DAA5;
+      --vanilla-deep: #E8C684;
+      --strawberry: #E8919B;
+      --strawberry-deep: #D67280;
+      --chocolate: #6B4226;
+      --chocolate-deep: #4A2D1A;
+      --ink: #2B1810;
+      --ink-soft: #5A3C2A;
+
+      --shadow-soft: 0 1px 2px rgba(43, 24, 16, 0.04), 0 4px 12px rgba(43, 24, 16, 0.06);
+      --shadow-lift: 0 4px 8px rgba(43, 24, 16, 0.08), 0 16px 32px rgba(43, 24, 16, 0.10);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Decorative grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.22 0 0 0 0 0.10 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ============ NAV ============ */
+    nav {
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg,
+          var(--chocolate) 0%, var(--chocolate) 33.3%,
+          var(--strawberry) 33.3%, var(--strawberry) 66.6%,
+          var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
+      box-shadow: var(--shadow-soft);
+      /* REPLACE: drop in your actual icons/badge.png as background-image */
+    }
+    nav .links {
+      display: flex; align-items: center; gap: 28px;
+      font-size: 15px;
+    }
+    nav .links a:not(.btn) {
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    nav .links a:not(.btn):hover { color: var(--ink); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--cream);
+    }
+    .btn-primary:hover {
+      background: var(--chocolate-deep);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lift);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
+    .btn-secondary:hover { background: var(--ink); color: var(--cream); }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding: 60px 0 80px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .hero-text .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--strawberry-deep);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(44px, 6vw, 78px);
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--strawberry-deep);
+    }
+    .hero .lede {
+      font-size: 19px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      max-width: 520px;
+      margin-bottom: 36px;
+    }
+    .hero .cta-row {
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .hero .meta {
+      margin-top: 28px;
+      display: flex; align-items: center; gap: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .hero .meta .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--chocolate);
+    }
+
+    /* The visual: a layered ice cream cross-section showing URL preservation */
+    .hero-visual {
+      position: relative;
+    }
+    .url-stack {
+      display: flex; flex-direction: column;
+      gap: 14px;
+      transform: rotate(-2deg);
+    }
+    .url-bar {
+      background: var(--cream-card);
+      border: 1.5px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .url-bar:hover { transform: translateX(4px); }
+    .url-bar .swatch {
+      width: 10px; height: 32px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .url-bar.dev .swatch { background: var(--chocolate); }
+    .url-bar.staging .swatch { background: var(--strawberry); }
+    .url-bar.prod .swatch { background: var(--vanilla-deep); }
+    .url-bar .env-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .url-bar.dev .env-tag { background: rgba(107, 66, 38, 0.12); color: var(--chocolate); }
+    .url-bar.staging .env-tag { background: rgba(214, 114, 128, 0.18); color: var(--strawberry-deep); }
+    .url-bar.prod .env-tag { background: rgba(232, 198, 132, 0.35); color: var(--ink); }
+    .url-bar .url {
+      color: var(--ink);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .url-bar .url .domain { font-weight: 600; }
+    .url-bar .url .path { color: var(--ink-soft); }
+    .url-bar.active {
+      border-color: var(--strawberry);
+      box-shadow: 0 0 0 4px rgba(232, 145, 155, 0.18), var(--shadow-lift);
+    }
+
+    .swap-indicator {
+      position: absolute;
+      right: -16px;
+      top: 50%;
+      transform: translateY(-50%) rotate(2deg);
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      box-shadow: var(--shadow-lift);
+      writing-mode: vertical-rl;
+    }
+
+    /* ============ STRIPE SECTION (the three flavors) ============ */
+    .stripe-row {
+      margin: 100px 0 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      box-shadow: var(--shadow-lift);
+    }
+    .stripe {
+      padding: 48px 36px 44px;
+      position: relative;
+      min-height: 240px;
+    }
+    .stripe.choc {
+      background: var(--chocolate);
+      color: var(--cream);
+    }
+    .stripe.straw {
+      background: var(--strawberry);
+      color: var(--ink);
+    }
+    .stripe.van {
+      background: var(--vanilla-warm);
+      color: var(--ink);
+    }
+    .stripe .flavor {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 15px;
+      opacity: 0.75;
+      margin-bottom: 6px;
+    }
+    .stripe h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 38px;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .stripe p {
+      font-size: 15px;
+      line-height: 1.5;
+      opacity: 0.85;
+      max-width: 260px;
+    }
+    .stripe .stripe-key {
+      position: absolute;
+      bottom: 24px; right: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      opacity: 0.6;
+    }
+
+    /* ============ HOW IT WORKS ============ */
+    section.section {
+      padding: 120px 0;
+    }
+    .section-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--strawberry-deep);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(34px, 4.5vw, 54px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+    .section-title em { font-style: italic; color: var(--strawberry-deep); }
+    .section-sub {
+      font-size: 18px;
+      color: var(--ink-soft);
+      max-width: 600px;
+      margin-bottom: 56px;
+    }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feature {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 28px 28px 32px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lift);
+    }
+    .feature .icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+    .feature.f-choc .icon { background: var(--chocolate); color: var(--cream); }
+    .feature.f-straw .icon { background: var(--strawberry); color: var(--ink); }
+    .feature.f-van .icon { background: var(--vanilla-warm); color: var(--ink); }
+    .feature h4 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .feature p {
+      font-size: 15px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    /* ============ KEYBOARD SHORTCUTS ============ */
+    .shortcuts {
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: var(--radius-lg);
+      padding: 72px 60px;
+      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shortcuts::after {
+      content: '';
+      position: absolute;
+      right: -120px; top: -120px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, var(--strawberry) 0%, transparent 70%);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+    .shortcuts .section-eyebrow { color: var(--strawberry); }
+    .shortcuts h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4vw, 48px);
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+      color: var(--cream);
+    }
+    .shortcuts h2 em { color: var(--strawberry); font-style: italic; }
+    .shortcuts .sub {
+      color: rgba(250, 243, 227, 0.7);
+      font-size: 17px;
+      margin-bottom: 48px;
+      max-width: 540px;
+    }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .key-card {
+      background: rgba(250, 243, 227, 0.06);
+      border: 1px solid rgba(250, 243, 227, 0.1);
+      border-radius: var(--radius-md);
+      padding: 28px 24px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .key-card:hover {
+      background: rgba(250, 243, 227, 0.1);
+      border-color: rgba(250, 243, 227, 0.2);
+    }
+    .key-card .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .key-card.dev .label { color: var(--strawberry); }
+    .key-card.staging .label { color: var(--strawberry); }
+    .key-card.prod .label { color: var(--strawberry); }
+    .key-card .env-name {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: var(--cream);
+    }
+    .key-combo {
+      display: flex; gap: 8px;
+      align-items: center;
+    }
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 38px;
+      padding: 0 12px;
+      background: var(--cream);
+      color: var(--ink);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25), inset 0 -2px 0 rgba(43, 24, 16, 0.15);
+    }
+    .key-plus {
+      color: rgba(250, 243, 227, 0.5);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .setup-note {
+      margin-top: 36px;
+      padding: 20px 24px;
+      background: rgba(250, 243, 227, 0.05);
+      border: 1px solid rgba(250, 243, 227, 0.12);
+      border-radius: var(--radius-md);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      color: rgba(250, 243, 227, 0.78);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .setup-note strong {
+      color: var(--cream);
+      font-weight: 600;
+    }
+    .setup-note code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: rgba(250, 243, 227, 0.1);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: var(--strawberry);
+    }
+    .setup-icon {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--strawberry);
+      color: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    /* ============ SCREENSHOTS SECTION ============ */
+    .screenshots {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      align-items: stretch;
+    }
+    .screenshot-card {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+    }
+    .screenshot-card .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--strawberry-deep);
+      margin-bottom: 10px;
+    }
+    .screenshot-card h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .screenshot-card p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .image-placeholder {
+      flex: 1;
+      min-height: 280px;
+      border: 2px dashed rgba(43, 24, 16, 0.2);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--ink-soft);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-align: center;
+      padding: 24px;
+      background:
+        repeating-linear-gradient(45deg,
+          transparent 0, transparent 12px,
+          rgba(43, 24, 16, 0.025) 12px, rgba(43, 24, 16, 0.025) 24px);
+    }
+    .image-placeholder strong {
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    /* ============ WORKFLOWS / IN THE WILD ============ */
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .workflow {
+      padding: 34px 30px 32px;
+      border-radius: var(--radius-md);
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-left-width: 5px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .workflow:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lift);
+    }
+    .workflow.w-choc { border-left-color: var(--chocolate); }
+    .workflow.w-straw { border-left-color: var(--strawberry); }
+    .workflow.w-van { border-left-color: var(--vanilla-deep); }
+    .workflow .scenario {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 21px;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .workflow p {
+      font-size: 15px;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+    .workflow kbd {
+      min-width: 26px;
+      height: 24px;
+      padding: 0 7px;
+      font-size: 11px;
+      border-radius: 5px;
+      background: var(--cream);
+      border: 1px solid rgba(43, 24, 16, 0.12);
+      box-shadow: 0 1px 0 rgba(43, 24, 16, 0.12);
+      margin: 0 1px;
+    }
+
+    /* ============ INSTALL CTA ============ */
+    .install {
+      background:
+        linear-gradient(rgba(43, 24, 16, 0.04), rgba(43, 24, 16, 0.04)),
+        url('./wallpaper.png') center/cover no-repeat;
+      border-radius: var(--radius-lg);
+      padding: 80px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .install-inner {
+      background: var(--cream-card);
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 56px 40px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 8px rgba(43, 24, 16, 0.10), 0 24px 48px rgba(43, 24, 16, 0.18);
+    }
+    .install h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4.5vw, 46px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    .install h2 em { font-style: italic; color: var(--strawberry-deep); }
+    .install p {
+      color: var(--ink-soft);
+      margin-bottom: 32px;
+      font-size: 17px;
+    }
+    .install .btn-primary {
+      font-size: 17px;
+      padding: 14px 28px;
+    }
+    .install .small {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .install .small a { color: var(--ink); }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 56px 0 40px;
+      border-top: 1px solid rgba(43, 24, 16, 0.1);
+      margin-top: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    footer .made-by {
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+    footer .made-by a {
+      color: var(--ink);
+      font-weight: 500;
+    }
+    footer .foot-links {
+      display: flex; gap: 24px;
+      font-size: 14px;
+    }
+    footer .foot-links a {
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+    footer .foot-links a:hover { color: var(--ink); }
+
+    /* ============ ANIMATIONS ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-text > * { animation: fadeUp 0.6s ease both; }
+    .hero-text > *:nth-child(1) { animation-delay: 0.05s; }
+    .hero-text > *:nth-child(2) { animation-delay: 0.15s; }
+    .hero-text > *:nth-child(3) { animation-delay: 0.25s; }
+    .hero-text > *:nth-child(4) { animation-delay: 0.35s; }
+    .hero-text > *:nth-child(5) { animation-delay: 0.45s; }
+    .hero-visual { animation: fadeUp 0.8s ease 0.3s both; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 880px) {
+      .hero { grid-template-columns: 1fr; gap: 48px; padding: 30px 0 60px; }
+      .stripe-row { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .workflow-grid { grid-template-columns: 1fr; }
+      .screenshots { grid-template-columns: 1fr; }
+      .keys { grid-template-columns: 1fr; }
+      section.section { padding: 80px 0; }
+      nav .links { gap: 16px; }
+      nav .links a:not(.btn) { display: none; }
+      .install { padding: 48px 20px; }
+      .install-inner { padding: 40px 24px; }
+      .shortcuts { padding: 48px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <nav>
+      <a href="/" class="logo">
+        <span class="logo-mark"></span>
+        Neapolitan
+      </a>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a>
+        <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switche/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary">Add to Chrome</a>
+      </div>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-text">
+        <span class="eyebrow">v1.0.1 · Chrome &amp; Safari</span>
+        <h1>Same page,<br><em>every environment,</em><br>one keystroke.</h1>
+        <p class="lede">Compare any page across development, staging, and production in a single keystroke. Path, query string, and hash come with you — so you can spot the difference without losing your place.</p>
+        <div class="cta-row">
+          <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switche/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary">Add to Chrome — Free</a>
+          <a href="https://github.com/SteveRyherd/neapolitan" class="btn btn-secondary">View on GitHub</a>
+        </div>
+        <div class="meta">
+          <span class="dot"></span>
+          <span>No tracking · No data collected · Open source</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="url-stack">
+          <div class="url-bar dev">
+            <span class="swatch"></span>
+            <span class="env-tag">dev</span>
+            <span class="url"><span class="domain">dev.acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+          </div>
+          <div class="url-bar staging active">
+            <span class="swatch"></span>
+            <span class="env-tag">staging</span>
+            <span class="url"><span class="domain">staging.acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+            <span class="swap-indicator">Alt+S</span>
+          </div>
+          <div class="url-bar prod">
+            <span class="swatch"></span>
+            <span class="env-tag">prod</span>
+            <span class="url"><span class="domain">acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ THE THREE FLAVORS ============ -->
+    <div class="stripe-row">
+      <div class="stripe choc">
+        <div class="flavor">Chocolate</div>
+        <h3>Development</h3>
+        <p>Where you build and break. One keystroke brings you here from any other environment, same page intact.</p>
+        <div class="stripe-key">ALT + X</div>
+      </div>
+      <div class="stripe straw">
+        <div class="flavor">Strawberry</div>
+        <h3>Staging</h3>
+        <p>The dress rehearsal. Hop in to verify a fix matches dev, then jump to prod with one keystroke — never retyping a URL.</p>
+        <div class="stripe-key">ALT + S</div>
+      </div>
+      <div class="stripe van">
+        <div class="flavor">Vanilla</div>
+        <h3>Production</h3>
+        <p>What your users actually see. Compare it against staging or dev at the exact same page, instantly.</p>
+        <div class="stripe-key">ALT + W</div>
+      </div>
+    </div>
+
+    <!-- ============ HOW IT WORKS / FEATURES ============ -->
+    <section class="section" id="how">
+      <div class="section-eyebrow">How it works</div>
+      <h2 class="section-title">Three environments. <em>One URL.</em></h2>
+      <p class="section-sub">Configure your domains once. From then on, every URL path, query parameter, and hash fragment travels with you when you compare environments — no copy-paste, no losing your place.</p>
+
+      <div class="screenshots">
+        <div class="screenshot-card">
+          <div class="label">The popup</div>
+          <h3>One click, every project</h3>
+          <p>Browse to any configured site, click the icon, pick an environment. The popup shows you exactly where you are and where you can go.</p>
+          <div class="image-placeholder">
+            <strong>Drop in: popup.png</strong>
+            <span>from .github/screenshots/popup.png</span>
+            <span>Recommended size: 600 × 480</span>
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <div class="label">The options page</div>
+          <h3>Set up once. Forget it.</h3>
+          <p>Define your projects and their environment URLs. Neapolitan auto-detects which environment you're in based on the current tab.</p>
+          <div class="image-placeholder">
+            <strong>Drop in: options.png</strong>
+            <span>from .github/screenshots/options.png</span>
+            <span>Recommended size: 600 × 480</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ IN THE WILD / WORKFLOWS ============ -->
+    <section class="section" style="padding-top: 0;">
+      <div class="section-eyebrow">In the wild</div>
+      <h2 class="section-title">When you'd <em>reach for it.</em></h2>
+      <p class="section-sub">Three scenarios that show up every week if you ship software.</p>
+
+      <div class="workflow-grid">
+        <div class="workflow w-choc">
+          <div class="scenario">"There's a bug only in production."</div>
+          <p>Click into the broken page. Hit <kbd>Alt</kbd>+<kbd>X</kbd>. You're in dev at the exact same URL, ready to reproduce.</p>
+        </div>
+        <div class="workflow w-straw">
+          <div class="scenario">"Did my fix actually ship to staging?"</div>
+          <p>Cycle <kbd>Alt</kbd>+<kbd>X</kbd> → <kbd>Alt</kbd>+<kbd>S</kbd> → <kbd>Alt</kbd>+<kbd>W</kbd>. Three environments, same page, side by side.</p>
+        </div>
+        <div class="workflow w-van">
+          <div class="scenario">"QA wants to compare staging vs prod."</div>
+          <p>Send them the prod URL. They install Neapolitan, hit a key, and they're on the matching staging page in one second.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ KEYBOARD SHORTCUTS ============ -->
+    <section class="section" id="features" style="padding-top: 0;">
+      <div class="shortcuts">
+        <div class="section-eyebrow">Keyboard shortcuts</div>
+        <h2>Switch <em>without clicking.</em></h2>
+        <p class="sub">Shown below is <em>Classic</em> — one of four recommended schemes built into the extension. Neapolitan also includes <em>Neapolitan</em> (copy/paste/save keys: C·S·V), <em>Easy as 1·2·3</em>, and <em>Banana Split</em>.</p>
+
+        <div class="keys">
+          <div class="key-card dev">
+            <div class="label">1 · Development</div>
+            <div class="env-name">Chocolate</div>
+            <div class="key-combo">
+              <kbd>Alt</kbd><span class="key-plus">+</span><kbd>X</kbd>
+            </div>
+          </div>
+          <div class="key-card staging">
+            <div class="label">2 · Staging</div>
+            <div class="env-name">Strawberry</div>
+            <div class="key-combo">
+              <kbd>Alt</kbd><span class="key-plus">+</span><kbd>S</kbd>
+            </div>
+          </div>
+          <div class="key-card prod">
+            <div class="label">3 · Production</div>
+            <div class="env-name">Vanilla</div>
+            <div class="key-combo">
+              <kbd>Alt</kbd><span class="key-plus">+</span><kbd>W</kbd>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-note">
+          <span class="setup-icon">i</span>
+          <span><strong>One-time setup:</strong> Chrome reserves shortcut binding for the user, so after installing you'll bind keys at <code>chrome://extensions/shortcuts</code>. The extension's options page shows you all four schemes side-by-side.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURE GRID ============ -->
+    <section class="section" style="padding-top: 0;">
+      <div class="section-eyebrow">Built for the way you work</div>
+      <h2 class="section-title">Quietly thorough.</h2>
+      <p class="section-sub">Designed by a working developer to disappear into your workflow until you need it, then deliver instantly.</p>
+
+      <div class="feature-grid">
+        <div class="feature f-choc">
+          <div class="icon">⌥</div>
+          <h4>Path preservation</h4>
+          <p>Your URL path, query parameters, and hash fragments come with you when you switch — no copy-pasting, no losing your place.</p>
+        </div>
+        <div class="feature f-straw">
+          <div class="icon">⌖</div>
+          <h4>Auto-detection</h4>
+          <p>Neapolitan recognizes which environment you're in automatically. The icon updates the moment you load a configured site.</p>
+        </div>
+        <div class="feature f-van">
+          <div class="icon">▦</div>
+          <h4>Many projects</h4>
+          <p>Configure as many products and domain mappings as you need. Each gets its own set of environment URLs.</p>
+        </div>
+        <div class="feature f-choc">
+          <div class="icon">◐</div>
+          <h4>Four themes</h4>
+          <p>Neapolitan (default), Dark, Light, and High Contrast. Pick the one that fits your editor and your environment.</p>
+        </div>
+        <div class="feature f-straw">
+          <div class="icon">⌘</div>
+          <h4>Customizable keys</h4>
+          <p>The default shortcuts work out of the box. Remap them in Chrome's extension shortcut settings to fit your muscle memory.</p>
+        </div>
+        <div class="feature f-van">
+          <div class="icon">⛨</div>
+          <h4>Zero tracking</h4>
+          <p>No analytics, no telemetry, no data collection. Neapolitan runs entirely on your machine — and the source is on GitHub.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INSTALL CTA ============ -->
+    <div class="install">
+      <div class="install-inner">
+        <h2>A developer tool that's as <em>delicious</em> as it is useful.</h2>
+        <p>Free. Open source. Available for Chrome and Safari today.</p>
+        <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switche/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary">Add to Chrome</a>
+        <div class="small">
+          Safari user? <a href="https://github.com/SteveRyherd/neapolitan/blob/main/.github/SAFARI_INSTALLATION.md">See the Safari installation guide →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+      <div class="made-by">
+        Built by <a href="https://steveryherd.com">Steve Ryherd</a> · Open source on <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/SteveRyherd/neapolitan/blob/main/PRIVACY.md">Privacy</a>
+        <a href="https://github.com/SteveRyherd/neapolitan/issues">Report a bug</a>
+        <a href="https://github.com/SteveRyherd/neapolitan/releases">Changelog</a>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
