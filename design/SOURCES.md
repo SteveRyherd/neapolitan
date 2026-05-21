@@ -25,9 +25,11 @@ Currently lives in this repo. **Public mirror:** see the [`design-assets-v1` Git
 
 Holds `generate-icons.sh` (an ImageMagick script) plus the base PNGs it consumes (`app-icon.png`, `development.png`, `staging.png`, `production.png`).
 
-The script's per-environment outputs **are actively used at runtime** — `src/background.js` calls `chrome.action.setIcon({ path: { 16: "/icons/${type}-16.png", 32: "/icons/${type}-32.png" } })` when the current tab's URL matches a configured environment. The shipped output PNGs live in `/icons/` (`development-16.png`, `development-32.png`, `staging-16.png`, `staging-32.png`, `production-16.png`, `production-32.png`); only those six files are required at runtime.
+The script's per-environment outputs **are actively used at runtime** — `src/background.js` calls `chrome.action.setIcon()` with a path built from the user's selected icon set and the matched environment type. The shipped PNGs live in `/icons/environments/<set>/<type>-<size>.png`. The only set currently shipped is `default/`, containing six files: `development-16.png`, `development-32.png`, `staging-16.png`, `staging-32.png`, `production-16.png`, `production-32.png`.
 
-To regenerate after editing a source PNG: run `generate-icons.sh` from its own directory (it writes outputs there), then copy the six `*-16.png` / `*-32.png` files into `/icons/`. The script also produces an `app-icon-*` family from `app-icon.png`; those outputs aren't loaded by the current `manifest.json` (which uses `badge@*` instead) so they don't need to be copied anywhere.
+To regenerate after editing a source PNG: run `generate-icons.sh` from its own directory (it writes outputs there), then copy the six resized PNGs into `/icons/environments/default/`. The script also produces an `app-icon-*` family from `app-icon.png`; those outputs aren't loaded by the current `manifest.json` (which uses `badge@*` instead) so they don't need to be copied anywhere.
+
+To add a new icon set (e.g. `pastel`), drop a sibling folder alongside `default/` with the same six filenames and have the settings layer write `iconSet: 'pastel'`. No code changes required — `background.js` already reads `state.settings.iconSet || 'default'`.
 
 ## For maintainers
 

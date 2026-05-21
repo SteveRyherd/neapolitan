@@ -17,6 +17,7 @@ const state = {
     followSystemTheme: true,
     showEmojiIcons: true,
     iconBadgeNotifications: true,
+    iconSet: 'default',
     autoDetectEnvironments: true,
     preservePathQuery: true
   }
@@ -215,13 +216,16 @@ function updateExtensionIcon(tabId, matchingServer) {
   const showBadge = true;
   
   if (matchingServer) {
-    // If we have a match, use the appropriate environment icon
+    // If we have a match, use the appropriate environment icon.
+    // Icon set is configurable to support future themed icon collections;
+    // the live PNGs live under /icons/environments/<set>/<type>-<size>.png.
     if (showBadge) {
+      const iconSet = state.settings.iconSet || 'default';
       chrome.action.setIcon({
         tabId: tabId,
         path: {
-          16: `/icons/${matchingServer.type}-16.png`,
-          32: `/icons/${matchingServer.type}-32.png`
+          16: `/icons/environments/${iconSet}/${matchingServer.type}-16.png`,
+          32: `/icons/environments/${iconSet}/${matchingServer.type}-32.png`
         }
       });
     } else {
