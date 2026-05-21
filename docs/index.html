@@ -1132,6 +1132,12 @@
     }
     @media (max-width: 480px) {
       .hero h1 { font-size: clamp(36px, 12vw, 50px); }
+      /* Shrink the nav lockup on iPhone-sized viewports — the 88px
+         wordmark crowds a 375px-wide nav. Halving keeps it readable
+         without dominating the top of the fold. */
+      .logo { gap: 10px; }
+      .logo-mark { width: 36px; height: 36px; border-radius: 10px; }
+      .logo-wordmark { height: 44px; top: 2px; }
     }
   </style>
 </head>
