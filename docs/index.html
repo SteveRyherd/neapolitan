@@ -65,6 +65,10 @@
       --vanilla-deep: #E8C684;
       --strawberry: #E8919B;
       --strawberry-deep: #D67280;
+      /* Label-safe rose — darker for small mono eyebrows so they clear
+         WCAG AA (4.5:1) on cream. Keep --strawberry-deep for large display
+         italics where 3:1 is sufficient. */
+      --strawberry-label: #B14457;
       --chocolate: #6B4226;
       --chocolate-deep: #4A2D1A;
       --ink: #2B1810;
@@ -114,7 +118,7 @@
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       font-family: 'Fraunces', serif;
       font-weight: 700;
       font-size: 22px;
@@ -124,10 +128,25 @@
       line-height: 1;
     }
     .logo-mark {
-      width: 36px; height: 36px;
-      border-radius: 10px;
+      align-self: center;
+    }
+    .logo-wordmark {
+      display: block;
+      height: 88px;
+      width: auto;
+      /* Nudge the wordmark down to optically center against the box —
+         the script's tall ascenders make a strict-center alignment
+         read as top-heavy. */
+      position: relative;
+      top: 3px;
+    }
+    .logo-mark {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      /* Tilted stripes (110deg) give the mark a slight forward lean —
+         a hint of motion, like speed lines on the cone. */
       background:
-        linear-gradient(180deg,
+        linear-gradient(110deg,
           var(--chocolate) 0%, var(--chocolate) 33.3%,
           var(--strawberry) 33.3%, var(--strawberry) 66.6%,
           var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
@@ -195,7 +214,7 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
       font-weight: 500;
-      color: var(--strawberry-deep);
+      color: var(--strawberry-label);
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-bottom: 20px;
@@ -224,6 +243,20 @@
     }
     .hero .cta-row {
       display: flex; gap: 14px; flex-wrap: wrap;
+      align-items: center;
+    }
+    .hero .cta-row .github-link {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 8px 4px;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .hero .cta-row .github-link:hover {
+      color: var(--ink);
+      border-bottom-color: var(--ink);
     }
     .hero .meta {
       margin-top: 28px;
@@ -370,7 +403,7 @@
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--strawberry-deep);
+      color: var(--strawberry-label);
       margin-bottom: 16px;
     }
     .section-title {
@@ -389,6 +422,46 @@
       color: var(--ink-soft);
       max-width: 600px;
       margin-bottom: 56px;
+    }
+
+    /* ============ DEMO REEL (animated GIF, full width) ============ */
+    .demo-reel {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-soft);
+    }
+    .demo-reel-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--strawberry-label);
+      margin-bottom: 10px;
+    }
+    .demo-reel h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 22px;
+    }
+    .demo-reel-frame {
+      width: 100%;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      background: var(--ink);
+      display: block;
+    }
+    .demo-reel-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     /* ============ SCREENSHOTS ============ */
@@ -412,7 +485,7 @@
       font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--strawberry-deep);
+      color: var(--strawberry-label);
       margin-bottom: 10px;
     }
     .screenshot-card h3 {
@@ -744,17 +817,18 @@
     }
 
     .setup-note {
-      margin-top: 36px;
-      padding: 20px 24px;
-      background: rgba(250, 243, 227, 0.05);
-      border: 1px solid rgba(250, 243, 227, 0.12);
+      margin: 0 0 36px;
+      padding: 22px 26px;
+      background: rgba(232, 145, 155, 0.08);
+      border: 1px solid rgba(232, 145, 155, 0.28);
+      border-left: 4px solid var(--strawberry);
       border-radius: var(--radius-md);
       display: flex;
       gap: 14px;
       align-items: flex-start;
-      color: rgba(250, 243, 227, 0.78);
-      font-size: 14px;
-      line-height: 1.55;
+      color: rgba(250, 243, 227, 0.88);
+      font-size: 15px;
+      line-height: 1.6;
     }
     .setup-note strong { color: var(--cream); font-weight: 600; }
     .setup-note code {
@@ -862,7 +936,7 @@
     }
     .story-text p { font-size: 17px; color: var(--ink-soft); margin-bottom: 1em; line-height: 1.6; }
     .story-text p:last-child { margin-bottom: 0; }
-    .story-text a { color: var(--strawberry-deep); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+    .story-text a { color: var(--strawberry-label); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 
     /* ============ FAQ ============ */
     .faq details {
@@ -930,6 +1004,12 @@
       border-radius: var(--radius-md);
       box-shadow: 0 4px 8px rgba(43, 24, 16, 0.10), 0 24px 48px rgba(43, 24, 16, 0.18);
     }
+    .install-wordmark {
+      display: block;
+      width: clamp(220px, 36vw, 320px);
+      height: auto;
+      margin: 0 auto 28px;
+    }
     .install h2 {
       font-family: 'Fraunces', serif;
       font-weight: 500;
@@ -964,8 +1044,25 @@
       flex-wrap: wrap;
       gap: 20px;
     }
-    footer .made-by { font-size: 14px; color: var(--ink-soft); }
+    footer .made-by {
+      font-size: 14px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     footer .made-by a { color: var(--ink); font-weight: 500; }
+    footer .footer-mark {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background:
+        linear-gradient(110deg,
+          var(--chocolate) 0%, var(--chocolate) 33.3%,
+          var(--strawberry) 33.3%, var(--strawberry) 66.6%,
+          var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
+      box-shadow: var(--shadow-soft);
+      flex-shrink: 0;
+    }
     footer .foot-links { display: flex; gap: 24px; font-size: 14px; }
     footer .foot-links a { color: var(--ink-soft); text-decoration: none; }
     footer .foot-links a:hover { color: var(--ink); }
@@ -1043,9 +1140,9 @@
 
     <!-- ============ NAV ============ -->
     <nav>
-      <a href="/" class="logo">
+      <a href="/" class="logo" aria-label="Neapolitan — home">
         <span class="logo-mark" aria-hidden="true"></span>
-        Neapolitan
+        <img class="logo-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan">
       </a>
       <div class="links">
         <a href="#how">How it works</a>
@@ -1065,7 +1162,7 @@
           <p class="lede">Compare any page across development, staging, and production in a single keystroke. Path, query string, and hash come with you — so you can spot the difference without losing your place.</p>
           <div class="cta-row">
             <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
-            <a href="https://github.com/SteveRyherd/neapolitan" class="btn btn-secondary btn-lg">View on GitHub</a>
+            <a href="https://github.com/SteveRyherd/neapolitan" class="github-link">View source on GitHub →</a>
           </div>
           <div class="meta">
             <span class="dot"></span>
@@ -1123,6 +1220,16 @@
       <div class="section-eyebrow">How it works</div>
       <h2 class="section-title">Three environments. <em>One URL.</em></h2>
       <p class="section-sub">Configure your domains once. From then on, every URL path, query parameter, and hash fragment travels with you when you compare environments — no copy-paste, no losing your place.</p>
+
+      <!-- Animated demo: keystroke → environment swap, looped. -->
+      <div class="demo-reel">
+        <div class="demo-reel-label">Watch it work</div>
+        <h3>One keystroke. Same page. Different environment.</h3>
+        <div class="demo-reel-frame">
+          <img src="/assets/img/demo.gif" alt="Animated demo showing Neapolitan switching the current tab from dev to staging to production at the same URL path with a single keystroke" loading="lazy">
+        </div>
+      </div>
+
       <div class="screenshots">
         <div class="screenshot-card">
           <div class="label">The popup</div>
@@ -1148,7 +1255,7 @@
     <!-- ============ IN THE WILD / WORKFLOWS ============ -->
     <section class="section" style="padding-top: 0;">
       <div class="section-eyebrow">In the wild</div>
-      <h2 class="section-title">When you'd <em>reach for it.</em></h2>
+      <h2 class="section-title">When you'd reach for it.</h2>
       <p class="section-sub">Three scenarios that show up every week if you ship software.</p>
       <div class="workflow-grid">
         <div class="workflow w-choc">
@@ -1170,8 +1277,15 @@
     <section class="section" id="features" style="padding-top: 0;">
       <div class="shortcuts">
         <div class="section-eyebrow">Keyboard shortcuts</div>
-        <h2>Switch <em>without clicking.</em></h2>
-        <p class="sub">Chrome doesn't let extensions bind shortcuts for you — so out of the box, Neapolitan ships with <em>none</em>. You set them yourself at <code style="background: rgba(250,243,227,0.1); padding: 2px 7px; border-radius: 5px; font-family: 'JetBrains Mono', monospace; color: var(--strawberry); font-size: 14px;">chrome://extensions/shortcuts</code>. Here are four schemes I recommend — each one earns its place differently.</p>
+        <h2>Switch without clicking.</h2>
+        <p class="sub">Pick a scheme below and set it yourself — here are four worth copying. Each one earns its place differently.</p>
+
+        <!-- 30-second setup banner: lifted above the carousel so the
+             "no defaults" reality is the first thing the visitor sees. -->
+        <div class="setup-note">
+          <span class="setup-icon">1</span>
+          <span><strong>30-second setup.</strong> Chrome reserves keyboard shortcuts for the user — extensions can <em>suggest</em>, but can't bind. After installing, open <code>chrome://extensions/shortcuts</code> and copy whichever scheme below matches your muscle memory.</span>
+        </div>
 
         <!-- Tab navigation -->
         <div class="scheme-tabs" id="schemeTabs" role="tablist">
@@ -1266,11 +1380,6 @@
           </article>
 
         </div>
-
-        <div class="setup-note">
-          <span class="setup-icon">i</span>
-          <span><strong>Why no defaults?</strong> Chrome reserves keyboard shortcut binding for the user — extensions can <em>suggest</em>, but can't bind. After installing, head to <code>chrome://extensions/shortcuts</code> and pick whichever scheme above matches your muscle memory. Takes about 30 seconds.</span>
-        </div>
       </div>
     </section>
 
@@ -1323,8 +1432,9 @@
         <div class="story-text">
           <div class="section-eyebrow">The story</div>
           <h2 class="section-title" style="margin-bottom: 18px;">Built for myself in 2013. Shipped in 2025.</h2>
-          <p>The first version of this lived in my own browser for about a decade — a private dev tool I built because comparing the same page across our three environments meant copy-pasting URLs all day. I was rewriting URLs in my head, every hour, for years. It worked well enough that I never bothered to release it.</p>
-          <p>Manifest V3 changed that. Rather than retire the tool, I dragged the whole thing into the modern Chrome extension architecture, redesigned the UI, added Safari support, wrote the docs I never had, and put it on the store. Same idea, twelve years of refinement, and now it's free for everyone.</p>
+          <p>The first version of this lived in my own browser for a decade — 45 lines of JavaScript, written one afternoon because our server names were numbered and forgettable. Before that, I'd been rewriting URLs by hand, every hour, for years.</p>
+          <p>It was &ldquo;good enough for me.&rdquo; So it stayed that way — unchanged, unshipped, unmentioned.</p>
+          <p>Then Chrome's Manifest V3 forced a rewrite. I could retire the tool or rebuild it properly. I picked rebuild — modern extension architecture, redesigned UI, Safari support, the documentation I'd never bothered to write. Same idea, twelve years of refinement, and now it's free for everyone.</p>
           <p style="margin-top: 20px;"><a href="https://steveryherd.com" rel="author">— Steve Ryherd</a></p>
         </div>
       </div>
@@ -1333,7 +1443,7 @@
     <!-- ============ FAQ ============ -->
     <section class="section faq" id="faq" style="padding-top: 0;">
       <div class="section-eyebrow">FAQ</div>
-      <h2 class="section-title">Questions you'd ask <em>before installing.</em></h2>
+      <h2 class="section-title">Questions you'd ask before installing.</h2>
 
       <details>
         <summary>Why not just edit my hosts file?</summary>
@@ -1388,6 +1498,7 @@
     <!-- ============ INSTALL CTA ============ -->
     <div class="install">
       <div class="install-inner">
+        <img class="install-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan" width="478" height="123">
         <h2>A developer tool that's as <em>delicious</em> as it is useful.</h2>
         <p>Free. Open source. Available for Chrome and Safari today.</p>
         <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary btn-lg">Add to Chrome</a>
@@ -1400,7 +1511,8 @@
     <!-- ============ FOOTER ============ -->
     <footer>
       <div class="made-by">
-        Built by <a href="https://steveryherd.com">Steve Ryherd</a> · Open source on <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a>
+        <span class="footer-mark" aria-hidden="true"></span>
+        <span>Built by <a href="https://steveryherd.com">Steve Ryherd</a> · Open source on <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a></span>
       </div>
       <div class="foot-links">
         <a href="/privacy.html">Privacy</a>
