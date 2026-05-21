@@ -1,453 +1,271 @@
 /**
- * Popup script for Browser Environment Switcher
- * 
- * This script handles the environment switcher popup UI, displaying
- * available environments and allowing users to switch between them.
+ * Popup script - renders the environment switcher dropdown.
+ *
+ * Reads current tab state from the service worker, asks for the
+ * environment's server list, and renders one button per server type.
  */
 
-// Debug logging to help diagnose issues
-const DEBUG = true;
+import ThemeManager from '../shared/theme-manager.js';
+import { Messages } from '../shared/messages.js';
+import { buildSwitchURL } from '../shared/rewrite.js';
 
-/**
- * Log messages to console when in debug mode
- * @param {string} message - The message to log
- * @param {*} data - Optional data to log
- */
-function log(message, data) {
-  if (!DEBUG) return;
-  
-  if (data) {
-    console.log(message, data);
-  } else {
-    console.log(message);
-  }
-}
-
-// Global variables to track state
-let currentTabId = null;
-let appSettings = {
-  theme: 'neapolitan',
-  showEmojiIcons: true,
-  iconBadgeNotifications: true,
-  autoDetectEnvironments: true,
-  preservePathQuery: true
+const EMOJI = {
+  development: '🍫',
+  staging:     '🍓',
+  production:  '🍦',
 };
 
-// Import the ThemeManager module
-let ThemeManager;
+const ENV_DISPLAY_NAMES = {
+  development: 'Development',
+  staging:     'Staging',
+  production:  'Production',
+};
 
-/**
- * Initialize the popup when DOM is fully loaded
- */
+const TEXT_INDICATOR = {
+  development: 'D',
+  staging:     'S',
+  production:  'P',
+};
+
+const BADGE_CLASS = {
+  development: 'dev-icon-badge',
+  staging:     'staging-icon-badge',
+  production:  'prod-icon-badge',
+};
+
+let currentTabId = null;
+let appSettings = ThemeManager.getSettings();
+
 document.addEventListener('DOMContentLoaded', initialize);
 
-/**
- * Initialize the popup UI
- */
 async function initialize() {
   try {
-    console.log("Popup DOM loaded");
-    
-    // Initialize ThemeManager
-    // We need to import the module dynamically since module imports are not supported in content scripts
-    try {
-      const module = await import('../shared/theme-manager.js');
-      ThemeManager = module.default;
-      await ThemeManager.initialize();
-      appSettings = ThemeManager.getSettings();
-      
-      log("Theme manager initialized with settings:", appSettings);
-    } catch (error) {
-      console.error("Error initializing theme manager:", error);
-      // Fall back to storage API
-      chrome.storage.local.get('appSettings', function(data) {
-        if (data.appSettings) {
-          appSettings = data.appSettings;
-        }
-      });
-    }
-    
-    // Get the current active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      if (!tabs || !tabs.length) {
-        console.error("No active tab found");
-        document.getElementById("popup-title").textContent = "Error: No active tab";
-        return;
-      }
-      
-      // Store current tab ID
-      currentTabId = tabs[0].id;
-      
-      // Load state for current tab
-      loadStateForTab(currentTabId);
-      
-      // Add tab change listener
-      chrome.tabs.onActivated.addListener(handleTabChange);
-    });
+    appSettings = await ThemeManager.initialize();
   } catch (error) {
-    console.error("Error initializing popup:", error);
-    document.getElementById("popup-title").textContent = "Error loading environments";
+    console.error('Error initializing theme manager:', error);
   }
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs?.length) {
+      setTitle('Error: No active tab');
+      return;
+    }
+    currentTabId = tabs[0].id;
+    loadStateForTab(currentTabId);
+    chrome.tabs.onActivated.addListener(handleTabChange);
+  });
 }
 
-/**
- * Handle tab changes while popup is open
- */
+window.addEventListener('unload', () => {
+  chrome.tabs.onActivated.removeListener(handleTabChange);
+});
+
 function handleTabChange(activeInfo) {
-  console.log("Tab changed to:", activeInfo.tabId);
-  
-  // Update current tab ID
   currentTabId = activeInfo.tabId;
-  
-  // Load state for new tab
   loadStateForTab(currentTabId);
 }
 
-/**
- * Load state for a specific tab
- */
 function loadStateForTab(tabId) {
-  // Then get state from background script
-  console.log("Requesting state from background script for tab:", tabId);
-  chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, function(state) {
-    console.log("State received:", state);
-    
+  chrome.runtime.sendMessage({ action: Messages.GET_STATE, tabId }, (state) => {
+    // If the user switched tabs while we were waiting, drop this response.
+    if (tabId !== currentTabId) return;
+
     if (!state) {
-      console.error("No state received from background script");
-      document.getElementById("popup-title").textContent = "Error loading state";
+      setTitle('Error loading state');
       return;
     }
-    
+
     const { matchingServer, currentURL } = state;
-    
     if (!matchingServer || !currentURL) {
-      console.log("No matching environment found");
       displayNoEnvironmentMessage();
       return;
     }
-    
-    // Set popup title
-    document.getElementById("popup-title").textContent = `${matchingServer.name} Environment`;
-    
-    // Get servers for this environment
+
+    setTitle(`${matchingServer.name} Environment`);
+
     chrome.runtime.sendMessage(
-      { action: "getServers", environmentName: matchingServer.name }, 
-      function(environmentServers) {
-        // Display environment server links
-        displayEnvironmentServers(environmentServers, matchingServer, currentURL);
-      }
+      { action: Messages.GET_SERVERS, environmentName: matchingServer.name },
+      (servers) => {
+        if (tabId !== currentTabId) return;
+        displayEnvironmentServers(servers, matchingServer, currentURL);
+      },
     );
   });
 }
 
-// Cleanup when popup is closed
-window.addEventListener('unload', function() {
-  // Remove tab change listener when popup closes
-  chrome.tabs.onActivated.removeListener(handleTabChange);
-});
-
-/**
- * Display environment servers in the popup
- * @param {Array} servers - Available servers for the environment
- * @param {Object} currentServer - The current server environment
- * @param {string} currentURL - The current tab URL
- */
 function displayEnvironmentServers(servers, currentServer, currentURL) {
-  // Apply environment styling based on current server
-  applyEnvironmentStyling(currentServer.type);
-  
-  // Get the link list element
+  ThemeManager.applyEnvironmentStyling(currentServer.type);
+
+  // Replace the "<env name> Environment" heading from loadStateForTab with
+  // just the environment type — users want to see at a glance whether
+  // they're on Production, Staging, or Development.
+  setTitle(ENV_DISPLAY_NAMES[currentServer.type] ?? currentServer.name);
+
   const linkList = document.getElementById('link-list');
   linkList.innerHTML = '';
-  
-  if (!servers || !servers.length) {
-    console.error("No servers received for environment:", currentServer.name);
-    return;
+
+  if (!servers?.length) return;
+
+  // Skip servers with an empty host - those are placeholders created when
+  // the user runs the "Create configuration" flow but hasn't filled in
+  // the other side yet. Rendering them would crash on URL construction.
+  const renderable = servers.filter((s) => s.host?.trim());
+
+  for (const server of renderable) {
+    linkList.appendChild(renderServerLink(server, currentServer, currentURL));
   }
-  
-  // Create new links for each server
-  for (const server of servers) {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    
-    // Create a container div for the icon and text
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'link-content';
-    contentDiv.style.display = 'flex';
-    contentDiv.style.alignItems = 'center';
-    contentDiv.style.gap = '8px';
-    
-    // Create badge span
-    const badge = document.createElement('span');
-    badge.className = 'icon-badge';
-    
-    // Only show emoji icons if setting is enabled
-    if (appSettings.showEmojiIcons) {
-      // Add emoji icon
-      const icon = document.createElement('span');
-      icon.className = 'emoji-icon';
-      
-      // Set appropriate emoji for each environment
-      switch(server.type) {
-        case 'development':
-          badge.classList.add('dev-icon-badge');
-          icon.textContent = '🍫';
-          break;
-        case 'staging':
-          badge.classList.add('staging-icon-badge');
-          icon.textContent = '🍓';
-          break;
-        case 'production':
-          badge.classList.add('prod-icon-badge');
-          icon.textContent = '🍦';
-          break;
-      }
-      
-      badge.appendChild(icon);
-    } else {
-      // Add text indicator instead
-      const indicator = document.createElement('span');
-      indicator.style.fontSize = 'var(--font-size-xs)';
-      indicator.style.fontWeight = 'var(--font-weight-bold)';
-      
-      // Set appropriate text for each environment
-      switch(server.type) {
-        case 'development':
-          badge.classList.add('dev-icon-badge');
-          indicator.textContent = 'D';
-          indicator.style.color = '#000000'; /* Use black text for better visibility */
-          break;
-        case 'staging':
-          badge.classList.add('staging-icon-badge');
-          indicator.textContent = 'S';
-          indicator.style.color = '#000000'; /* Use black text for better visibility */
-          break;
-        case 'production':
-          badge.classList.add('prod-icon-badge');
-          indicator.textContent = 'P';
-          indicator.style.color = '#000000'; /* Use black text for better visibility */
-          break;
-      }
-      
-      badge.appendChild(indicator);
-    }
-    
-    // Create name span
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
-    
-    // Add badge and name to link content div
-    contentDiv.appendChild(badge);
-    contentDiv.appendChild(nameSpan);
-    
-    // Add content div to link
-    a.appendChild(contentDiv);
-    
-    // Create new URL preserving path, query, and hash
-    const url = new URL(currentURL);
-    
-    // Always use HTTP protocol and let server redirect if needed
-    const newUrl = new URL(`http://${server.host}${url.pathname}${url.search}${url.hash}`);
-    
-    // CHANGED: Set actual URL instead of "#" to support Ctrl+click
-    a.href = newUrl.toString();
-    a.title = newUrl.toString();
-    a.dataset.url = newUrl.toString();
-    a.addEventListener("click", loadEnvironment);
-    
-    // Mark the current environment type as active
-    if (currentServer.type === server.type) {
-      a.classList.add("active");
-    }
-    
-    li.appendChild(a);
-    linkList.appendChild(li);
+
+  linkList.appendChild(renderEditConfigLink(currentServer.name));
+}
+
+function renderServerLink(server, currentServer, currentURL) {
+  const li = document.createElement('li');
+  const link = document.createElement('a');
+
+  const content = document.createElement('div');
+  content.className = 'link-content';
+  content.style.display = 'flex';
+  content.style.alignItems = 'center';
+  content.style.gap = '8px';
+
+  content.appendChild(renderBadge(server.type));
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = server.type.charAt(0).toUpperCase() + server.type.slice(1);
+  content.appendChild(nameSpan);
+
+  link.appendChild(content);
+
+  const targetUrl = buildSwitchURL(currentURL, server.host);
+  link.href = targetUrl;
+  link.title = targetUrl;
+  link.dataset.url = targetUrl;
+  link.addEventListener('click', loadEnvironment);
+
+  if (currentServer.type === server.type) {
+    link.classList.add('active');
   }
-  
-  // Add "Edit Configuration" link
-  const editLi = document.createElement('li');
-  const editLink = document.createElement('a');
-  editLink.textContent = "Edit configuration";
-  editLink.href = "#";
-  editLink.className = "edit-config-link";
-  editLink.style.marginTop = "var(--spacing-lg)";
-  
-  editLink.addEventListener('click', function() {
-    // Store action to be processed by options page
-    chrome.storage.local.set({ 
+
+  li.appendChild(link);
+  return li;
+}
+
+function renderBadge(serverType) {
+  const badge = document.createElement('span');
+  badge.className = 'icon-badge';
+  if (BADGE_CLASS[serverType]) badge.classList.add(BADGE_CLASS[serverType]);
+
+  if (appSettings.showEmojiIcons) {
+    const icon = document.createElement('span');
+    icon.className = 'emoji-icon';
+    icon.textContent = EMOJI[serverType] ?? '';
+    badge.appendChild(icon);
+  } else {
+    const indicator = document.createElement('span');
+    indicator.style.fontSize = 'var(--font-size-xs)';
+    indicator.style.fontWeight = 'var(--font-weight-bold)';
+    indicator.style.color = '#000000';
+    indicator.textContent = TEXT_INDICATOR[serverType] ?? '';
+    badge.appendChild(indicator);
+  }
+
+  return badge;
+}
+
+function renderEditConfigLink(environmentName) {
+  const li = document.createElement('li');
+  const link = document.createElement('a');
+  link.textContent = 'Edit configuration';
+  link.href = '#';
+  link.className = 'edit-config-link';
+  link.style.marginTop = 'var(--spacing-lg)';
+
+  link.addEventListener('click', () => {
+    chrome.storage.local.set({
       pendingConfigAction: {
-        action: "edit",
-        environmentName: currentServer.name,
-        timestamp: Date.now()
-      }
-    }, function() {
-      chrome.runtime.openOptionsPage();
-    });
+        action: 'edit',
+        environmentName,
+        timestamp: Date.now(),
+      },
+    }, () => chrome.runtime.openOptionsPage());
   });
-  
-  editLi.appendChild(editLink);
-  linkList.appendChild(editLi);
+
+  li.appendChild(link);
+  return li;
 }
 
-/**
- * Load the selected environment when a link is clicked
- * @param {Event} event - Click event
- */
 function loadEnvironment(event) {
-  // CHANGED: Check for modifier keys that should open in new tab
-  const isModifierClick = event.ctrlKey || event.metaKey || event.button === 1;
-  
-  // If modifier keys are pressed, let browser handle naturally
-  if (isModifierClick) {
-    // Don't prevent default - let browser open in new tab
-    window.close(); // Still close the popup
+  // Modifier-clicks (Ctrl/Cmd/middle-click) should open in a new tab.
+  if (event.ctrlKey || event.metaKey || event.button === 1) {
+    window.close();
     return;
   }
-  
-  // Normal click - prevent default and handle manually
+
   event.preventDefault();
-  
-  try {
-    const targetUrl = this.dataset.url;
-    console.log("Switching to URL:", targetUrl);
-    
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      if (tabs && tabs.length > 0) {
-        chrome.tabs.update(tabs[0].id, { url: targetUrl });
-        window.close(); // Close the popup
-      }
-    });
-  } catch (error) {
-    console.error("Error switching environment:", error);
-  }
+  const targetUrl = this.dataset.url;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs?.length) {
+      chrome.tabs.update(tabs[0].id, { url: targetUrl });
+      window.close();
+    }
+  });
 }
 
-/**
- * Display a message when no matching environment is found
- */
 function displayNoEnvironmentMessage() {
-  // Get the current tab's URL for creating a new configuration
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-    if (!tabs || !tabs.length) return;
-    
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs?.length) return;
+
     const currentUrl = new URL(tabs[0].url);
     const hostname = currentUrl.hostname;
-    
-    document.getElementById("popup-title").textContent = "No matching environment";
-    
-    // Clear any existing links
+
+    setTitle('No matching environment');
+
     const linkList = document.getElementById('link-list');
-    while (linkList.firstChild) {
-      linkList.removeChild(linkList.firstChild);
-    }
-    
-    // Add a message
+    linkList.innerHTML = '';
+
     const messageLi = document.createElement('li');
     const message = document.createElement('div');
     message.textContent = "Current site doesn't match any configured environments.";
-    message.style.padding = "var(--spacing-md)";
-    message.style.color = "var(--text-muted)";
+    message.style.padding = 'var(--spacing-md)';
+    message.style.color = 'var(--text-muted)';
     messageLi.appendChild(message);
     linkList.appendChild(messageLi);
-    
-    // Add "Create Configuration" link
-    const createLi = document.createElement('li');
-    const createLink = document.createElement('a');
-    createLink.textContent = `Create Configuration`;
-    createLink.href = "#";
-    createLink.className = "edit-config-link";
-    createLink.style.display = "block";
-    createLink.style.padding = "var(--spacing-md)";
-    createLink.style.marginTop = "var(--spacing-md)";
-    createLink.style.textAlign = "center";
-    createLink.style.backgroundColor = "var(--chocolate-base)";
-    createLink.style.color = "var(--text-light)";
-    createLink.style.borderRadius = "var(--radius-sm)";
-    createLink.style.textDecoration = "none";
-    
-    createLink.addEventListener('click', function() {
-      // Store configuration data in Chrome storage
-      chrome.storage.local.set({ 
-        pendingConfigAction: {
-          action: "create",
-          hostname: hostname,
-          url: tabs[0].url,
-          timestamp: Date.now()
-        }
-      }, function() {
-        // Open options page after data is stored
-        chrome.runtime.openOptionsPage();
-      });
-    });
-    
-    createLi.appendChild(createLink);
-    linkList.appendChild(createLi);
+
+    linkList.appendChild(renderCreateConfigLink(hostname, tabs[0].url));
   });
 }
 
-/**
- * Handle errors in the popup
- * @param {string} message - Error message
- * @param {Error} [error] - Optional Error object
- */
-function handleError(message, error) {
-  log(`ERROR: ${message}`, error);
-  document.getElementById("popup-title").textContent = "Error";
-  
-  // Clear any existing links
-  const linkList = document.getElementById('link-list');
-  while (linkList.firstChild) {
-    linkList.removeChild(linkList.firstChild);
-  }
-  
-  // Add an error message
+function renderCreateConfigLink(hostname, url) {
   const li = document.createElement('li');
-  const errorMessage = document.createElement('div');
-  errorMessage.textContent = message;
-  errorMessage.style.padding = "var(--spacing-md)";
-  errorMessage.style.color = "#f44336";
-  li.appendChild(errorMessage);
-  linkList.appendChild(li);
+  const link = document.createElement('a');
+  link.textContent = 'Create Configuration';
+  link.href = '#';
+  link.className = 'edit-config-link';
+  link.style.display = 'block';
+  link.style.padding = 'var(--spacing-md)';
+  link.style.marginTop = 'var(--spacing-md)';
+  link.style.textAlign = 'center';
+  link.style.backgroundColor = 'var(--chocolate-base)';
+  link.style.color = 'var(--text-light)';
+  link.style.borderRadius = 'var(--radius-sm)';
+  link.style.textDecoration = 'none';
+
+  link.addEventListener('click', () => {
+    chrome.storage.local.set({
+      pendingConfigAction: {
+        action: 'create',
+        hostname,
+        url,
+        timestamp: Date.now(),
+      },
+    }, () => chrome.runtime.openOptionsPage());
+  });
+
+  li.appendChild(link);
+  return li;
 }
 
-/**
- * Apply environment-specific styling
- * @param {string} environmentType - Type of environment (development, staging, production)
- */
-function applyEnvironmentStyling(environmentType) {
-  // Use ThemeManager if available
-  if (ThemeManager) {
-    ThemeManager.applyEnvironmentStyling(environmentType);
-  } else {
-    // Fallback if ThemeManager isn't available
-    const body = document.body;
-    
-    // Remove existing environment classes
-    body.classList.remove('env-development', 'env-staging', 'env-production');
-    
-    // Add appropriate environment class
-    body.classList.add(`env-${environmentType}`);
-    
-    // Also set data attribute on html element
-    document.documentElement.setAttribute('data-environment', environmentType);
-  }
-  
-  // Update the title/header with environment name
-  const popupTitle = document.getElementById('popup-title');
-  if (popupTitle) {
-    // Store the original text content to preserve it
-    if (!popupTitle.dataset.originalText) {
-      popupTitle.dataset.originalText = popupTitle.textContent;
-    }
-    
-    // Set environment-specific title
-    const envNames = {
-      'development': 'Development',
-      'staging': 'Staging',
-      'production': 'Production'
-    };
-    
-    // popupTitle.textContent = `${envNames[environmentType] || 'Switch'} Environment`;
-    popupTitle.textContent = `${envNames[environmentType] || 'Switch'}`;
-  }
+function setTitle(text) {
+  const el = document.getElementById('popup-title');
+  if (el) el.textContent = text;
 }
