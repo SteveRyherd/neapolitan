@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Domain switcher</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --text-faint: #999;
+  --border-soft: rgba(0,0,0,0.06);
+  --surface-2: rgba(0,0,0,0.025);
+  --surface-3: rgba(0,0,0,0.04);
+  --hover: rgba(0,0,0,0.04);
+  --active: rgba(0,0,0,0.07);
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f1f1f;
+    --text: #f0f0f0;
+    --text-dim: #aaa;
+    --text-faint: #777;
+    --border-soft: rgba(255,255,255,0.07);
+    --surface-2: rgba(255,255,255,0.04);
+    --surface-3: rgba(255,255,255,0.06);
+    --hover: rgba(255,255,255,0.06);
+    --active: rgba(255,255,255,0.10);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  width: 340px;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.popup-header {
+  padding: 12px 14px;
+  border-bottom: 0.5px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.h-icon { width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0; }
+.h-title { font-size: 13px; font-weight: 500; letter-spacing: -0.01em; }
+.h-status { font-size: 11px; color: var(--text-faint); margin-left: auto; font-family: var(--mono); }
+.popup-current {
+  padding: 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-2);
+}
+.c-icon { width: 44px; height: 44px; border-radius: 9px; flex-shrink: 0; }
+.c-name { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; }
+.c-url { font-size: 11px; color: var(--text-dim); font-family: var(--mono); margin-top: 2px; word-break: break-all; }
+.popup-actions { padding: 8px 6px 10px; }
+.a-title {
+  font-size: 10px;
+  color: var(--text-faint);
+  padding: 6px 10px 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.1s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+}
+.action-item:hover:not(.current) { background: var(--hover); }
+.action-item:active:not(.current) { background: var(--active); }
+.action-item .a-icon { width: 24px; height: 24px; border-radius: 5px; flex-shrink: 0; }
+.action-item .a-name { font-size: 13px; font-weight: 500; flex-grow: 1; letter-spacing: -0.01em; }
+.action-item .a-target { font-size: 11px; color: var(--text-faint); font-family: var(--mono); }
+.action-item.current { background: var(--surface-3); cursor: default; }
+.action-item.current .a-name { color: var(--text-dim); }
+.action-item.current .a-target { font-family: inherit; color: var(--text-faint); font-style: italic; }
+.grey .h-title { color: var(--text-dim); }
+.grey .h-status { color: var(--text-faint); }
+.grey-url {
+  padding: 8px 14px;
+  background: var(--surface-3);
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  text-align: center;
+  border-bottom: 0.5px solid var(--border-soft);
+  word-break: break-all;
+}
+.grey-body { padding: 28px 24px 26px; text-align: center; }
+.grey-body .big { width: 64px; height: 64px; border-radius: 12px; margin: 0 auto 16px; display: block; }
+.grey-body .g-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+.grey-body .g-body { font-size: 12px; color: var(--text-faint); margin: 0; line-height: 1.55; }
+
+.dev { background: linear-gradient(110deg, #6B4226 0%, #6B4226 74.5%, #F3A8BA 74.5%, #F3A8BA 84.5%, #F4E4BD 84.5%, #F4E4BD 100%); }
+.stg { background: linear-gradient(110deg, #6B4226 0%, #6B4226 19%, #F3A8BA 19%, #F3A8BA 81%, #F4E4BD 81%, #F4E4BD 100%); }
+.prd { background: linear-gradient(110deg, #6B4226 0%, #6B4226 15.5%, #F3A8BA 15.5%, #F3A8BA 26.5%, #F4E4BD 26.5%, #F4E4BD 100%); }
+.unk { background: linear-gradient(110deg, #4A4A4A 0%, #4A4A4A 33.3%, #B5B5B5 33.3%, #B5B5B5 66.6%, #E0E0E0 66.6%, #E0E0E0 100%); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// === CONFIG — edit these for your domains ===
+const ENV_RULES = [
+  { env: 'development', match: u => u.hostname === 'localhost' || u.hostname.endsWith('.localhost') },
+  { env: 'staging',     match: u => u.hostname.startsWith('staging.') },
+  { env: 'production',  match: u => u.hostname === 'www.production.com' || u.hostname === 'production.com' },
+];
+
+const ENV_BASES = {
+  development: 'http://localhost:3000',
+  staging:     'https://staging.website',
+  production:  'https://www.production.com',
+};
+
+const ENV_LABELS = {
+  development: 'Development',
+  staging:     'Staging',
+  production:  'Production',
+  unknown:     'Unknown',
+};
+
+const ENV_CLASS = {
+  development: 'dev',
+  staging:     'stg',
+  production:  'prd',
+  unknown:     'unk',
+};
+
+const INTERNAL_SCHEMES = /^(chrome|chrome-extension|about|edge|view-source|moz-extension|opera|brave):/i;
+
+// === LOGIC ===
+function classifyTab(url) {
+  if (!url) return { kind: 'internal', display: '(no url)' };
+  if (INTERNAL_SCHEMES.test(url)) return { kind: 'internal', display: url };
+  let parsed;
+  try { parsed = new URL(url); }
+  catch (e) { return { kind: 'internal', display: url }; }
+  for (const rule of ENV_RULES) {
+    if (rule.match(parsed)) return { kind: 'env', env: rule.env, parsed };
+  }
+  return { kind: 'env', env: 'unknown', parsed };
+}
+
+function switchTo(targetEnv, parsedUrl, tabId) {
+  const base = ENV_BASES[targetEnv];
+  if (!base || !parsedUrl) return;
+  const target = new URL(base);
+  target.pathname = parsedUrl.pathname;
+  target.search = parsedUrl.search;
+  target.hash = parsedUrl.hash;
+  chrome.tabs.update(tabId, { url: target.toString() });
+  window.close();
+}
+
+// === RENDERING ===
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function renderInternal(url) {
+  document.getElementById('root').innerHTML = `
+    <div class="grey">
+      <div class="popup-header">
+        <div class="h-icon unk"></div>
+        <span class="h-title">Domain switcher</span>
+        <span class="h-status">inactive</span>
+      </div>
+      <div class="grey-url">${esc(url)}</div>
+      <div class="grey-body">
+        <div class="big unk"></div>
+        <p class="g-title">Not available on Chrome pages</p>
+        <p class="g-body">Switching only works on regular websites. Open a normal tab to use the extension.</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderEnv(env, parsed, tabId) {
+  const root = document.getElementById('root');
+  const currentClass = ENV_CLASS[env] || 'unk';
+  const currentLabel = ENV_LABELS[env] || env;
+  const hostPath = parsed ? parsed.host + parsed.pathname : '';
+
+  const order = ['development', 'staging', 'production'];
+  const items = order.map(e => {
+    const isCurrent = e === env;
+    const cls = ENV_CLASS[e];
+    const base = ENV_BASES[e] ? ENV_BASES[e].replace(/^https?:\/\//, '') : '';
+    if (isCurrent) {
+      return `
+        <button class="action-item current" disabled>
+          <div class="a-icon ${cls}"></div>
+          <span class="a-name">${ENV_LABELS[e]}</span>
+          <span class="a-target">currently here</span>
+        </button>
+      `;
+    }
+    return `
+      <button class="action-item" data-env="${e}">
+        <div class="a-icon ${cls}"></div>
+        <span class="a-name">${ENV_LABELS[e]}</span>
+        <span class="a-target">${esc(base)}</span>
+      </button>
+    `;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="popup-header">
+      <div class="h-icon ${currentClass}"></div>
+      <span class="h-title">Domain switcher</span>
+      <span class="h-status">${esc(env)}</span>
+    </div>
+    <div class="popup-current">
+      <div class="c-icon ${currentClass}"></div>
+      <div>
+        <div class="c-name">${esc(currentLabel)}</div>
+        <div class="c-url">${esc(hostPath)}</div>
+      </div>
+    </div>
+    <div class="popup-actions">
+      <div class="a-title">Switch to</div>
+      ${items}
+    </div>
+  `;
+
+  root.querySelectorAll('button.action-item:not(.current)').forEach(btn => {
+    btn.addEventListener('click', () => switchTo(btn.dataset.env, parsed, tabId));
+  });
+}
+
+async function init() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) { renderInternal('(no active tab)'); return; }
+    const result = classifyTab(tab.url);
+    if (result.kind === 'internal') renderInternal(result.display);
+    else renderEnv(result.env, result.parsed, tab.id);
+  } catch (e) {
+    console.error('Popup init error:', e);
+    renderInternal('(unable to read tab info)');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

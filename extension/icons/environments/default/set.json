@@ -1,0 +1,5 @@
+{
+  "id": "default",
+  "displayName": "Default",
+  "types": ["development", "staging", "production", "unmatched"]
+}
