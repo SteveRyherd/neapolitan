@@ -608,10 +608,13 @@
       width: auto;
       height: auto;
       object-fit: contain;
-      /* Source artwork ships with a black canvas + warm glow.
-         "lighten" lets the glow shine through against the dark section
-         while making the black border disappear seamlessly. */
-      mix-blend-mode: lighten;
+      /* Frame the black canvas so it reads as a deliberate "card"
+         on the ink section, not a stray rectangle. */
+      border-radius: 18px;
+      border: 1px solid rgba(250, 243, 227, 0.08);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.35),
+        0 18px 36px rgba(0, 0, 0, 0.28);
     }
     .scheme-body .scheme-label {
       font-family: 'JetBrains Mono', monospace;
