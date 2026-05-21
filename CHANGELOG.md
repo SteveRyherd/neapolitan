@@ -1,8 +1,39 @@
 # Changelog
+
 All notable changes to the Neapolitan Domain Switcher will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Landing page at [neapolitan.page](https://neapolitan.page) (Cloudflare Pages, source in `/docs/`)
+- Custom 404 page with original dropped-cone artwork
+- `homepage_url` and `author` fields in `manifest.json`
+
+### Changed
+- Renamed the "Familiar Keys" keyboard scheme to "Neapolitan"
+- Framed keyboard-scheme images with a rounded border and soft shadow on the landing page
+
+## [1.0.1] - 2025-08-28
+
+### Added
+- Option to open the options page in its own tab (closes bug #3)
+
+### Fixed
+- Header styling now scoped correctly; popup title margins corrected
+- Preview header gap in the options preview pane
+
+## [1.0.0] - 2025-05-01
+First official public release on the Chrome Web Store.
+
+### Added
+- Chrome Web Store icon set
+- Build scripts (`build-chrome.sh`, `build-safari.sh`)
+
+### Changed
+- Removed `.md` files from the packaged build output
 
 ## [1.0.0-rc.1] - 2025-04-30
 First official release candidate after 12 years of internal development.
@@ -45,4 +76,4 @@ First official release candidate after 12 years of internal development.
 - Clear visual indicators for active environment
 
 ## Earlier History
-This project was developed 12 years ago then shelved for a siginicant time, with significant modernization efforts to align with current browser extension standards and web development practices. The 1.0.0 release represents the first official public version.
+This project was developed 12 years ago then shelved for a significant time, with significant modernization efforts to align with current browser extension standards and web development practices. The 1.0.0 release represents the first official public version.

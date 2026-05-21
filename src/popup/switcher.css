@@ -175,30 +175,6 @@ ul#link-list a:hover {
   text-decoration: underline;
 }
 
-/* Paper texture overlay - add this class to body */
-.texture-overlay {
-  position: relative;
-}
-
-.texture-overlay::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('../images/paper-texture.png');
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 10;
-}
-
-
-
-/* Keep your existing CSS rules and add/modify these */
-
-
-
 /* Make active links match their environment color */
 .env-development ul#link-list a.active { 
   background-color: var(--chocolate-dark);

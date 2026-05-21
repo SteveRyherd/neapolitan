@@ -26,3 +26,6 @@ Thumbs.db
 *.swo
 *.sublime*
 
+# Staging area for files pending review/deletion
+_trash/
+

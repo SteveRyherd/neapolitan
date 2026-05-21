@@ -22,15 +22,22 @@ Safari supports most Chrome extension APIs through compatibility layers, with a 
 
 To build for Safari:
 
-1. First, ensure the extension works in Chrome
-2. Use the Safari Web Extension Converter tool in Xcode. From the parent directory of your code run:
+1. First, ensure the extension works in Chrome.
+2. From the project root, run the Safari build script. It prepares a clean copy of the extension under `build/safari` and prints the exact `xcrun` invocation to use next:
    ```
-   xcrun safari-web-extension-converter ./browser-environment-switcher --app-name "EnvSwitcher" --bundle-identifier "com.desatt.envswitcher"
+   ./build-safari.sh
    ```
-3. The tool will create a new Xcode project
-4. You'll need to sign the extension with your Apple Developer account
-5. Ensure the Team is properly set, and the identifier bundles need to match for the app and extension (don't let xcode add .extension, that appears to fail)
-6. You can then build and install the extension
+3. Run the Safari Web Extension Converter on the prepared directory (the script will print this command for you):
+   ```
+   xcrun safari-web-extension-converter ./build/safari \
+     --app-name "NeapolitanDomainSwitcher" \
+     --bundle-identifier "com.steveryherd.neapolitan" \
+     --project-location "build"
+   ```
+4. The tool will create a new Xcode project.
+5. Sign the extension with your Apple Developer account.
+6. Ensure the Team is set, and that the app and extension bundle identifiers match (don't let Xcode append `.extension` — that's been observed to fail).
+7. Build and install the extension from Xcode.
 
 ## Safari-Specific Issues to Watch For
 
