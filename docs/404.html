@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lost your scoop? — Neapolitan</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/badge-32.png">
-  <link rel="icon" type="image/png" sizes="128x128" href="/assets/img/badge.png">
+  <link rel="icon" href="/assets/img/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <style>
     :root {
       --cream: #FAF3E3;
@@ -18,7 +20,6 @@
       --ink-mute: #6B5645;
       --chocolate: #6B4226;
       --strawberry: #E8A2B5;
-      --strawberry-deep: #C97084;
       --vanilla-warm: #F4E4C1;
     }
     *, *::before, *::after { box-sizing: border-box; }
@@ -41,6 +42,12 @@
       max-width: 540px;
       text-align: center;
     }
+    .dropped-cone {
+      width: min(340px, 82vw);
+      height: auto;
+      margin: 0 auto 18px;
+      display: block;
+    }
     .stripes {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -53,21 +60,13 @@
     .stripes > div:nth-child(1) { background: var(--chocolate); }
     .stripes > div:nth-child(2) { background: var(--strawberry); }
     .stripes > div:nth-child(3) { background: var(--vanilla-warm); }
-
-    .dropped-cone {
-      width: 220px;
-      height: 220px;
-      margin: 0 auto 8px;
-      display: block;
-      animation: cone-wobble 4s ease-in-out infinite;
-      transform-origin: 110px 175px;
-    }
-    @keyframes cone-wobble {
-      0%, 100% { transform: rotate(-4deg); }
-      50%      { transform: rotate(4deg); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .dropped-cone { animation: none; }
+    .code {
+      font-family: "JetBrains Mono", "SF Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--ink-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 18px;
     }
     h1 {
       font-family: "Fraunces", Georgia, serif;
@@ -79,6 +78,7 @@
       font-size: 1.1rem;
       color: var(--ink-soft);
       margin: 0 0 1.5em;
+      line-height: 1.5;
     }
     .btn {
       display: inline-block;
@@ -88,86 +88,34 @@
       border-radius: 999px;
       text-decoration: none;
       font-weight: 500;
+      transition: background 0.15s ease;
     }
     .btn:hover { background: var(--ink-soft); }
-    .code {
-      font-family: "JetBrains Mono", "SF Mono", monospace;
-      font-size: 0.85rem;
-      color: var(--ink-mute);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 18px;
-    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <!-- Dropped Neapolitan cone, upside down -->
-    <svg class="dropped-cone" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An upside-down ice cream cone with three Neapolitan scoops spilled on the floor">
-      <defs>
-        <radialGradient id="puddleGlow" cx="50%" cy="60%" r="60%">
-          <stop offset="0%" stop-color="#6B4226" stop-opacity="0.15"/>
-          <stop offset="100%" stop-color="#6B4226" stop-opacity="0"/>
-        </radialGradient>
-        <linearGradient id="coneStripe" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#C89060"/>
-          <stop offset="100%" stop-color="#8B5A2B"/>
-        </linearGradient>
-      </defs>
-
-      <!-- Floor shadow / puddle -->
-      <ellipse cx="110" cy="190" rx="92" ry="14" fill="url(#puddleGlow)"/>
-
-      <!-- Three spilled scoops on the floor, slightly flattened -->
-      <!-- Chocolate scoop (left, slightly behind) -->
-      <ellipse cx="62" cy="172" rx="32" ry="24" fill="#6B4226"/>
-      <ellipse cx="58" cy="166" rx="10" ry="6" fill="#8C5A3A" opacity="0.7"/>
-
-      <!-- Vanilla scoop (right) -->
-      <ellipse cx="158" cy="172" rx="30" ry="22" fill="#F4E4C1"/>
-      <ellipse cx="154" cy="166" rx="9" ry="5" fill="#FFF7E0" opacity="0.8"/>
-
-      <!-- Strawberry scoop (center, in front, overlapping the other two slightly) -->
-      <ellipse cx="110" cy="178" rx="36" ry="26" fill="#E8A2B5"/>
-      <ellipse cx="105" cy="172" rx="12" ry="7" fill="#F4BCC9" opacity="0.85"/>
-      <!-- Tiny strawberry "seeds" for texture -->
-      <circle cx="98" cy="184" r="1.2" fill="#A04860"/>
-      <circle cx="120" cy="180" r="1.2" fill="#A04860"/>
-      <circle cx="112" cy="190" r="1.2" fill="#A04860"/>
-      <circle cx="128" cy="186" r="1.2" fill="#A04860"/>
-
-      <!-- The upside-down cone, tipped diagonally -->
-      <g transform="rotate(-22 110 100)">
-        <!-- Cone body (triangle, point down) -->
-        <path d="M 70 55 L 150 55 L 110 145 Z" fill="url(#coneStripe)" stroke="#5A3815" stroke-width="1.5" stroke-linejoin="round"/>
-        <!-- Waffle pattern: diagonal lines both directions -->
-        <g stroke="#5A3815" stroke-width="1" opacity="0.6" fill="none">
-          <line x1="78" y1="68" x2="142" y2="68"/>
-          <line x1="85" y1="85" x2="135" y2="85"/>
-          <line x1="92" y1="102" x2="128" y2="102"/>
-          <line x1="100" y1="120" x2="120" y2="120"/>
-          <line x1="78" y1="68" x2="110" y2="145"/>
-          <line x1="142" y1="68" x2="110" y2="145"/>
-          <line x1="95" y1="55" x2="110" y2="145"/>
-          <line x1="125" y1="55" x2="110" y2="145"/>
-        </g>
-        <!-- Cone rim (the open top, now at bottom since cone is upside down) -->
-        <ellipse cx="110" cy="55" rx="40" ry="6" fill="#A06934" stroke="#5A3815" stroke-width="1.5"/>
-        <!-- Dark inside opening hint -->
-        <ellipse cx="110" cy="55" rx="34" ry="4" fill="#3D2410"/>
-      </g>
-
-      <!-- A few drip droplets between cone and scoops -->
-      <circle cx="92" cy="150" r="2.5" fill="#E8A2B5" opacity="0.7"/>
-      <circle cx="138" cy="148" r="2" fill="#F4E4C1" opacity="0.7"/>
-      <circle cx="115" cy="158" r="1.8" fill="#6B4226" opacity="0.7"/>
-    </svg>
-
-    <div class="stripes"><div></div><div></div><div></div></div>
+  <main class="card">
+    <picture>
+      <source srcset="/assets/img/404.webp" type="image/webp">
+      <img
+        class="dropped-cone"
+        src="/assets/img/404.png"
+        alt="A dropped Neapolitan ice cream cone"
+        width="680"
+        height="680">
+    </picture>
+    <div class="stripes" aria-hidden="true">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
     <div class="code">404 · Page not found</div>
     <h1>Lost your scoop?</h1>
-    <p>This page doesn't exist in any of our environments. Maybe a typo, maybe a moved link — either way, the carton is back this way.</p>
+    <p>
+      This page doesn't exist in any of our environments.
+      Maybe a typo, maybe a moved link — either way, the carton is back this way.
+    </p>
     <a class="btn" href="/">← Back to neapolitan.page</a>
-  </div>
+  </main>
 </body>
 </html>
