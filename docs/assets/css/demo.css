@@ -1,0 +1,76 @@
+/* ============================================================
+   demo.css — environment-specific page theming for demo.html.
+   Env class (env-development / env-staging / env-production)
+   is set on <html> by an inline script in demo.html's <head>
+   before first paint, so there's no FOUC.
+   ============================================================ */
+
+/* ---- Sticky environment banner ---- */
+.page-env-banner {
+  display: none; /* hidden by default; shown per env below */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 7px 20px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none; /* don't block clicks */
+}
+
+/* Push page content below the fixed banner (banner is ~32px tall) */
+html.env-development body,
+html.env-staging body {
+  padding-top: 72px; /* 40px existing + 32px banner */
+}
+
+/* ============================================================
+   Development — deep chocolate
+   ============================================================ */
+html.env-development body {
+  background: #3D2010;
+}
+
+html.env-development .page-env-banner {
+  display: block;
+  background: #2A1208;
+  color: #F4DAA5;
+  border-bottom: 1px solid rgba(244, 218, 165, 0.18);
+}
+
+/* Page header text — needs to be light on the dark background */
+html.env-development .demo-page-header .eyebrow {
+  color: #E8919B; /* --strawberry — lighter than label variant for dark bg */
+}
+html.env-development .demo-page-header h1 {
+  color: #FAF3E3; /* --cream */
+}
+html.env-development .demo-page-header h1 em {
+  color: #E8919B; /* --strawberry */
+}
+html.env-development .demo-page-header p {
+  color: #C5A882; /* warm mid-tone, readable on dark chocolate */
+}
+
+/* ============================================================
+   Staging — light strawberry wash
+   ============================================================ */
+html.env-staging body {
+  background: #FDE8EA;
+}
+
+html.env-staging .page-env-banner {
+  display: block;
+  background: #F5C5C9;
+  color: #7A2535;
+  border-bottom: 1px solid rgba(122, 37, 53, 0.18);
+}
+
+/* ============================================================
+   Production — no overrides; cream from demo.html is correct.
+   ============================================================ */

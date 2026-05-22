@@ -8,6 +8,21 @@
   <meta name="robots" content="noindex">
   <link rel="icon" href="/assets/img/favicon.ico" sizes="any">
 
+  <!-- Set env class on <html> before first paint so demo.css
+       can theme the page without a flash of the default cream. -->
+  <script>
+    (function () {
+      var host = window.location.hostname.replace(/^www\./, '');
+      var env = !host           ? 'unmatched'   :
+        host === 'neapolitan.page'         ? 'production'  :
+        host === 'staging.neapolitan.page' ? 'staging'     : 'development';
+      document.documentElement.classList.add('env-' + env);
+    }());
+  </script>
+
+  <!-- Per-environment page theming (background, sticky banner) -->
+  <link rel="stylesheet" href="/assets/css/demo.css">
+
   <!-- Site landing-page fonts (used outside the popup) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -606,6 +621,10 @@
 </head>
 <body>
 
+  <!-- Sticky environment banner — visible on dev and staging,
+       hidden on production. Populated by JS at boot. -->
+  <div id="pageBanner" class="page-env-banner"></div>
+
   <div class="wrap">
 
     <header class="demo-page-header">
@@ -973,7 +992,15 @@
     /* ============================================================
        Boot.
        ============================================================ */
-    render(detectEnvironment());
+    const _bootEnv = detectEnvironment();
+
+    // Populate the sticky page-level banner for dev / staging.
+    const $pageBanner = document.getElementById('pageBanner');
+    if (_bootEnv && VIEW_CONTENT[_bootEnv.type].banner) {
+      $pageBanner.textContent = VIEW_CONTENT[_bootEnv.type].banner;
+    }
+
+    render(_bootEnv);
   </script>
 </body>
 </html>
