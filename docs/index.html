@@ -1003,6 +1003,7 @@
       padding: 56px 40px;
       border-radius: var(--radius-md);
       box-shadow: 0 4px 8px rgba(43, 24, 16, 0.10), 0 24px 48px rgba(43, 24, 16, 0.18);
+      position: relative;
     }
     .install-wordmark {
       display: block;
@@ -1010,6 +1011,35 @@
       height: auto;
       margin: 0 auto 28px;
     }
+    /* Award-ribbon "Best in Show" sticker — anchored to the cream
+       card with translate(-50%, -50%) so it straddles the top-left
+       corner. Both `top` and `left` are viewport-responsive: `left`
+       shrinks (50px on phones → 10px on desktop) so the ribbon hugs
+       the corner more tightly on wide screens, while `top` grows
+       (20px on phones → 40px on desktop) so it doesn't crowd the
+       wordmark on smaller layouts. pointer-events:none so it can't
+       steal clicks. */
+    .install-award {
+      position: absolute;
+      top: clamp(20px, 5vw, 40px);
+      left: clamp(10px, 76px - 4vw, 50px);
+      width: clamp(120px, 13vw, 170px);
+      height: auto;
+      transform: translate(-50%, -50%) rotate(-10deg);
+      z-index: 2;
+    }
+    .install-award picture { display: block; }
+    .install-award img { display: block; width: 100%; height: auto; }
+    /* Second picture (folded-back state) is stacked on top, hidden by default.
+       Hard swap on hover — no crossfade, since the transparent fold area
+       would let the flat version show through during any transition. */
+    .install-award picture + picture {
+      position: absolute;
+      inset: 0;
+      visibility: hidden;
+    }
+    .install-award:hover picture:first-child { visibility: hidden; }
+    .install-award:hover picture + picture { visibility: visible; }
     .install h2 {
       font-family: 'Fraunces', serif;
       font-weight: 500;
@@ -1512,6 +1542,16 @@
     <!-- ============ INSTALL CTA ============ -->
     <div class="install">
       <div class="install-inner">
+        <div class="install-award" aria-hidden="true">
+          <picture>
+            <source srcset="/assets/img/award-ribbon_nofold.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon_nofold.png" alt="" width="765" height="759">
+          </picture>
+          <picture>
+            <source srcset="/assets/img/award-ribbon_realistic.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon_realistic.png" alt="" width="765" height="759">
+          </picture>
+        </div>
         <img class="install-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan" width="478" height="123">
         <h2>A developer tool that's as <em>delicious</em> as it is useful.</h2>
         <p>Free. Open source. Available for Chrome and Safari today.</p>
