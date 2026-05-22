@@ -1126,6 +1126,14 @@
       section.section { padding: 80px 0; }
       nav .links { gap: 16px; }
       nav .links a:not(.btn) { display: none; }
+      /* Shrink the nav CTA on mobile so it fits on one line next to
+         the wordmark — full-size desktop padding wraps to two lines
+         on iPhone-width viewports. */
+      nav .links .btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
       .install { padding: 48px 20px; }
       .install-inner { padding: 40px 24px; }
       .shortcuts { padding: 48px 28px; }
