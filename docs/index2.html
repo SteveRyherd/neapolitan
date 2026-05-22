@@ -17,9 +17,15 @@
   <script>
     (function () {
       var host = window.location.hostname.replace(/^www\./, '');
-      var env = !host                            ? 'unmatched'  :
-        host === 'neapolitan.page'               ? 'production' :
-        host === 'staging.neapolitan.page'       ? 'staging'    : 'development';
+      var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+      // On localhost, ?env=staging (etc.) overrides hostname detection so you
+      // can preview any theme without deploying.
+      var paramEnv = isLocal && new URLSearchParams(window.location.search).get('env');
+      var VALID = { development: 1, staging: 1, production: 1 };
+      var env = (paramEnv && VALID[paramEnv]) ? paramEnv :
+        !host                            ? 'unmatched'  :
+        host === 'neapolitan.page'       ? 'production' :
+        host === 'staging.neapolitan.page' ? 'staging'  : 'development';
       document.documentElement.classList.add('env-' + env);
       var link = document.createElement('link');
       link.rel  = 'stylesheet';
@@ -490,7 +496,7 @@
     /* ============ SCREENSHOTS ============ */
     .screenshots {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 32px;
       align-items: stretch;
     }
@@ -527,10 +533,14 @@
     .screenshot-card picture {
       display: block;
       width: 100%;
+      flex: 1;
+      min-height: 0;
     }
     .screenshot-card img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom;
       border-radius: var(--radius-sm);
       border: 1px solid rgba(43, 24, 16, 0.08);
       display: block;
@@ -1086,6 +1096,49 @@
     }
     .install .small a { color: var(--ink); }
 
+    /* ============ ENV PICKER (localhost only) ============ */
+    #envPicker {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 9000;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      box-shadow: var(--shadow-lift);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    #envPicker:hover { opacity: 1; }
+    #envPicker .ep-label {
+      color: rgba(250, 243, 227, 0.5);
+      text-transform: uppercase;
+      margin-right: 2px;
+    }
+    .ep-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.15s;
+      line-height: 1;
+    }
+    .ep-btn:hover { transform: translateY(-1px); }
+    .ep-btn.ep-dev  { background: var(--chocolate);    color: var(--cream); }
+    .ep-btn.ep-stag { background: var(--strawberry);   color: var(--ink); }
+    .ep-btn.ep-prod { background: var(--vanilla-warm); color: var(--ink); }
+    .ep-btn.ep-active { border-color: #fff; }
+
     /* ============ FOOTER ============ */
     footer {
       padding: 56px 0 40px;
@@ -1215,12 +1268,27 @@
     }
 
     /* ---- Toolbar strip ---- */
+    /* ---- Browser-chrome wrapper: visually groups toolbar + stage ---- */
+    .demo-browser {
+      border-top: 1px solid rgba(43, 24, 16, 0.1);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      background: rgba(43, 24, 16, 0.04);
+      padding: 20px 24px 24px;
+    }
+
+    /* Inner window frame — the "browser" itself */
+    .demo-browser-window {
+      border: 1.5px solid rgba(43, 24, 16, 0.14);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-lift);
+    }
+
     .ext-toolbar-strip {
       display: flex; justify-content: flex-end; align-items: center; gap: 10px;
       padding: 10px 14px;
-      background: var(--cream-card);
-      border-top: 1px solid rgba(43, 24, 16, 0.08);
-      border-bottom: 1px solid rgba(43, 24, 16, 0.08);
+      background: #EDEAE3;
+      border-bottom: 1px solid rgba(43, 24, 16, 0.1);
       position: relative;
     }
     .ext-toolbar-strip .hint {
@@ -1324,6 +1392,38 @@
     .mini-cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .mini-btn { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; background: var(--ink); color: var(--cream); font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
     .mini-link { font-size: 12px; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ---- Demo stage: hardcoded colors per simulated environment --------
+       The mini-hero uses CSS variables (--ink, --cream, etc.) which get
+       flipped by the dev theme. These rules lock each simulation to its
+       own correct colors regardless of which page theme is active.       */
+
+    /* Production (vanilla) — always dark ink on light vanilla bg */
+    .demo-stage.env-production .mini-wordmark,
+    .demo-stage.env-production .mini-env-tag,
+    .demo-stage.env-production .mini-headline  { color: #2B1810; }
+    .demo-stage.env-production .mini-lede,
+    .demo-stage.env-production .mini-link      { color: #5A3C2A; }
+    .demo-stage.env-production .mini-lede code { color: #5A3C2A; background: rgba(43,24,16,0.08); }
+    .demo-stage.env-production .mini-btn       { background: #2B1810; color: #FAF3E3; }
+
+    /* Staging (strawberry) — always dark ink on light pink bg */
+    .demo-stage.env-staging .mini-wordmark,
+    .demo-stage.env-staging .mini-env-tag,
+    .demo-stage.env-staging .mini-headline  { color: #2B1810; }
+    .demo-stage.env-staging .mini-lede,
+    .demo-stage.env-staging .mini-link      { color: #5A3C2A; }
+    .demo-stage.env-staging .mini-btn       { background: #2B1810; color: #FAF3E3; }
+
+    /* Development (chocolate) — always light cream on dark bg */
+    .demo-stage.env-development .mini-wordmark,
+    .demo-stage.env-development .mini-env-tag,
+    .demo-stage.env-development .mini-headline  { color: #FAF3E3; }
+    .demo-stage.env-development .mini-lede,
+    .demo-stage.env-development .mini-link      { color: #C5A882; }
+    .demo-stage.env-development .mini-lede code { color: #C5A882; background: rgba(250,243,227,0.12); }
+    .demo-stage.env-development .mini-btn       { background: #FAF3E3; color: #2B1810; }
+
     .stage-unmatched { max-width: 540px; margin: 0 auto; text-align: center; color: var(--ink); }
     .stage-unmatched .stage-flavor { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
     .stage-unmatched h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 8px; }
@@ -1516,6 +1616,11 @@
           <h3>Click the icon. <em style="font-style:italic;color:var(--strawberry-deep)">Hop environments.</em></h3>
         </div>
 
+        <!-- Browser-chrome wrapper: groups the toolbar + stage so they
+             read as a single "browser window" distinct from the card header. -->
+        <div class="demo-browser">
+          <div class="demo-browser-window">
+
         <!-- Toolbar strip: the extension button lives here -->
         <div class="ext-toolbar-strip" id="toolbarStrip">
           <span class="hint" id="toolbarHint">Try it →</span>
@@ -1573,6 +1678,9 @@
             <p><code id="unmatchedHost">file://</code> isn't a configured environment — but the links above still navigate to the real environments.</p>
           </div>
         </div>
+
+          </div><!-- /.demo-browser-window -->
+        </div><!-- /.demo-browser -->
       </div>
 
       <div class="screenshots">
@@ -1581,8 +1689,7 @@
           <h3>One click, every project</h3>
           <p>Browse to any configured site, click the icon, pick an environment. The popup shows you exactly where you are and where you can go.</p>
           <picture>
-            <source srcset="/assets/img/popup.webp" type="image/webp">
-            <img src="/assets/img/popup-2x.png" alt="The Neapolitan popup showing development, staging, and production options for the current site" loading="lazy" width="720" height="738">
+            <img src="/assets/img/popup-new.png" alt="The Neapolitan popup showing development, staging, and production options for the current site" loading="lazy" width="1467" height="1136">
           </picture>
         </div>
         <div class="screenshot-card">
@@ -1590,8 +1697,7 @@
           <h3>Set up once. Forget it.</h3>
           <p>Define your projects and their environment URLs. Neapolitan auto-detects which environment you're in based on the current tab.</p>
           <picture>
-            <source srcset="/assets/img/options.webp" type="image/webp">
-            <img src="/assets/img/options-2x.png" alt="The Neapolitan options page showing environment configuration and the four built-in keyboard shortcut schemes" loading="lazy" width="1400" height="1084">
+            <img src="/assets/img/options-new.png" alt="The Neapolitan options page showing environment configuration and the four built-in keyboard shortcut schemes" loading="lazy" width="1024" height="792">
           </picture>
         </div>
       </div>
@@ -1882,6 +1988,9 @@
   <!-- ============ KONAMI TOAST (easter egg, all envs) ============ -->
   <div id="konamiToast" class="konami-toast" aria-live="polite"></div>
 
+  <!-- ============ ENV PICKER (localhost only) ============ -->
+  <div id="envPicker" style="display:none"></div>
+
   <!-- ============ SCRIPTS ============ -->
   <script>
   /* ============================================================
@@ -1889,9 +1998,13 @@
      ============================================================ */
   (function () {
     var host = window.location.hostname.replace(/^www\./, '');
-    window.__neapEnv = !host                            ? 'unmatched'  :
-      host === 'neapolitan.page'               ? 'production' :
-      host === 'staging.neapolitan.page'       ? 'staging'    : 'development';
+    var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    var paramEnv = isLocal && new URLSearchParams(window.location.search).get('env');
+    var VALID = { development: 1, staging: 1, production: 1 };
+    window.__neapEnv = (paramEnv && VALID[paramEnv]) ? paramEnv :
+      !host                              ? 'unmatched'  :
+      host === 'neapolitan.page'         ? 'production' :
+      host === 'staging.neapolitan.page' ? 'staging'    : 'development';
   }());
 
   /* ============================================================
@@ -2206,22 +2319,33 @@
 
     // Live-mode toggle persistence
     try { $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true'; } catch (e) {}
+    // If the page was loaded with a hash (e.g. from a "Really go there" link),
+    // the user clearly wants to navigate — turn the toggle on automatically.
+    if (window.location.hash) { $liveMode.checked = true; }
     $liveMode.addEventListener('change', function () {
       try { localStorage.setItem('neap.demo.liveMode', String($liveMode.checked)); } catch (e) {}
     });
 
-    // IntersectionObserver: update URL hash when demo scrolls into view
-    // so "Really go there" links return the user to the right spot.
+    // IntersectionObserver: update URL hash as sections scroll into view.
+    // Fires when the top of a section enters the top 40% of the viewport
+    // (rootMargin clips the bottom 60%), so the hash stays current as the
+    // user reads down the page. "Really go there" links preserve this hash
+    // so users land back near the demo on return.
     if ('IntersectionObserver' in window) {
-      var demoSection = document.getElementById('demo');
-      if (demoSection) {
-        new IntersectionObserver(function (entries) {
-          var isVisible = entries[0].isIntersecting;
-          try {
-            history.replaceState(null, '', window.location.pathname + (isVisible ? '#demo' : ''));
-          } catch (e) {}
-        }, { threshold: 0.3 }).observe(demoSection);
-      }
+      var trackIds = ['how', 'demo', 'features', 'story', 'faq'];
+      var sectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            try {
+              history.replaceState(null, '', window.location.pathname + '#' + entry.target.id);
+            } catch (e) {}
+          }
+        });
+      }, { rootMargin: '0px 0px -60% 0px', threshold: 0 });
+      trackIds.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+      });
     }
 
     render(detectDemoEnv());
@@ -2298,6 +2422,44 @@
     if (env === 'development') {
       console.log('%c<!-- 🍫 Hello, view-source explorer. The dev branch is yours to poke at. -->', 'color:#6B4226;font-size:11px;font-family:monospace;');
     }
+  }());
+
+  /* ============================================================
+     6. ENV PICKER — localhost only
+     A floating widget that lets you preview any env theme
+     by appending ?env=<name> and reloading.
+     ============================================================ */
+  (function () {
+    var host = window.location.hostname;
+    var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    if (!isLocal) return;
+
+    var picker = document.getElementById('envPicker');
+    if (!picker) return;
+
+    var current = new URLSearchParams(window.location.search).get('env') || 'development';
+
+    var ENVS = [
+      { key: 'development', label: '🍫 Dev',     cls: 'ep-dev'  },
+      { key: 'staging',     label: '🍓 Staging', cls: 'ep-stag' },
+      { key: 'production',  label: '🍦 Prod',    cls: 'ep-prod' },
+    ];
+
+    var html = '<span class="ep-label">Preview:</span>';
+    ENVS.forEach(function (e) {
+      var active = e.key === current ? ' ep-active' : '';
+      html += '<button class="ep-btn ' + e.cls + active + '" data-env="' + e.key + '">' + e.label + '</button>';
+    });
+    picker.innerHTML = html;
+    picker.style.display = 'flex';
+
+    picker.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('.ep-btn');
+      if (!btn) return;
+      var params = new URLSearchParams(window.location.search);
+      params.set('env', btn.dataset.env);
+      window.location.search = params.toString();
+    });
   }());
 
   </script>

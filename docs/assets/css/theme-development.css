@@ -202,3 +202,73 @@ html.env-development .story-text a { color: #E8919B; }
 /* ---- Demo embed (interactive demo component inside the page) ---- */
 html.env-development .demo-embed-label { color: #E8919B; }
 html.env-development .demo-embed h3    { color: #FAF3E3; }
+
+/* ---- Demo browser chrome wrapper ---- */
+html.env-development .demo-browser {
+  background: rgba(0, 0, 0, 0.2);
+}
+html.env-development .demo-browser-window {
+  border-color: rgba(250, 243, 227, 0.12);
+}
+
+/* ---- Demo browser toolbar strip ---- */
+/* Base styles hardcode #EDEAE3 (light); override for dark page. */
+html.env-development .demo-browser .ext-toolbar-strip {
+  background: #2A1208;
+  border-bottom-color: rgba(250, 243, 227, 0.1);
+}
+
+/* ---- Demo stage: development environment ---- */
+/* Base #c5b0a1 is too pale on a dark page. */
+html.env-development .demo-stage.env-development { background: #4a3028; }
+
+/* ---- Stripe row ---- */
+/* --cream flips to dark after palette inversion, making chocolate
+   stripe text invisible. Vanilla flips --ink to light on light bg. */
+html.env-development .stripe.choc { color: #FAF3E3; }
+html.env-development .stripe.van  { color: #2B1810; }
+
+/* ---- Keyboard shortcuts: scheme slide content ---- */
+/* .scheme-name uses var(--cream) which flips to near-black. */
+html.env-development .scheme-body .scheme-name { color: #FAF3E3; }
+html.env-development .scheme-body .scheme-why  { color: rgba(250, 243, 227, 0.8); }
+
+/* ---- Feature grid: chocolate icon ---- */
+/* Icon symbol uses var(--cream) which flips to dark on chocolate bg. */
+html.env-development .feature.f-choc .icon { color: #FAF3E3; }
+
+/* ---- Env picker (localhost preview widget) ---- */
+/* var(--ink) flips to cream; restore a dark background. */
+html.env-development #envPicker { background: #1A0A04; }
+/* Dev button: chocolate bg needs light text after the flip. */
+html.env-development .ep-btn.ep-dev  { color: #FAF3E3; }
+/* Prod button: vanilla bg needs dark text (--ink flipped to light). */
+html.env-development .ep-btn.ep-prod { color: #2B1810; }
+
+/* ---- Live-mode toggle ---- */
+/* Unchecked track: rgba(43,24,16,0.18) is near-invisible on dark toolbar. */
+html.env-development .toggle-track { background: rgba(250, 243, 227, 0.3); }
+
+/* ---- Demo stage: mini-hero content ---- */
+/* Eyebrow uses --strawberry-label (#B14457 — dark rose) which is low
+   contrast on the darkened dev stage. Use the lighter strawberry. */
+html.env-development .demo-stage.env-development .mini-eyebrow { color: #E8919B; }
+/* Lede body text — bump opacity on the dark bg. */
+html.env-development .demo-stage.env-development .mini-lede { color: #C5A882; }
+
+/* ---- Feature grid: vanilla icons (Many projects, Zero tracking) ---- */
+/* --ink flips to cream (#FAF3E3) — light on light vanilla bg.
+   User wants these black. */
+html.env-development .feature.f-van .icon { color: #2B1810; }
+
+/* ---- Keyboard shortcuts: scheme-why italic keys (e.g. D·S·P) ---- */
+/* .scheme-why em uses var(--cream) which flips to near-black. */
+html.env-development .scheme-body .scheme-why em { color: #FAF3E3; }
+
+/* ---- Keyboard shortcuts: env-label pills ---- */
+/* Dev label: var(--cream) text flips to dark on chocolate bg. */
+html.env-development .scheme-keys .env-label.dev  { color: #FAF3E3; }
+/* Prod label: var(--ink) text flips to light (#FAF3E3) on vanilla bg. */
+html.env-development .scheme-keys .env-label.prod { color: #2B1810; }
+/* Staging label: same flip issue on strawberry bg. */
+html.env-development .scheme-keys .env-label.staging { color: #2B1810; }
