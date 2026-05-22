@@ -1,0 +1,30 @@
+/* ============================================================
+   demo.css — shared styles for the sticky env banner and the
+   interactive demo component embedded in index2.html.
+
+   The per-env colors (background, text, border) live in
+   theme-development.css and theme-staging.css. This file owns
+   the structural rules that are env-agnostic.
+   ============================================================ */
+
+/* ---- Sticky environment banner ---- */
+/* Hidden by default; theme-*.css sets display:block on dev/staging. */
+.page-env-banner {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 20px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

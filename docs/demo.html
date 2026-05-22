@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neapolitan — Interactive demo</title>
+  <meta name="description" content="Try the Neapolitan environment switcher right in your browser — click the toolbar icon to hop between dev, staging, and production at this same page.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/img/favicon.ico" sizes="any">
+
+  <!-- Set env class on <html> before first paint so demo.css
+       can theme the page without a flash of the default cream. -->
+  <script>
+    (function () {
+      var host = window.location.hostname.replace(/^www\./, '');
+      var env = !host           ? 'unmatched'   :
+        host === 'neapolitan.page'         ? 'production'  :
+        host === 'staging.neapolitan.page' ? 'staging'     : 'development';
+      document.documentElement.classList.add('env-' + env);
+    }());
+  </script>
+
+  <!-- Per-environment page theming (background, sticky banner) -->
+  <link rel="stylesheet" href="/assets/css/demo.css">
+
+  <!-- Site landing-page fonts (used outside the popup) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       Landing-page tokens — kept in sync with docs/index.html.
+       ============================================================ */
+    :root {
+      --cream: #FAF3E3;
+      --cream-card: #FFF9EC;
+      --vanilla-warm: #F4DAA5;
+      --vanilla-deep: #E8C684;
+      --strawberry: #E8919B;
+      --strawberry-deep: #D67280;
+      --strawberry-label: #B14457;
+      --chocolate: #6B4226;
+      --chocolate-deep: #4A2D1A;
+      --ink: #2B1810;
+      --ink-soft: #5A3C2A;
+      --shadow-soft: 0 1px 2px rgba(43, 24, 16, 0.04), 0 4px 12px rgba(43, 24, 16, 0.06);
+      --shadow-lift: 0 4px 8px rgba(43, 24, 16, 0.08), 0 16px 32px rgba(43, 24, 16, 0.10);
+
+      /* ----- Popup design tokens — cloned from
+         extension/src/shared/design-system.css. Risk noted in
+         CLAUDE.md: this can drift from the extension, but for now
+         that's accepted. ----- */
+      --vanilla-base: #f6e2b3;
+      --strawberry-base: #fdaeae;
+      --chocolate-base: #b49982;
+      --vanilla-light: #faf0d1;
+      --vanilla-dark: #ecd494;
+      --strawberry-light: #fff1f1;
+      --strawberry-dark: #ffb8b8;
+      --chocolate-light: #c5b0a1;
+      --chocolate-dark: #a3877a;
+      --text-primary: #5a4738;
+      --text-light: #ffffff;
+      --env-development-accent: #8d7260;
+      --env-staging-accent: #ff9a9a;
+      --env-production-accent: #e6d090;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 880px; margin: 0 auto; }
+
+    .demo-page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .demo-page-header .eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--strawberry-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .demo-page-header h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .demo-page-header h1 em {
+      font-style: italic;
+      color: var(--strawberry-deep);
+    }
+    .demo-page-header p {
+      color: var(--ink-soft);
+      font-size: 16px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       Toolbar — a thin strip that holds the extension icon.
+       Not a fake browser; just a place for the icon to live so
+       it reads as "an extension button" instead of a random dot.
+       The real address bar is the visitor's actual browser above.
+       ============================================================ */
+    .ext-toolbar-strip {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: 12px 12px 0 0;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+    }
+    .ext-toolbar-strip .hint {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      opacity: 0.75;
+    }
+
+    /* Live-mode toggle — small switch + label. */
+    .live-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 8px;
+      border-radius: 999px;
+      transition: background-color 0.15s;
+    }
+    .live-toggle:hover { background: rgba(43, 24, 16, 0.04); }
+    .live-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .toggle-track {
+      width: 30px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(43, 24, 16, 0.18);
+      position: relative;
+      transition: background-color 0.15s;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      transition: transform 0.18s ease, background-color 0.15s;
+    }
+    .live-toggle input:checked + .toggle-track {
+      background: var(--chocolate);
+    }
+    .live-toggle input:checked + .toggle-track .toggle-thumb {
+      transform: translateX(12px);
+    }
+    .live-toggle input:focus-visible + .toggle-track {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+    .toggle-label { font-weight: 500; color: var(--ink); }
+    .live-toggle input:not(:checked) ~ .toggle-label { color: var(--ink-soft); }
+
+    .ext-button {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .ext-button:hover {
+      background: rgba(43, 24, 16, 0.05);
+      border-color: rgba(43, 24, 16, 0.08);
+    }
+    .ext-button:active { transform: scale(0.96); }
+    .ext-button[aria-expanded="true"] {
+      background: rgba(43, 24, 16, 0.08);
+      border-color: rgba(43, 24, 16, 0.12);
+    }
+
+    /* The environment icon — striped tile with a letter dot.
+       Built in CSS so the popup can re-color it per env. */
+    .ext-icon {
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      background:
+        linear-gradient(180deg,
+          var(--chocolate-base) 0%, var(--chocolate-base) 33.3%,
+          var(--strawberry-base) 33.3%, var(--strawberry-base) 66.6%,
+          var(--vanilla-base) 66.6%, var(--vanilla-base) 100%);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+      position: relative;
+      display: inline-block;
+    }
+    .ext-icon::after {
+      content: attr(data-letter);
+      position: absolute;
+      right: -4px; bottom: -4px;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #000;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .ext-icon[data-env="development"]::after { background: var(--chocolate-base); color: #fff; }
+    .ext-icon[data-env="staging"]::after     { background: var(--strawberry-base); }
+    .ext-icon[data-env="production"]::after  { background: var(--vanilla-base); }
+    .ext-icon[data-env="unmatched"] {
+      filter: grayscale(0.85) opacity(0.65);
+    }
+    .ext-icon[data-env="unmatched"]::after {
+      content: "";
+      background: #aaa;
+    }
+
+    /* Stage area below the strip — colored to match the current
+       env so the user can see the popup theme it as well. */
+    .stage {
+      padding: 36px 28px 44px;
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      box-shadow: var(--shadow-soft);
+      transition: background-color 0.25s;
+      min-height: 220px;
+    }
+    .stage.env-development { background: var(--chocolate-light); }
+    .stage.env-staging     { background: var(--strawberry-light); }
+    .stage.env-production  { background: var(--vanilla-light); }
+    .stage.env-unmatched   { background: #f4f1ec; }
+
+    /* ============================================================
+       Env banner — the "you're on dev/staging" warning strip that
+       real deployments slap at the top of non-prod builds. Hidden
+       on production so visitors see a clean site.
+       ============================================================ */
+    .env-banner {
+      margin: -36px -28px 28px;
+      padding: 8px 16px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--ink);
+      border-bottom: 1px dashed rgba(43, 24, 16, 0.18);
+    }
+    .stage.env-development .env-banner {
+      background: var(--chocolate-dark);
+      color: var(--text-light);
+      border-bottom-color: rgba(0,0,0,0.2);
+    }
+    .stage.env-staging .env-banner {
+      background: var(--strawberry-dark);
+      color: var(--ink);
+    }
+
+    /* ============================================================
+       Mini-hero — a tiny, lo-fi droste of the real landing page.
+       Logo mark + wordmark + eyebrow + headline + CTA, all scaled
+       down. Not pixel-faithful; just enough that visitors recognize
+       the page and see it themed by environment.
+       ============================================================ */
+    .mini-hero {
+      max-width: 620px;
+      margin: 0 auto;
+      color: var(--ink);
+    }
+    .mini-hero-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed rgba(43, 24, 16, 0.15);
+    }
+    .mini-logo-mark {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background:
+        linear-gradient(110deg,
+          var(--chocolate) 0%, var(--chocolate) 33.3%,
+          var(--strawberry) 33.3%, var(--strawberry) 66.6%,
+          var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
+      box-shadow: var(--shadow-soft);
+      flex-shrink: 0;
+    }
+    .mini-wordmark {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .mini-env-tag {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.55);
+      color: var(--ink);
+      border: 1px solid rgba(43, 24, 16, 0.12);
+    }
+
+    .mini-hero-body {
+      text-align: left;
+    }
+    .mini-eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--strawberry-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .mini-headline {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(20px, 2.4vw, 28px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: var(--ink);
+    }
+    .mini-headline em {
+      font-style: italic;
+      color: var(--strawberry-deep);
+    }
+    .mini-lede {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-bottom: 14px;
+      max-width: 480px;
+    }
+    .mini-lede code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(255,255,255,0.6);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .mini-lede strong { color: var(--ink); }
+
+    .mini-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    /* Spans rather than anchors — this is a decorative mini-hero,
+       not a real CTA. The real CTA is the popup. */
+    .mini-btn {
+      display: inline-flex; align-items: center;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--cream);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .mini-link {
+      font-size: 12px;
+      color: var(--ink-soft);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Per-env touches on the mini-hero */
+    .stage.env-development .mini-env-tag { background: var(--chocolate-base); color: var(--text-light); border-color: var(--chocolate-dark); }
+    .stage.env-staging     .mini-env-tag { background: var(--strawberry-base); border-color: var(--strawberry-dark); }
+    .stage.env-production  .mini-env-tag { background: var(--vanilla-base); border-color: var(--vanilla-dark); }
+
+    /* Unmatched fallback block */
+    .stage-unmatched {
+      max-width: 540px;
+      margin: 0 auto;
+      text-align: center;
+      color: var(--ink);
+    }
+    .stage-unmatched .stage-flavor {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+    .stage-unmatched h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+    .stage-unmatched p {
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+    .stage-unmatched code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: rgba(255,255,255,0.6);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       The popup itself — cloned from
+       extension/src/popup/switcher.html / switcher.css / components.css.
+       Scoped under .neap-popup so it doesn't bleed into the landing
+       page's styles. Anchored to the toolbar strip.
+       ============================================================ */
+    .neap-popup {
+      position: absolute;
+      top: calc(100% - 2px);
+      right: 12px;
+      width: 220px;
+      background: var(--vanilla-light);
+      color: var(--text-primary);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Helvetica, Arial, sans-serif;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(43, 24, 16, 0.22),
+                  0 2px 6px rgba(43, 24, 16, 0.12);
+      overflow: hidden;
+      z-index: 50;
+      transform-origin: top right;
+      transform: scale(0.96) translateY(-4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .neap-popup[data-open="true"] {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .neap-popup.env-development { background: var(--chocolate-light); }
+    .neap-popup.env-staging     { background: var(--strawberry-light); }
+    .neap-popup.env-production  { background: var(--vanilla-light); }
+
+    .neap-popup .neapolitan-stripe {
+      display: flex;
+      height: 4px;
+      width: 100%;
+    }
+    .neap-popup .neapolitan-stripe > div { height: 100%; width: 33.33%; }
+    .neap-popup .stripe-vanilla   { background: var(--vanilla-base); }
+    .neap-popup .stripe-strawberry { background: var(--strawberry-base); }
+    .neap-popup .stripe-chocolate { background: var(--chocolate-base); }
+    .neap-popup .neapolitan-stripe-top { opacity: 0.6; }
+    .neap-popup .neapolitan-stripe-bottom {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 8px;
+    }
+
+    .neap-popup .popup-title {
+      margin: 0;
+      padding: 10px 6px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+      border-top: 1px solid white;
+      border-bottom: 1px solid white;
+    }
+    .neap-popup.env-development .popup-title {
+      background: var(--chocolate-base);
+      color: var(--text-light);
+    }
+    .neap-popup.env-staging .popup-title {
+      background: var(--strawberry-base);
+      color: var(--text-primary);
+    }
+    .neap-popup.env-production .popup-title {
+      background: var(--vanilla-base);
+      color: var(--text-primary);
+    }
+    .neap-popup.env-unmatched .popup-title {
+      background: #e6e1da;
+      color: var(--text-primary);
+    }
+
+    .neap-popup ul {
+      list-style: none;
+      padding: 12px 0;
+      margin: 0;
+    }
+    .neap-popup ul li { margin: 0; padding: 0; }
+
+    .neap-popup ul a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      text-decoration: none;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background-color 0.15s ease, transform 0.15s ease;
+      border-radius: 4px;
+      margin: 2px 8px;
+      background: rgba(255,255,255,0.6);
+      border-left: 4px solid transparent;
+      font-size: 13px;
+    }
+    .neap-popup ul a:hover {
+      background: rgba(255,255,255,0.85);
+      transform: translateY(-1px);
+    }
+
+    .neap-popup.env-development ul a.active {
+      background: var(--chocolate-dark);
+      color: var(--text-light);
+      border-left: 4px solid var(--env-development-accent);
+    }
+    .neap-popup.env-staging ul a.active {
+      background: var(--strawberry-dark);
+      border-left: 4px solid var(--env-staging-accent);
+    }
+    .neap-popup.env-production ul a.active {
+      background: var(--vanilla-dark);
+      border-left: 4px solid var(--env-production-accent);
+    }
+
+    .neap-popup .icon-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
+    }
+    .neap-popup .dev-icon-badge     { background: #ffffff; }
+    .neap-popup .staging-icon-badge { background: var(--strawberry-base); }
+    .neap-popup .prod-icon-badge    { background: var(--vanilla-base); }
+    .neap-popup .emoji-icon {
+      font-size: 12px;
+      filter: drop-shadow(0 0 1px rgba(0,0,0,0.6));
+      line-height: 1;
+    }
+
+    .neap-popup .edit-config-link {
+      display: block;
+      text-align: center;
+      font-size: 12px;
+      padding: 5px 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      margin: 10px 0 0;
+      opacity: 0.7;
+      background: transparent !important;
+      border-left: none !important;
+      transform: none !important;
+    }
+    .neap-popup .edit-config-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    /* ============================================================
+       Mobile
+       ============================================================ */
+    @media (max-width: 640px) {
+      body { padding: 24px 12px 60px; }
+      .ext-toolbar-strip .hint { display: none; }
+      .ext-toolbar-strip { justify-content: flex-end; }
+      .neap-popup { right: 8px; }
+      .stage-content h2 { font-size: 20px; }
+    }
+    @media (max-width: 420px) {
+      .toggle-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky environment banner — visible on dev and staging,
+       hidden on production. Populated by JS at boot. -->
+  <div id="pageBanner" class="page-env-banner"></div>
+
+  <div class="wrap">
+
+    <header class="demo-page-header">
+      <span class="eyebrow">Interactive demo</span>
+      <h1>Click the icon. <em>Hop environments.</em></h1>
+      <p>The button on the right is the extension. Click it, pick an environment, and your browser will actually jump to dev, staging, or production at the same path — just like the extension does.</p>
+    </header>
+
+    <!-- Toolbar strip with the extension icon -->
+    <div class="ext-toolbar-strip" id="toolbarStrip">
+      <span class="hint" id="toolbarHint">Try it →</span>
+
+      <!-- Live-mode toggle. Off (default) = clicks swap views in
+           place; on = clicks actually navigate to the target host. -->
+      <label class="live-toggle" title="When on, clicking an environment actually navigates there">
+        <input type="checkbox" id="liveModeToggle">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Really go there</span>
+      </label>
+
+      <button class="ext-button" id="extButton" aria-haspopup="true" aria-expanded="false" aria-label="Open Neapolitan switcher">
+        <span class="ext-icon" id="extIcon" data-env="unmatched" data-letter="?"></span>
+      </button>
+
+      <!-- The popup — anchored under the toolbar strip -->
+      <div class="neap-popup" id="neapPopup" role="dialog" aria-label="Switch environment" data-open="false">
+        <div class="neapolitan-stripe neapolitan-stripe-top">
+          <div class="stripe-chocolate"></div>
+          <div class="stripe-strawberry"></div>
+          <div class="stripe-vanilla"></div>
+        </div>
+        <h2 class="popup-title" id="popupTitle">Production</h2>
+        <div class="neapolitan-stripe neapolitan-stripe-bottom">
+          <div class="stripe-chocolate"></div>
+          <div class="stripe-strawberry"></div>
+          <div class="stripe-vanilla"></div>
+        </div>
+        <ul id="popupLinks"></ul>
+      </div>
+    </div>
+
+    <!-- Stage — droste-style mini version of the landing page,
+         tinted by current environment. Tells the visitor "this is
+         our site, and right now you're seeing the X environment of
+         it." Switches identity (label, accent) when they navigate. -->
+    <div class="stage" id="stage">
+      <!-- Env banner — dev/staging show a "this is not prod" strip
+           the way real deployments often do. Production hides it. -->
+      <div class="env-banner" id="envBanner" hidden></div>
+
+      <div class="mini-hero">
+        <div class="mini-hero-nav">
+          <span class="mini-logo-mark" aria-hidden="true"></span>
+          <span class="mini-wordmark">Neapolitan</span>
+          <span class="mini-env-tag" id="miniEnvTag">Production</span>
+        </div>
+        <div class="mini-hero-body">
+          <span class="mini-eyebrow" id="miniEyebrow">v1.0.1 · Chrome &amp; Safari</span>
+          <h2 class="mini-headline" id="miniHeadline">Same page, <em>every environment,</em><br>one keystroke.</h2>
+          <p class="mini-lede" id="miniLede">You're viewing <code id="stageHost">www.neapolitan.page</code> — the <strong id="miniFlavor">Vanilla</strong> stripe. Click the icon above to hop to a different one.</p>
+          <div class="mini-cta-row">
+            <span class="mini-btn" id="miniCta">Add to Chrome</span>
+            <span class="mini-link" id="miniLink">View source ↗</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unmatched fallback for file:// / no-hostname contexts.
+           The real extension would show this; we keep it for fidelity. -->
+      <div class="stage-unmatched" id="stageUnmatched" hidden>
+        <div class="stage-flavor">Unmatched</div>
+        <h2>Not on a configured host</h2>
+        <p><code id="unmatchedHost">file://</code> isn't a configured environment — but the popup links above still navigate to the real dev / staging / prod sites.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+       Configuration — the three real environments of this site.
+       Order matters: production last so it renders below in the popup.
+       ============================================================ */
+    const ENVIRONMENTS = [
+      {
+        type: 'development',
+        label: 'Development',
+        host: 'development.neapolitan-9ah.pages.dev',
+        emoji: '🍫',
+        flavor: 'Chocolate',
+      },
+      {
+        type: 'staging',
+        label: 'Staging',
+        host: 'staging.neapolitan.page',
+        emoji: '🍓',
+        flavor: 'Strawberry',
+      },
+      {
+        type: 'production',
+        label: 'Production',
+        host: 'www.neapolitan.page',
+        emoji: '🍦',
+        flavor: 'Vanilla',
+      },
+    ];
+
+    const TEXT_INDICATOR = { development: 'D', staging: 'S', production: 'P' };
+    const BADGE_CLASS = {
+      development: 'dev-icon-badge',
+      staging: 'staging-icon-badge',
+      production: 'prod-icon-badge',
+    };
+
+    /* Per-env touches for the mini-hero — keeps the three views
+       visually distinct beyond just the background tint. Production
+       is the clean reference; dev/staging get a banner and a
+       version-string variant the way real deployments often do. */
+    const VIEW_CONTENT = {
+      development: {
+        banner: '🍫  Dev build — not for sharing',
+        eyebrow: 'v1.0.1-dev · build #42',
+        ledeSuffix: " stripe. This is where the work happens — broken things land here first.",
+      },
+      staging: {
+        banner: '🍓  Staging — release candidate',
+        eyebrow: 'v1.0.1-rc · pre-release',
+        ledeSuffix: " stripe. The dress rehearsal — last stop before users see it.",
+      },
+      production: {
+        banner: null,
+        eyebrow: 'v1.0.1 · Chrome &amp; Safari',
+        ledeSuffix: " stripe. Click the icon above to hop to a different one.",
+      },
+    };
+
+    /* ============================================================
+       Environment detection — DEMO version, NOT the extension's.
+       The real extension's matcher (background.js getEnvironmentServer)
+       only matches configured hosts and leaves everything else
+       unmatched. Here we fake it so every viewer sees a "matched"
+       state: prod-host → production, staging-host → staging, any
+       other hostname (Cloudflare preview deploys, localhost, etc.)
+       → development. This is the demo's job: show what the
+       extension does, even when the demo is being viewed on a host
+       the extension wouldn't actually recognize. Only truly
+       hostnameless contexts (file://) fall through to unmatched.
+       ============================================================ */
+    function detectEnvironment() {
+      const host = window.location.hostname.replace(/^www\./, '');
+      if (!host) return null; // file:// or similar — no hostname at all
+
+      if (host === 'neapolitan.page') return ENVIRONMENTS.find(e => e.type === 'production');
+      if (host === 'staging.neapolitan.page') return ENVIRONMENTS.find(e => e.type === 'staging');
+      return ENVIRONMENTS.find(e => e.type === 'development');
+    }
+
+    /* ============================================================
+       URL rewrite — preserves path/search/hash and swaps host,
+       same shape as extension/src/shared/rewrite.js. Divergence:
+       the extension forces http:// so servers can negotiate the
+       upgrade; this demo runs in a web page so we emit https://
+       directly. Saves the visitor a redirect bounce and the
+       "Not Secure" flash during live-mode navigation.
+       ============================================================ */
+    function buildSwitchURL(targetHost) {
+      const u = new URL(window.location.href);
+      return 'https://' + targetHost + u.pathname + u.search + u.hash;
+    }
+
+    /* ============================================================
+       Render — icon, popup, stage. No URL bar to fake — the
+       visitor's real browser address bar is the address bar.
+       ============================================================ */
+    const $ext         = document.getElementById('extButton');
+    const $extIcon     = document.getElementById('extIcon');
+    const $liveMode    = document.getElementById('liveModeToggle');
+    const $popup       = document.getElementById('neapPopup');
+    const $links       = document.getElementById('popupLinks');
+    const $title       = document.getElementById('popupTitle');
+    const $stage       = document.getElementById('stage');
+    const $envBanner   = document.getElementById('envBanner');
+    const $miniHero    = document.querySelector('.mini-hero');
+    const $miniEnvTag  = document.getElementById('miniEnvTag');
+    const $miniEyebrow = document.getElementById('miniEyebrow');
+    const $miniFlavor  = document.getElementById('miniFlavor');
+    const $miniLede    = document.getElementById('miniLede');
+    const $sHost       = document.getElementById('stageHost');
+    const $unmatched   = document.getElementById('stageUnmatched');
+    const $unmHost     = document.getElementById('unmatchedHost');
+    const $hint        = document.getElementById('toolbarHint');
+
+    function render(env) {
+      const envType = env ? env.type : 'unmatched';
+
+      /* --- Toolbar icon --- */
+      $extIcon.dataset.env = envType;
+      $extIcon.dataset.letter = env ? TEXT_INDICATOR[env.type] : '?';
+
+      /* --- Toolbar hint copy --- */
+      $hint.textContent = env
+        ? "You're on " + env.label + " — try switching →"
+        : "Not on a configured host — preview still works ↓";
+
+      /* --- Popup theming --- */
+      $popup.classList.remove('env-development', 'env-staging', 'env-production', 'env-unmatched');
+      $popup.classList.add('env-' + envType);
+      $title.textContent = env ? env.label : 'No matching environment';
+
+      /* --- Popup links --- */
+      $links.innerHTML = '';
+
+      if (!env) {
+        // When the page is loaded off any configured host (file://,
+        // localhost, a preview deployment), still let the visitor
+        // jump into the real environments — render every link as
+        // a fresh navigation to that host's root.
+        for (const target of ENVIRONMENTS) {
+          $links.appendChild(renderLink(target, null));
+        }
+      } else {
+        for (const target of ENVIRONMENTS) {
+          $links.appendChild(renderLink(target, env));
+        }
+
+        // "Edit configuration" — non-functional here, just for fidelity.
+        const editLi = document.createElement('li');
+        const editLink = document.createElement('a');
+        editLink.className = 'edit-config-link';
+        editLink.href = '#';
+        editLink.textContent = 'Edit configuration';
+        editLink.addEventListener('click', (e) => e.preventDefault());
+        editLi.appendChild(editLink);
+        $links.appendChild(editLi);
+      }
+
+      /* --- Stage theming --- */
+      $stage.classList.remove(
+        'env-development', 'env-staging', 'env-production', 'env-unmatched',
+      );
+      $stage.classList.add('env-' + envType);
+
+      if (env) {
+        $miniHero.hidden = false;
+        $unmatched.hidden = true;
+        $miniEnvTag.textContent = env.label;
+        $miniFlavor.textContent = env.flavor;
+
+        const view = VIEW_CONTENT[env.type];
+        // Banner — production hides it; dev/staging show the
+        // "this isn't prod" warning strip many real deployments do.
+        if (view.banner) {
+          $envBanner.hidden = false;
+          $envBanner.textContent = view.banner;
+        } else {
+          $envBanner.hidden = true;
+        }
+        // Eyebrow version string flips per env. innerHTML so the
+        // `&amp;` in production's "Chrome &amp; Safari" decodes.
+        $miniEyebrow.innerHTML = view.eyebrow;
+        // Lede mentions the *fake* env host (env.host), not the
+        // visitor's real one — because in swap-views mode the user
+        // is browsing a simulated tour of all three sites, not
+        // their actual current host.
+        $sHost.textContent = env.host;
+        $miniLede.innerHTML =
+          "You're viewing <code>" + env.host + "</code> — the <strong>" +
+          env.flavor + "</strong>" + view.ledeSuffix;
+      } else {
+        $miniHero.hidden = true;
+        $envBanner.hidden = true;
+        $unmatched.hidden = false;
+        $unmHost.textContent = window.location.hostname || 'file://';
+      }
+    }
+
+    function renderLink(target, currentEnv) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+
+      // Hrefs stay real so right-click → "open in new tab" still
+      // jumps to the live environment. Left-click is intercepted
+      // below: in-place swap by default, real navigation when
+      // "Really go there" is toggled on.
+      const targetUrl = currentEnv
+        ? buildSwitchURL(target.host)
+        : 'https://' + target.host + '/';
+      a.href = targetUrl;
+      a.title = targetUrl;
+
+      const badge = document.createElement('span');
+      badge.className = 'icon-badge ' + BADGE_CLASS[target.type];
+      const emojiSpan = document.createElement('span');
+      emojiSpan.className = 'emoji-icon';
+      emojiSpan.textContent = target.emoji;
+      badge.appendChild(emojiSpan);
+      a.appendChild(badge);
+
+      const name = document.createElement('span');
+      name.textContent = target.label;
+      a.appendChild(name);
+
+      if (currentEnv && target.type === currentEnv.type) a.classList.add('active');
+
+      // Click semantics:
+      //   - Cmd/Ctrl/Shift/middle click → fall through to the real
+      //     href so power-users can pop environments open in new
+      //     tabs (mirrors loadEnvironment() in the extension popup).
+      //   - Plain left click + "Really go there" ON → fall through
+      //     to the real href; the browser navigates and the URL bar
+      //     actually changes. This is the demo demonstrating the
+      //     extension's feature using itself.
+      //   - Plain left click + "Really go there" OFF → preventDefault
+      //     and swap the view in place. Stays on the current page.
+      a.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        if ($liveMode.checked) return; // browser follows the href
+        e.preventDefault();
+        render(target);
+        closePopup();
+      });
+
+      li.appendChild(a);
+      return li;
+    }
+
+    /* ============================================================
+       Popup open/close.
+       ============================================================ */
+    function openPopup() {
+      $popup.dataset.open = 'true';
+      $ext.setAttribute('aria-expanded', 'true');
+    }
+    function closePopup() {
+      $popup.dataset.open = 'false';
+      $ext.setAttribute('aria-expanded', 'false');
+    }
+    function togglePopup() {
+      ($popup.dataset.open === 'true') ? closePopup() : openPopup();
+    }
+
+    $ext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePopup();
+    });
+    document.addEventListener('click', (e) => {
+      if (!$popup.contains(e.target) && !$ext.contains(e.target)) closePopup();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePopup();
+    });
+
+    /* ============================================================
+       Live-mode toggle persistence.
+       ============================================================ */
+    try {
+      $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true';
+    } catch (e) { /* private mode / disabled storage — fine */ }
+    $liveMode.addEventListener('change', () => {
+      try {
+        localStorage.setItem('neap.demo.liveMode', String($liveMode.checked));
+      } catch (e) { /* swallow */ }
+    });
+
+    /* ============================================================
+       Boot.
+       ============================================================ */
+    const _bootEnv = detectEnvironment();
+
+    // Populate the sticky page-level banner for dev / staging.
+    const $pageBanner = document.getElementById('pageBanner');
+    if (_bootEnv && VIEW_CONTENT[_bootEnv.type].banner) {
+      $pageBanner.textContent = VIEW_CONTENT[_bootEnv.type].banner;
+    }
+
+    render(_bootEnv);
+  </script>
+</body>
+</html>
