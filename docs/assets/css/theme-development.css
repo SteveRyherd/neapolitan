@@ -204,8 +204,9 @@ html.env-development .demo-embed-label { color: #E8919B; }
 html.env-development .demo-embed h3    { color: #FAF3E3; }
 
 /* ---- Demo browser chrome wrapper ---- */
+/* Base uses #FFFEFA (near-white); override for dark page to be a half-step lighter than --cream-card (#4A2D1A) */
 html.env-development .demo-browser {
-  background: rgba(0, 0, 0, 0.2);
+  background: #52321E;
 }
 html.env-development .demo-browser-window {
   border-color: rgba(250, 243, 227, 0.12);
@@ -217,10 +218,27 @@ html.env-development .demo-browser .ext-toolbar-strip {
   background: #2A1208;
   border-bottom-color: rgba(250, 243, 227, 0.1);
 }
+/* Keyboard hint bar above the toolbar strip */
+html.env-development .demo-kb-hint {
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom-color: rgba(250, 243, 227, 0.15);
+  color: rgba(250, 243, 227, 0.82);
+}
+html.env-development .demo-kb-hint kbd {
+  background: rgba(250, 243, 227, 0.12);
+  border-color: rgba(250, 243, 227, 0.3);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  color: rgba(250, 243, 227, 0.95);
+}
+html.env-development .demo-kb-hint .kb-label {
+  color: rgba(250, 243, 227, 0.85);
+}
+html.env-development .demo-kb-hint .kb-sep {
+  color: rgba(250, 243, 227, 0.28);
+}
 
 /* ---- Demo stage: development environment ---- */
-/* Base #c5b0a1 is too pale on a dark page. */
-html.env-development .demo-stage.env-development { background: #4a3028; }
+/* Base is now #4a3028 — same value, no override needed. */
 
 /* ---- Stripe row ---- */
 /* --cream flips to dark after palette inversion, making chocolate

@@ -1255,6 +1255,13 @@
       margin-bottom: 32px;
       box-shadow: var(--shadow-soft);
     }
+    /* Extra side breathing room on wide viewports */
+    @media (min-width: 880px) {
+      .demo-embed { margin-left: 80px; margin-right: 80px; }
+    }
+    @media (min-width: 1100px) {
+      .demo-embed { margin-left: 112px; margin-right: 112px; }
+    }
     .demo-embed-header { padding: 28px 28px 22px; }
     .demo-embed-label {
       font-family: 'JetBrains Mono', monospace;
@@ -1270,10 +1277,10 @@
     /* ---- Toolbar strip ---- */
     /* ---- Browser-chrome wrapper: visually groups toolbar + stage ---- */
     .demo-browser {
-      border-top: 1px solid rgba(43, 24, 16, 0.1);
+      border-top: 1px solid rgba(43, 24, 16, 0.08);
       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-      background: rgba(43, 24, 16, 0.04);
-      padding: 20px 24px 24px;
+      background: #FFFEFA; /* a half-step lighter than --cream-card for the "window well" feel */
+      padding: 24px 32px 32px;
     }
 
     /* Inner window frame — the "browser" itself */
@@ -1330,6 +1337,58 @@
     .ext-button:active { transform: scale(0.96); }
     .ext-button[aria-expanded="true"] { background: rgba(43,24,16,0.08); border-color: rgba(43,24,16,0.12); }
 
+    /* Beacon pulse — draws attention to the button before first click */
+    @keyframes beacon-ring {
+      0%   { transform: scale(0.9);  opacity: 0.7; }
+      65%  { transform: scale(1.75); opacity: 0; }
+      100% { transform: scale(1.75); opacity: 0; }
+    }
+    .ext-button.is-pristine::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 12px;
+      border: 2px solid var(--strawberry);
+      animation: beacon-ring 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    /* Keyboard shortcut hint — pointer devices only */
+    .demo-kb-hint {
+      display: none;
+    }
+    @media (hover: hover) {
+      .demo-kb-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: rgba(43, 24, 16, 0.05);
+        border-bottom: 1px solid rgba(43, 24, 16, 0.1);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: rgba(43, 24, 16, 0.72);
+        letter-spacing: 0.04em;
+      }
+      .demo-kb-hint kbd {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 18px; padding: 0 5px;
+        background: var(--cream-card);
+        border: 1px solid rgba(43,24,16,0.3);
+        box-shadow: 0 1px 0 rgba(43,24,16,0.2);
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 600; color: rgba(43,24,16,0.88);
+      }
+      .demo-kb-hint .kb-label {
+        color: rgba(43,24,16,0.72);
+      }
+      .demo-kb-hint .kb-sep {
+        color: rgba(43,24,16,0.28);
+      }
+    }
+
     .ext-icon {
       width: 24px; height: 24px; border-radius: 5px;
       background: linear-gradient(180deg,
@@ -1360,7 +1419,7 @@
       border-top: 1px solid rgba(43, 24, 16, 0.08);
       transition: background-color 0.25s; min-height: 200px;
     }
-    .demo-stage.env-development { background: #c5b0a1; }
+    .demo-stage.env-development { background: #4a3028; }
     .demo-stage.env-staging     { background: #fff1f1; }
     .demo-stage.env-production  { background: #faf0d1; }
     .demo-stage.env-unmatched   { background: #f4f1ec; }
@@ -1609,7 +1668,7 @@
       <!-- Interactive demo — replaces the static GIF. The popup
            is the real extension popup, the stage below re-themes
            per environment. id="demo" anchors the IntersectionObserver
-           so "Really go there" links land back here. -->
+           id="demo" anchors the IntersectionObserver hash tracking. -->
       <div class="demo-embed" id="demo">
         <div class="demo-embed-header">
           <div class="demo-embed-label">Try it — no install needed</div>
@@ -1621,6 +1680,16 @@
         <div class="demo-browser">
           <div class="demo-browser-window">
 
+        <!-- Keyboard shortcut hint bar — pointer devices only (hidden on touch via CSS) -->
+        <div class="demo-kb-hint">
+          <span>Keyboard shortcuts:</span>
+          <kbd>⌥X</kbd><span class="kb-label">dev</span>
+          <span class="kb-sep">·</span>
+          <kbd>⌥S</kbd><span class="kb-label">staging</span>
+          <span class="kb-sep">·</span>
+          <kbd>⌥W</kbd><span class="kb-label">prod</span>
+        </div>
+
         <!-- Toolbar strip: the extension button lives here -->
         <div class="ext-toolbar-strip" id="toolbarStrip">
           <span class="hint" id="toolbarHint">Try it →</span>
@@ -1628,10 +1697,10 @@
           <label class="live-toggle" title="When on, clicking an environment actually navigates there">
             <input type="checkbox" id="liveModeToggle">
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            <span class="toggle-label">Really go there</span>
+            <span class="toggle-label">Live mode</span>
           </label>
 
-          <button class="ext-button" id="extButton"
+          <button class="ext-button is-pristine" id="extButton"
                   aria-haspopup="true" aria-expanded="false"
                   aria-label="Open Neapolitan switcher">
             <span class="ext-icon" id="extIcon" data-env="unmatched" data-letter="?"></span>
@@ -2313,14 +2382,31 @@
     function openPopup()  { $popup.dataset.open = 'true';  $ext.setAttribute('aria-expanded','true'); }
     function closePopup() { $popup.dataset.open = 'false'; $ext.setAttribute('aria-expanded','false'); }
 
-    $ext.addEventListener('click', function (e) { e.stopPropagation(); ($popup.dataset.open === 'true') ? closePopup() : openPopup(); });
+    $ext.addEventListener('click', function (e) {
+      e.stopPropagation();
+      $ext.classList.remove('is-pristine'); // clear beacon on first interaction
+      ($popup.dataset.open === 'true') ? closePopup() : openPopup();
+    });
     document.addEventListener('click', function (e) { if (!$popup.contains(e.target) && !$ext.contains(e.target)) closePopup(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePopup(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closePopup(); return; }
+      // Alt+X → dev, Alt+S → staging, Alt+W → prod (mirrors real extension shortcuts)
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        var envMap = { KeyX: 'development', KeyS: 'staging', KeyW: 'production' };
+        var target = envMap[e.code];
+        if (target) {
+          e.preventDefault();
+          $ext.classList.remove('is-pristine');
+          closePopup();
+          render(target);
+        }
+      }
+    });
 
     // Live-mode toggle persistence
     try { $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true'; } catch (e) {}
-    // If the page was loaded with a hash (e.g. from a "Really go there" link),
-    // the user clearly wants to navigate — turn the toggle on automatically.
+    // If the page was loaded with a hash, the user clearly wants to navigate —
+    // turn live mode on automatically.
     if (window.location.hash) { $liveMode.checked = true; }
     $liveMode.addEventListener('change', function () {
       try { localStorage.setItem('neap.demo.liveMode', String($liveMode.checked)); } catch (e) {}
@@ -2329,8 +2415,7 @@
     // IntersectionObserver: update URL hash as sections scroll into view.
     // Fires when the top of a section enters the top 40% of the viewport
     // (rootMargin clips the bottom 60%), so the hash stays current as the
-    // user reads down the page. "Really go there" links preserve this hash
-    // so users land back near the demo on return.
+    // user reads down the page.
     if ('IntersectionObserver' in window) {
       var trackIds = ['how', 'demo', 'features', 'story', 'faq'];
       var sectionObserver = new IntersectionObserver(function (entries) {
