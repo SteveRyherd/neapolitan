@@ -8,6 +8,35 @@
   <meta name="theme-color" content="#FAF3E3">
   <link rel="canonical" href="https://neapolitan.page/">
 
+  <!-- ============================================================
+       Env detection — runs synchronously before first paint so
+       the per-env theme CSS loads with no FOUC.
+       Sets html.env-<development|staging|production> and injects
+       the matching <link> for the theme stylesheet.
+       ============================================================ -->
+  <script>
+    (function () {
+      var host = window.location.hostname.replace(/^www\./, '');
+      var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+      // On localhost, ?env=staging (etc.) overrides hostname detection so you
+      // can preview any theme without deploying.
+      var paramEnv = isLocal && new URLSearchParams(window.location.search).get('env');
+      var VALID = { development: 1, staging: 1, production: 1 };
+      var env = (paramEnv && VALID[paramEnv]) ? paramEnv :
+        !host                            ? 'unmatched'  :
+        host === 'neapolitan.page'       ? 'production' :
+        host === 'staging.neapolitan.page' ? 'staging'  : 'development';
+      document.documentElement.classList.add('env-' + env);
+      var link = document.createElement('link');
+      link.rel  = 'stylesheet';
+      link.href = '/assets/css/theme-' + env + '.css';
+      document.head.appendChild(link);
+    }());
+  </script>
+
+  <!-- Sticky banner + demo-component shared styles -->
+  <link rel="stylesheet" href="/assets/css/demo.css">
+
   <!-- Favicons -->
   <link rel="icon" href="/assets/img/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
@@ -467,7 +496,7 @@
     /* ============ SCREENSHOTS ============ */
     .screenshots {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 32px;
       align-items: stretch;
     }
@@ -504,10 +533,14 @@
     .screenshot-card picture {
       display: block;
       width: 100%;
+      flex: 1;
+      min-height: 0;
     }
     .screenshot-card img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom;
       border-radius: var(--radius-sm);
       border: 1px solid rgba(43, 24, 16, 0.08);
       display: block;
@@ -1063,6 +1096,49 @@
     }
     .install .small a { color: var(--ink); }
 
+    /* ============ ENV PICKER (localhost only) ============ */
+    #envPicker {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 9000;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      box-shadow: var(--shadow-lift);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    #envPicker:hover { opacity: 1; }
+    #envPicker .ep-label {
+      color: rgba(250, 243, 227, 0.5);
+      text-transform: uppercase;
+      margin-right: 2px;
+    }
+    .ep-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.15s;
+      line-height: 1;
+    }
+    .ep-btn:hover { transform: translateY(-1px); }
+    .ep-btn.ep-dev  { background: var(--chocolate);    color: var(--cream); }
+    .ep-btn.ep-stag { background: var(--strawberry);   color: var(--ink); }
+    .ep-btn.ep-prod { background: var(--vanilla-warm); color: var(--ink); }
+    .ep-btn.ep-active { border-color: #fff; }
+
     /* ============ FOOTER ============ */
     footer {
       padding: 56px 0 40px;
@@ -1168,6 +1244,311 @@
       .install-inner { padding: 40px 24px; }
       .shortcuts { padding: 48px 28px; }
     }
+    /* ============================================================
+       Demo embed wrapper — replaces .demo-reel in the #how section
+       ============================================================ */
+    .demo-embed {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-soft);
+    }
+    /* Extra side breathing room on wide viewports */
+    @media (min-width: 880px) {
+      .demo-embed { margin-left: 80px; margin-right: 80px; }
+    }
+    @media (min-width: 1100px) {
+      .demo-embed { margin-left: 112px; margin-right: 112px; }
+    }
+    .demo-embed-header { padding: 28px 28px 22px; }
+    .demo-embed-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--strawberry-label); margin-bottom: 10px;
+    }
+    .demo-embed h3 {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 26px; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 0;
+    }
+
+    /* ---- Toolbar strip ---- */
+    /* ---- Browser-chrome wrapper: visually groups toolbar + stage ---- */
+    .demo-browser {
+      border-top: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      background: #FFFEFA; /* a half-step lighter than --cream-card for the "window well" feel */
+      padding: 24px 32px 32px;
+    }
+
+    /* Inner window frame — the "browser" itself */
+    .demo-browser-window {
+      border: 1.5px solid rgba(43, 24, 16, 0.14);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-lift);
+    }
+
+    .ext-toolbar-strip {
+      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: #EDEAE3;
+      border-bottom: 1px solid rgba(43, 24, 16, 0.1);
+      position: relative;
+    }
+    .ext-toolbar-strip .hint {
+      flex: 1; font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--ink-soft); opacity: 0.75;
+    }
+    .live-toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink-soft);
+      cursor: pointer; user-select: none;
+      padding: 4px 8px; border-radius: 999px; transition: background-color 0.15s;
+    }
+    .live-toggle:hover { background: rgba(43, 24, 16, 0.04); }
+    .live-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .toggle-track {
+      width: 30px; height: 18px; border-radius: 999px;
+      background: rgba(43, 24, 16, 0.18); position: relative;
+      transition: background-color 0.15s; flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.18s ease;
+    }
+    .live-toggle input:checked + .toggle-track { background: var(--chocolate); }
+    .live-toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(12px); }
+    .live-toggle input:focus-visible + .toggle-track { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .toggle-label { font-weight: 500; color: var(--ink); }
+    .live-toggle input:not(:checked) ~ .toggle-label { color: var(--ink-soft); }
+
+    .ext-button {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: transparent; border: 1px solid transparent; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background-color 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .ext-button:hover { background: rgba(43,24,16,0.05); border-color: rgba(43,24,16,0.08); }
+    .ext-button:active { transform: scale(0.96); }
+    .ext-button[aria-expanded="true"] { background: rgba(43,24,16,0.08); border-color: rgba(43,24,16,0.12); }
+
+    /* Beacon pulse — draws attention to the button before first click */
+    @keyframes beacon-ring {
+      0%   { transform: scale(0.9);  opacity: 0.7; }
+      65%  { transform: scale(1.75); opacity: 0; }
+      100% { transform: scale(1.75); opacity: 0; }
+    }
+    .ext-button.is-pristine::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 12px;
+      border: 2px solid var(--strawberry);
+      animation: beacon-ring 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    /* Keyboard shortcut hint — pointer devices only */
+    .demo-kb-hint {
+      display: none;
+    }
+    @media (hover: hover) {
+      .demo-kb-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: rgba(43, 24, 16, 0.05);
+        border-bottom: 1px solid rgba(43, 24, 16, 0.1);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: rgba(43, 24, 16, 0.72);
+        letter-spacing: 0.04em;
+      }
+      .demo-kb-hint kbd {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 18px; padding: 0 5px;
+        background: var(--cream-card);
+        border: 1px solid rgba(43,24,16,0.3);
+        box-shadow: 0 1px 0 rgba(43,24,16,0.2);
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; font-weight: 600; color: rgba(43,24,16,0.88);
+      }
+      .demo-kb-hint .kb-label {
+        color: rgba(43,24,16,0.72);
+      }
+      .demo-kb-hint .kb-sep {
+        color: rgba(43,24,16,0.28);
+      }
+    }
+
+    .ext-icon {
+      width: 24px; height: 24px; border-radius: 5px;
+      background: linear-gradient(180deg,
+        #b49982 0%, #b49982 33.3%,
+        #fdaeae 33.3%, #fdaeae 66.6%,
+        #f6e2b3 66.6%, #f6e2b3 100%);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+      position: relative; display: inline-block;
+    }
+    .ext-icon::after {
+      content: attr(data-letter);
+      position: absolute; right: -4px; bottom: -4px;
+      width: 15px; height: 15px; border-radius: 50%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 10px; font-weight: 700; color: #000;
+      background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+    }
+    .ext-icon[data-env="development"]::after { background: #b49982; color: #fff; }
+    .ext-icon[data-env="staging"]::after     { background: #fdaeae; }
+    .ext-icon[data-env="production"]::after  { background: #f6e2b3; }
+    .ext-icon[data-env="unmatched"] { filter: grayscale(0.85) opacity(0.65); }
+    .ext-icon[data-env="unmatched"]::after { content: ""; background: #aaa; }
+
+    /* ---- Demo stage (droste mini-hero) ---- */
+    .demo-stage {
+      padding: 36px 28px 44px;
+      border-top: 1px solid rgba(43, 24, 16, 0.08);
+      transition: background-color 0.25s; min-height: 200px;
+    }
+    .demo-stage.env-development { background: #4a3028; }
+    .demo-stage.env-staging     { background: #fff1f1; }
+    .demo-stage.env-production  { background: #faf0d1; }
+    .demo-stage.env-unmatched   { background: #f4f1ec; }
+
+    .stage-env-banner {
+      margin: -36px -28px 28px; padding: 8px 16px;
+      text-align: center; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      font-weight: 500; color: var(--ink);
+      border-bottom: 1px dashed rgba(43, 24, 16, 0.18);
+    }
+    .demo-stage.env-development .stage-env-banner { background: #a3877a; color: #fff; border-bottom-color: rgba(0,0,0,0.2); }
+    .demo-stage.env-staging .stage-env-banner     { background: #ffb8b8; color: var(--ink); }
+
+    .mini-hero { max-width: 620px; margin: 0 auto; color: var(--ink); }
+    .mini-hero-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed rgba(43,24,16,0.15); }
+    .mini-logo-mark { width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; background: linear-gradient(110deg, var(--chocolate) 0%, var(--chocolate) 33.3%, var(--strawberry) 33.3%, var(--strawberry) 66.6%, var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%); box-shadow: var(--shadow-soft); }
+    .mini-wordmark { font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--ink); }
+    .mini-env-tag { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.55); color: var(--ink); border: 1px solid rgba(43,24,16,0.12); }
+    .demo-stage.env-development .mini-env-tag { background: #b49982; color: #fff; border-color: #a3877a; }
+    .demo-stage.env-staging     .mini-env-tag { background: #fdaeae; border-color: #ffb8b8; }
+    .demo-stage.env-production  .mini-env-tag { background: #f6e2b3; border-color: #ecd494; }
+
+    .mini-eyebrow { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; color: var(--strawberry-label); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .mini-headline { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; color: var(--ink); }
+    .mini-headline em { font-style: italic; color: var(--strawberry-deep); }
+    .mini-lede { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; max-width: 480px; }
+    .mini-lede code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: rgba(255,255,255,0.6); padding: 1px 5px; border-radius: 3px; }
+    .mini-cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .mini-btn { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; background: var(--ink); color: var(--cream); font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+    .mini-link { font-size: 12px; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ---- Demo stage: hardcoded colors per simulated environment --------
+       The mini-hero uses CSS variables (--ink, --cream, etc.) which get
+       flipped by the dev theme. These rules lock each simulation to its
+       own correct colors regardless of which page theme is active.       */
+
+    /* Production (vanilla) — always dark ink on light vanilla bg */
+    .demo-stage.env-production .mini-wordmark,
+    .demo-stage.env-production .mini-env-tag,
+    .demo-stage.env-production .mini-headline  { color: #2B1810; }
+    .demo-stage.env-production .mini-lede,
+    .demo-stage.env-production .mini-link      { color: #5A3C2A; }
+    .demo-stage.env-production .mini-lede code { color: #5A3C2A; background: rgba(43,24,16,0.08); }
+    .demo-stage.env-production .mini-btn       { background: #2B1810; color: #FAF3E3; }
+
+    /* Staging (strawberry) — always dark ink on light pink bg */
+    .demo-stage.env-staging .mini-wordmark,
+    .demo-stage.env-staging .mini-env-tag,
+    .demo-stage.env-staging .mini-headline  { color: #2B1810; }
+    .demo-stage.env-staging .mini-lede,
+    .demo-stage.env-staging .mini-link      { color: #5A3C2A; }
+    .demo-stage.env-staging .mini-btn       { background: #2B1810; color: #FAF3E3; }
+
+    /* Development (chocolate) — always light cream on dark bg */
+    .demo-stage.env-development .mini-wordmark,
+    .demo-stage.env-development .mini-env-tag,
+    .demo-stage.env-development .mini-headline  { color: #FAF3E3; }
+    .demo-stage.env-development .mini-lede,
+    .demo-stage.env-development .mini-link      { color: #C5A882; }
+    .demo-stage.env-development .mini-lede code { color: #C5A882; background: rgba(250,243,227,0.12); }
+    .demo-stage.env-development .mini-btn       { background: #FAF3E3; color: #2B1810; }
+
+    .stage-unmatched { max-width: 540px; margin: 0 auto; text-align: center; color: var(--ink); }
+    .stage-unmatched .stage-flavor { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+    .stage-unmatched h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 8px; }
+    .stage-unmatched p { color: var(--ink-soft); font-size: 14px; }
+    .stage-unmatched code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; }
+
+    /* ---- Popup ---- */
+    .neap-popup {
+      position: absolute; top: calc(100% - 2px); right: 12px; width: 220px;
+      background: #faf0d1; color: #5a4738;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(43,24,16,0.22), 0 2px 6px rgba(43,24,16,0.12);
+      overflow: hidden; z-index: 50;
+      transform-origin: top right;
+      transform: scale(0.96) translateY(-4px); opacity: 0; pointer-events: none;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .neap-popup[data-open="true"] { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+    .neap-popup.env-development { background: #c5b0a1; }
+    .neap-popup.env-staging     { background: #fff1f1; }
+    .neap-popup.env-production  { background: #faf0d1; }
+
+    .neap-popup .np-stripe { display: flex; height: 4px; width: 100%; }
+    .neap-popup .np-stripe > div { height: 100%; width: 33.33%; }
+    .np-s-van  { background: #f6e2b3; }
+    .np-s-straw { background: #fdaeae; }
+    .np-s-choc { background: #b49982; }
+    .neap-popup .np-stripe-top { opacity: 0.6; }
+    .neap-popup .np-stripe-bot { box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 8px; }
+
+    .neap-popup .popup-title { margin: 0; padding: 10px 6px; text-align: center; font-weight: 500; font-size: 14px; border-top: 1px solid white; border-bottom: 1px solid white; }
+    .neap-popup.env-development .popup-title { background: #b49982; color: #fff; }
+    .neap-popup.env-staging     .popup-title { background: #fdaeae; color: #5a4738; }
+    .neap-popup.env-production  .popup-title { background: #f6e2b3; color: #5a4738; }
+    .neap-popup.env-unmatched   .popup-title { background: #e6e1da; color: #5a4738; }
+
+    .neap-popup ul { list-style: none; padding: 12px 0; margin: 0; }
+    .neap-popup ul li { margin: 0; padding: 0; }
+    .neap-popup ul a { display: flex; align-items: center; gap: 8px; padding: 8px 16px; text-decoration: none; cursor: pointer; color: #5a4738; transition: background-color 0.15s, transform 0.15s; border-radius: 4px; margin: 2px 8px; background: rgba(255,255,255,0.6); border-left: 4px solid transparent; font-size: 13px; }
+    .neap-popup ul a:hover { background: rgba(255,255,255,0.85); transform: translateY(-1px); }
+    .neap-popup.env-development ul a.active { background: #a3877a; color: #fff; border-left-color: #8d7260; }
+    .neap-popup.env-staging     ul a.active { background: #ffb8b8; border-left-color: #ff9a9a; }
+    .neap-popup.env-production  ul a.active { background: #ecd494; border-left-color: #e6d090; }
+
+    .neap-popup .icon-badge { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.15); flex-shrink: 0; }
+    .neap-popup .dev-icon-badge     { background: #fff; }
+    .neap-popup .staging-icon-badge { background: #fdaeae; }
+    .neap-popup .prod-icon-badge    { background: #f6e2b3; }
+    .neap-popup .emoji-icon { font-size: 12px; filter: drop-shadow(0 0 1px rgba(0,0,0,0.6)); line-height: 1; }
+    .neap-popup .edit-config-link { display: block; text-align: center; font-size: 12px; padding: 5px 10px; color: #5a4738; text-decoration: none; margin: 10px 0 0; opacity: 0.7; background: transparent !important; border-left: none !important; transform: none !important; }
+    .neap-popup .edit-config-link:hover { opacity: 1; text-decoration: underline; }
+
+    /* ---- Easter egg: Konami toast ---- */
+    .konami-toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--ink); color: var(--cream);
+      padding: 14px 24px; border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace; font-size: 14px;
+      box-shadow: var(--shadow-lift); z-index: 9999;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+    }
+    .konami-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     @media (max-width: 480px) {
       .hero h1 { font-size: clamp(36px, 12vw, 50px); }
       /* Shrink the nav lockup on iPhone-sized viewports — the 88px
@@ -1194,6 +1575,11 @@
   </style>
 </head>
 <body>
+
+  <!-- Sticky env banner — shown on dev/staging, hidden on production.
+       Text is populated by JS. Styled via demo.css + theme-*.css. -->
+  <div id="pageBanner" class="page-env-banner"></div>
+
   <div class="wrap">
 
     <!-- ============ NAV ============ -->
@@ -1279,13 +1665,91 @@
       <h2 class="section-title">Three environments. <em>One URL.</em></h2>
       <p class="section-sub">Configure your domains once. From then on, every URL path, query parameter, and hash fragment travels with you when you compare environments — no copy-paste, no losing your place.</p>
 
-      <!-- Animated demo: keystroke → environment swap, looped. -->
-      <div class="demo-reel">
-        <div class="demo-reel-label">Watch it work</div>
-        <h3>One keystroke. Same page. Different environment.</h3>
-        <div class="demo-reel-frame">
-          <img src="/assets/img/demo.gif" alt="Animated demo showing Neapolitan switching the current tab from dev to staging to production at the same URL path with a single keystroke" loading="lazy">
+      <!-- Interactive demo — replaces the static GIF. The popup
+           is the real extension popup, the stage below re-themes
+           per environment. id="demo" anchors the IntersectionObserver
+           id="demo" anchors the IntersectionObserver hash tracking. -->
+      <div class="demo-embed" id="demo">
+        <div class="demo-embed-header">
+          <div class="demo-embed-label">Try it — no install needed</div>
+          <h3>Click the icon. <em style="font-style:italic;color:var(--strawberry-deep)">Hop environments.</em></h3>
         </div>
+
+        <!-- Browser-chrome wrapper: groups the toolbar + stage so they
+             read as a single "browser window" distinct from the card header. -->
+        <div class="demo-browser">
+          <div class="demo-browser-window">
+
+        <!-- Keyboard shortcut hint bar — pointer devices only (hidden on touch via CSS) -->
+        <div class="demo-kb-hint">
+          <span>Keyboard shortcuts:</span>
+          <kbd>⌥X</kbd><span class="kb-label">dev</span>
+          <span class="kb-sep">·</span>
+          <kbd>⌥S</kbd><span class="kb-label">staging</span>
+          <span class="kb-sep">·</span>
+          <kbd>⌥W</kbd><span class="kb-label">prod</span>
+        </div>
+
+        <!-- Toolbar strip: the extension button lives here -->
+        <div class="ext-toolbar-strip" id="toolbarStrip">
+          <span class="hint" id="toolbarHint">Try it →</span>
+
+          <label class="live-toggle" title="When on, clicking an environment actually navigates there">
+            <input type="checkbox" id="liveModeToggle">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Live mode</span>
+          </label>
+
+          <button class="ext-button is-pristine" id="extButton"
+                  aria-haspopup="true" aria-expanded="false"
+                  aria-label="Open Neapolitan switcher">
+            <span class="ext-icon" id="extIcon" data-env="unmatched" data-letter="?"></span>
+          </button>
+
+          <!-- Popup anchored to the toolbar strip -->
+          <div class="neap-popup" id="neapPopup"
+               role="dialog" aria-label="Switch environment" data-open="false">
+            <div class="np-stripe np-stripe-top">
+              <div class="np-s-choc"></div><div class="np-s-straw"></div><div class="np-s-van"></div>
+            </div>
+            <h2 class="popup-title" id="popupTitle">Production</h2>
+            <div class="np-stripe np-stripe-bot">
+              <div class="np-s-choc"></div><div class="np-s-straw"></div><div class="np-s-van"></div>
+            </div>
+            <ul id="popupLinks"></ul>
+          </div>
+        </div>
+
+        <!-- Stage: droste mini-hero that re-themes per env -->
+        <div class="demo-stage" id="demoStage">
+          <div class="stage-env-banner" id="stageBanner" hidden></div>
+
+          <div class="mini-hero" id="miniHero">
+            <div class="mini-hero-nav">
+              <span class="mini-logo-mark" aria-hidden="true"></span>
+              <span class="mini-wordmark">Neapolitan</span>
+              <span class="mini-env-tag" id="miniEnvTag">Production</span>
+            </div>
+            <div class="mini-hero-body">
+              <span class="mini-eyebrow" id="miniEyebrow">v1.0.1 · Chrome &amp; Safari</span>
+              <h2 class="mini-headline" id="miniHeadline">Same page, <em>every environment,</em> one keystroke.</h2>
+              <p class="mini-lede" id="miniLede">You're viewing <code id="stageHost">neapolitan.page</code> — the <strong id="miniFlavor">Vanilla</strong> stripe.</p>
+              <div class="mini-cta-row">
+                <span class="mini-btn">Add to Chrome</span>
+                <span class="mini-link">View source ↗</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage-unmatched" id="stageUnmatched" hidden>
+            <div class="stage-flavor">Unmatched</div>
+            <h2>Not on a configured host</h2>
+            <p><code id="unmatchedHost">file://</code> isn't a configured environment — but the links above still navigate to the real environments.</p>
+          </div>
+        </div>
+
+          </div><!-- /.demo-browser-window -->
+        </div><!-- /.demo-browser -->
       </div>
 
       <div class="screenshots">
@@ -1294,8 +1758,7 @@
           <h3>One click, every project</h3>
           <p>Browse to any configured site, click the icon, pick an environment. The popup shows you exactly where you are and where you can go.</p>
           <picture>
-            <source srcset="/assets/img/popup.webp" type="image/webp">
-            <img src="/assets/img/popup-2x.png" alt="The Neapolitan popup showing development, staging, and production options for the current site" loading="lazy" width="720" height="738">
+            <img src="/assets/img/popup-new.png" alt="The Neapolitan popup showing development, staging, and production options for the current site" loading="lazy" width="1467" height="1136">
           </picture>
         </div>
         <div class="screenshot-card">
@@ -1303,8 +1766,7 @@
           <h3>Set up once. Forget it.</h3>
           <p>Define your projects and their environment URLs. Neapolitan auto-detects which environment you're in based on the current tab.</p>
           <picture>
-            <source srcset="/assets/img/options.webp" type="image/webp">
-            <img src="/assets/img/options-2x.png" alt="The Neapolitan options page showing environment configuration and the four built-in keyboard shortcut schemes" loading="lazy" width="1400" height="1084">
+            <img src="/assets/img/options-new.png" alt="The Neapolitan options page showing environment configuration and the four built-in keyboard shortcut schemes" loading="lazy" width="1024" height="792">
           </picture>
         </div>
       </div>
@@ -1592,8 +2054,98 @@
 
   </div>
 
+  <!-- ============ KONAMI TOAST (easter egg, all envs) ============ -->
+  <div id="konamiToast" class="konami-toast" aria-live="polite"></div>
+
+  <!-- ============ ENV PICKER (localhost only) ============ -->
+  <div id="envPicker" style="display:none"></div>
+
   <!-- ============ SCRIPTS ============ -->
   <script>
+  /* ============================================================
+     1. ENV DETECTION (shared with head script; re-run here for JS)
+     ============================================================ */
+  (function () {
+    var host = window.location.hostname.replace(/^www\./, '');
+    var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    var paramEnv = isLocal && new URLSearchParams(window.location.search).get('env');
+    var VALID = { development: 1, staging: 1, production: 1 };
+    window.__neapEnv = (paramEnv && VALID[paramEnv]) ? paramEnv :
+      !host                              ? 'unmatched'  :
+      host === 'neapolitan.page'         ? 'production' :
+      host === 'staging.neapolitan.page' ? 'staging'    : 'development';
+  }());
+
+  /* ============================================================
+     2. PER-ENV CONTENT — version string, headline, CTAs
+     ============================================================ */
+  (function () {
+    var env = window.__neapEnv;
+
+    var CONTENT = {
+      development: {
+        pageTitle:  'Neapolitan [dev] — Compare environments at the same page',
+        eyebrow:    'v1.0.1-dev · build #42',
+        headline:   ['Same page,', '<em>every environment,</em>', 'one commit closer.'],
+        ctaText:    'File an issue',
+        ctaHref:    'https://github.com/SteveRyherd/neapolitan/issues',
+        navCtaText: 'File an issue',
+        banner:     '🍫  Dev build — not for sharing',
+      },
+      staging: {
+        pageTitle:  'Neapolitan [rc] — Compare environments at the same page',
+        eyebrow:    'v1.0.1-rc · pre-release',
+        headline:   ['Same page,', '<em>every environment,</em>', 'nearly ready.'],
+        ctaText:    'View release notes',
+        ctaHref:    'https://github.com/SteveRyherd/neapolitan/blob/main/CHANGELOG.md',
+        navCtaText: 'Release notes',
+        banner:     '🍓  Staging — release candidate',
+      },
+      production: null, // keep HTML defaults
+    };
+
+    var c = CONTENT[env];
+    if (!c) return; // production: leave everything as-is
+
+    // Page title
+    document.title = c.pageTitle;
+
+    // Sticky page banner
+    var banner = document.getElementById('pageBanner');
+    if (banner && c.banner) banner.textContent = c.banner;
+
+    // Hero eyebrow
+    var eyebrow = document.querySelector('.hero-text .eyebrow');
+    if (eyebrow) eyebrow.textContent = c.eyebrow;
+
+    // Hero h1 — innerHTML so <em> renders
+    var h1 = document.querySelector('.hero h1');
+    if (h1) h1.innerHTML = c.headline.join('<br>');
+
+    // Hero primary CTA
+    var heroCta = document.querySelector('.hero .cta-row .btn-primary');
+    if (heroCta) { heroCta.textContent = c.ctaText; heroCta.href = c.ctaHref; }
+
+    // Nav primary CTA
+    var navCta = document.querySelector('nav .links .btn-primary');
+    if (navCta) { navCta.textContent = c.navCtaText; navCta.href = c.ctaHref; }
+
+    // Install CTA button (bottom of page)
+    var installCta = document.querySelector('.install .btn-primary');
+    if (installCta) { installCta.textContent = c.ctaText; installCta.href = c.ctaHref; }
+
+    // Version eyebrow tooltip — clicking shows fake build metadata on dev/staging
+    if (eyebrow) {
+      eyebrow.style.cursor = 'help';
+      eyebrow.title = env === 'development'
+        ? 'Branch: development · Commit: a3f8c1d · Built: just now'
+        : 'Branch: staging · Tag: v1.0.1-rc.1 · CI: passing';
+    }
+  }());
+
+  /* ============================================================
+     3. MAC DETECTION + URL STACK CYCLING (original index.html JS)
+     ============================================================ */
     (function () {
       // ---- Mac detection: swap "Alt" → ⌥ on macOS ----
       var ua = navigator.userAgent || '';
@@ -1693,6 +2245,308 @@
       // Start
       startAuto();
     })();
+
+  /* ============================================================
+     4. INTERACTIVE DEMO COMPONENT
+     ============================================================ */
+  (function () {
+    var ENVIRONMENTS = [
+      { type: 'development', label: 'Development', host: 'development.neapolitan-9ah.pages.dev', emoji: '🍫', flavor: 'Chocolate' },
+      { type: 'staging',     label: 'Staging',     host: 'staging.neapolitan.page',              emoji: '🍓', flavor: 'Strawberry' },
+      { type: 'production',  label: 'Production',  host: 'www.neapolitan.page',                  emoji: '🍦', flavor: 'Vanilla' },
+    ];
+    var TEXT_INDICATOR = { development: 'D', staging: 'S', production: 'P' };
+    var BADGE_CLASS    = { development: 'dev-icon-badge', staging: 'staging-icon-badge', production: 'prod-icon-badge' };
+    var VIEW_CONTENT   = {
+      development: { banner: '🍫  Dev build — not for sharing', eyebrow: 'v1.0.1-dev · build #42',       ledeSuffix: ' stripe. This is where the work happens.' },
+      staging:     { banner: '🍓  Staging — release candidate', eyebrow: 'v1.0.1-rc · pre-release',      ledeSuffix: ' stripe. The dress rehearsal — last stop before prod.' },
+      production:  { banner: null,                              eyebrow: 'v1.0.1 · Chrome &amp; Safari', ledeSuffix: ' stripe. Click the icon above to hop to a different one.' },
+    };
+
+    // Demo uses the same faked env detection as demo.html —
+    // any hostname → some matched state (for display purposes).
+    function detectDemoEnv() {
+      var host = window.location.hostname.replace(/^www\./, '');
+      if (!host) return null;
+      if (host === 'neapolitan.page') return ENVIRONMENTS[2];           // production
+      if (host === 'staging.neapolitan.page') return ENVIRONMENTS[1];   // staging
+      return ENVIRONMENTS[0];                                            // development
+    }
+
+    function buildSwitchURL(targetHost) {
+      var u = new URL(window.location.href);
+      // Always preserve the #demo hash so the user lands back at the demo
+      return 'https://' + targetHost + u.pathname + u.search + '#demo';
+    }
+
+    var $ext        = document.getElementById('extButton');
+    var $extIcon    = document.getElementById('extIcon');
+    var $liveMode   = document.getElementById('liveModeToggle');
+    var $popup      = document.getElementById('neapPopup');
+    var $links      = document.getElementById('popupLinks');
+    var $title      = document.getElementById('popupTitle');
+    var $stage      = document.getElementById('demoStage');
+    var $stageBanner= document.getElementById('stageBanner');
+    var $miniHero   = document.getElementById('miniHero');
+    var $miniEnvTag = document.getElementById('miniEnvTag');
+    var $miniEyebrow= document.getElementById('miniEyebrow');
+    var $miniFlavor = document.getElementById('miniFlavor');
+    var $miniLede   = document.getElementById('miniLede');
+    var $stageHost  = document.getElementById('stageHost');
+    var $unmatched  = document.getElementById('stageUnmatched');
+    var $unmHost    = document.getElementById('unmatchedHost');
+    var $hint       = document.getElementById('toolbarHint');
+
+    if (!$ext) return; // demo not on this page
+
+    function render(env) {
+      var envType = env ? env.type : 'unmatched';
+      $extIcon.dataset.env    = envType;
+      $extIcon.dataset.letter = env ? TEXT_INDICATOR[env.type] : '?';
+      $hint.textContent = env
+        ? "You're on " + env.label + " — try switching →"
+        : "Not a configured host — preview still works ↓";
+
+      $popup.classList.remove('env-development','env-staging','env-production','env-unmatched');
+      $popup.classList.add('env-' + envType);
+      $title.textContent = env ? env.label : 'No matching environment';
+
+      $links.innerHTML = '';
+      var targets = env ? ENVIRONMENTS : ENVIRONMENTS;
+      for (var i = 0; i < targets.length; i++) {
+        $links.appendChild(renderLink(targets[i], env));
+      }
+      if (env) {
+        var editLi = document.createElement('li');
+        var editA  = document.createElement('a');
+        editA.className = 'edit-config-link';
+        editA.href = '#';
+        editA.textContent = 'Edit configuration';
+        editA.addEventListener('click', function (e) { e.preventDefault(); });
+        editLi.appendChild(editA);
+        $links.appendChild(editLi);
+      }
+
+      $stage.classList.remove('env-development','env-staging','env-production','env-unmatched');
+      $stage.classList.add('env-' + envType);
+
+      if (env) {
+        $miniHero.hidden   = false;
+        $unmatched.hidden  = true;
+        $miniEnvTag.textContent = env.label;
+        $miniFlavor.textContent = env.flavor;
+        var view = VIEW_CONTENT[env.type];
+        if (view.banner) { $stageBanner.hidden = false; $stageBanner.textContent = view.banner; }
+        else               { $stageBanner.hidden = true; }
+        $miniEyebrow.innerHTML = view.eyebrow;
+        $miniLede.innerHTML = "You're viewing <code>" + env.host + "</code> — the <strong>" + env.flavor + "</strong>" + view.ledeSuffix;
+      } else {
+        $miniHero.hidden  = true;
+        $stageBanner.hidden = true;
+        $unmatched.hidden = false;
+        if ($unmHost) $unmHost.textContent = window.location.hostname || 'file://';
+      }
+    }
+
+    function renderLink(target, currentEnv) {
+      var li = document.createElement('li');
+      var a  = document.createElement('a');
+      a.href  = currentEnv ? buildSwitchURL(target.host) : 'https://' + target.host + '/';
+      a.title = a.href;
+
+      var badge = document.createElement('span');
+      badge.className = 'icon-badge ' + BADGE_CLASS[target.type];
+      var emoji = document.createElement('span');
+      emoji.className = 'emoji-icon';
+      emoji.textContent = target.emoji;
+      badge.appendChild(emoji);
+      a.appendChild(badge);
+
+      var name = document.createElement('span');
+      name.textContent = target.label;
+      a.appendChild(name);
+
+      if (currentEnv && target.type === currentEnv.type) a.classList.add('active');
+
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        if ($liveMode.checked) return;
+        e.preventDefault();
+        render(target);
+        closePopup();
+      });
+      li.appendChild(a);
+      return li;
+    }
+
+    function openPopup()  { $popup.dataset.open = 'true';  $ext.setAttribute('aria-expanded','true'); }
+    function closePopup() { $popup.dataset.open = 'false'; $ext.setAttribute('aria-expanded','false'); }
+
+    $ext.addEventListener('click', function (e) {
+      e.stopPropagation();
+      $ext.classList.remove('is-pristine'); // clear beacon on first interaction
+      ($popup.dataset.open === 'true') ? closePopup() : openPopup();
+    });
+    document.addEventListener('click', function (e) { if (!$popup.contains(e.target) && !$ext.contains(e.target)) closePopup(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closePopup(); return; }
+      // Alt+X → dev, Alt+S → staging, Alt+W → prod (mirrors real extension shortcuts)
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        var envMap = { KeyX: 'development', KeyS: 'staging', KeyW: 'production' };
+        var target = envMap[e.code];
+        if (target) {
+          e.preventDefault();
+          $ext.classList.remove('is-pristine');
+          closePopup();
+          render(target);
+        }
+      }
+    });
+
+    // Live-mode toggle persistence
+    try { $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true'; } catch (e) {}
+    // If the page was loaded with a hash, the user clearly wants to navigate —
+    // turn live mode on automatically.
+    if (window.location.hash) { $liveMode.checked = true; }
+    $liveMode.addEventListener('change', function () {
+      try { localStorage.setItem('neap.demo.liveMode', String($liveMode.checked)); } catch (e) {}
+    });
+
+    // IntersectionObserver: update URL hash as sections scroll into view.
+    // Fires when the top of a section enters the top 40% of the viewport
+    // (rootMargin clips the bottom 60%), so the hash stays current as the
+    // user reads down the page.
+    if ('IntersectionObserver' in window) {
+      var trackIds = ['how', 'demo', 'features', 'story', 'faq'];
+      var sectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            try {
+              history.replaceState(null, '', window.location.pathname + '#' + entry.target.id);
+            } catch (e) {}
+          }
+        });
+      }, { rootMargin: '0px 0px -60% 0px', threshold: 0 });
+      trackIds.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+      });
+    }
+
+    render(detectDemoEnv());
+  }());
+
+  /* ============================================================
+     5. EASTER EGGS
+     ============================================================ */
+  (function () {
+    var env = window.__neapEnv || 'production';
+
+    // ---- A. Styled console message on dev / staging ----
+    if (env === 'development') {
+      console.log('%c🍫 Hey — you found the dev branch.', 'color:#C5A882;font-size:15px;font-weight:bold;font-style:italic;');
+      console.log('%cThings here may be half-baked. If you spot something broken, we\'d love a bug report:\nhttps://github.com/SteveRyherd/neapolitan/issues', 'color:#8A6550;font-size:12px;');
+    } else if (env === 'staging') {
+      console.log('%c🍓 You\'re on staging. This is the dress rehearsal.', 'color:#D67280;font-size:15px;font-weight:bold;font-style:italic;');
+      console.log('%cIf you find something that shouldn\'t ship, now\'s your moment:\nhttps://github.com/SteveRyherd/neapolitan/issues', 'color:#A05060;font-size:12px;');
+    }
+
+    // ---- B. Konami code (works on ALL envs — best surprise on prod) ----
+    var KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    var konamiIdx = 0;
+    var konamiMessages = {
+      development: '🍫 Unlimited scoops unlocked. (This was already free.)',
+      staging:     '🍓 You found the pre-release easter egg. Impressive.',
+      production:  '🍦 The secret vanilla layer. You earned it.',
+      unmatched:   '🍨 You found us. Hi.',
+    };
+    var $toast = document.getElementById('konamiToast');
+    document.addEventListener('keydown', function (e) {
+      if (e.key === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) {
+          konamiIdx = 0;
+          if ($toast) {
+            $toast.textContent = konamiMessages[env] || konamiMessages.production;
+            $toast.classList.add('show');
+            setTimeout(function () { $toast.classList.remove('show'); }, 3200);
+          }
+        }
+      } else {
+        konamiIdx = 0;
+      }
+    });
+
+    // ---- C. Logo mark click counter — dev only (5 clicks → hidden message) ----
+    if (env === 'development') {
+      var logoMark = document.querySelector('.logo-mark');
+      var clickCount = 0;
+      var clickTimer = null;
+      if (logoMark) {
+        logoMark.style.cursor = 'pointer';
+        logoMark.addEventListener('click', function () {
+          clickCount++;
+          clearTimeout(clickTimer);
+          if (clickCount >= 5) {
+            clickCount = 0;
+            if ($toast) {
+              $toast.textContent = '🍫🍫🍫 You clicked five times. The bar is yours.';
+              $toast.classList.add('show');
+              setTimeout(function () { $toast.classList.remove('show'); }, 3200);
+            }
+          } else {
+            // Reset if user stops clicking for 1.5s
+            clickTimer = setTimeout(function () { clickCount = 0; }, 1500);
+          }
+        });
+      }
+    }
+
+    // ---- D. Secret source comment (visible to view-source readers) ----
+    // (This is the comment — no JS needed, but logged for discovery.)
+    if (env === 'development') {
+      console.log('%c<!-- 🍫 Hello, view-source explorer. The dev branch is yours to poke at. -->', 'color:#6B4226;font-size:11px;font-family:monospace;');
+    }
+  }());
+
+  /* ============================================================
+     6. ENV PICKER — localhost only
+     A floating widget that lets you preview any env theme
+     by appending ?env=<name> and reloading.
+     ============================================================ */
+  (function () {
+    var host = window.location.hostname;
+    var isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    if (!isLocal) return;
+
+    var picker = document.getElementById('envPicker');
+    if (!picker) return;
+
+    var current = new URLSearchParams(window.location.search).get('env') || 'development';
+
+    var ENVS = [
+      { key: 'development', label: '🍫 Dev',     cls: 'ep-dev'  },
+      { key: 'staging',     label: '🍓 Staging', cls: 'ep-stag' },
+      { key: 'production',  label: '🍦 Prod',    cls: 'ep-prod' },
+    ];
+
+    var html = '<span class="ep-label">Preview:</span>';
+    ENVS.forEach(function (e) {
+      var active = e.key === current ? ' ep-active' : '';
+      html += '<button class="ep-btn ' + e.cls + active + '" data-env="' + e.key + '">' + e.label + '</button>';
+    });
+    picker.innerHTML = html;
+    picker.style.display = 'flex';
+
+    picker.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('.ep-btn');
+      if (!btn) return;
+      var params = new URLSearchParams(window.location.search);
+      params.set('env', btn.dataset.env);
+      window.location.search = params.toString();
+    });
+  }());
+
   </script>
 </body>
 </html>
