@@ -222,16 +222,16 @@ html.env-development .demo-browser .ext-toolbar-strip {
 html.env-development .demo-kb-hint {
   background: rgba(0, 0, 0, 0.15);
   border-bottom-color: rgba(250, 243, 227, 0.15);
-  color: rgba(250, 243, 227, 0.82);
-}
-html.env-development .demo-kb-hint kbd {
-  background: rgba(250, 243, 227, 0.12);
-  border-color: rgba(250, 243, 227, 0.3);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
   color: rgba(250, 243, 227, 0.95);
 }
+html.env-development .demo-kb-hint kbd {
+  background: rgba(250, 243, 227, 0.15);
+  border-color: rgba(250, 243, 227, 0.35);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  color: #FAF3E3;
+}
 html.env-development .demo-kb-hint .kb-label {
-  color: rgba(250, 243, 227, 0.85);
+  color: rgb(255 191 164 / 72%);
 }
 html.env-development .demo-kb-hint .kb-sep {
   color: rgba(250, 243, 227, 0.28);
