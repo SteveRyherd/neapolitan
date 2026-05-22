@@ -1,0 +1,204 @@
+/* ============================================================
+   theme-development.css — full dark chocolate immersion.
+
+   html.env-development is set on <html> by an inline <head>
+   script before first paint, so there's no FOUC.
+
+   Strategy: flip the two core palette variables (--cream ↔ dark
+   chocolate, --ink ↔ cream) so the variable-driven styles cascade
+   automatically. Then manually fix the places that break:
+   — .shortcuts (already ink-dark; re-darken it after the flip)
+   — wordmark images (black PNGs; invert to white)
+   — hardcoded rgba() borders (flip to light-on-dark)
+   — .btn-primary hover (would dissolve into the bg after the flip)
+   — url-bar env-tag visibility
+   ============================================================ */
+
+/* ---- Core palette flip ---- */
+html.env-development {
+  --cream:      #3D2010;
+  --cream-card: #4A2D1A;
+  --ink:        #FAF3E3;
+  --ink-soft:   #C5A882;
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.28), 0 4px 12px rgba(0,0,0,0.38);
+  --shadow-lift: 0 4px 8px rgba(0,0,0,0.35), 0 16px 32px rgba(0,0,0,0.48);
+}
+
+/* ---- Body ---- */
+html.env-development body {
+  background: #3D2010;
+  color: #FAF3E3;
+  padding-top: 72px; /* room for sticky banner (see demo.css) */
+}
+
+/* Tweak grain texture for dark bg — lighter turbulence, more opacity */
+html.env-development body::before {
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.05 0 0 0 0 0.01 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.9;
+}
+
+/* ---- Wordmark images (black PNG → invert to cream) ---- */
+html.env-development .logo-wordmark,
+html.env-development .install-wordmark {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+/* ---- Sticky environment banner ---- */
+html.env-development .page-env-banner {
+  display: block;
+  background: #2A1208;
+  color: #F4DAA5;
+  border-bottom: 1px solid rgba(244, 218, 165, 0.18);
+}
+
+/* ---- Nav ---- */
+html.env-development nav .links a:not(.btn):hover {
+  color: #FAF3E3;
+}
+
+/* ---- Buttons ---- */
+/* btn-primary: after palette flip it becomes cream-bg/dark-text —
+   that reads fine. Fix the hover so it doesn't melt into the bg. */
+html.env-development .btn-primary:hover {
+  background: #E8C684; /* vanilla-warm */
+  color: #2B1810;
+}
+/* btn-secondary border is now cream — looks right on dark */
+html.env-development .btn-secondary {
+  border-color: rgba(250, 243, 227, 0.6);
+}
+html.env-development .btn-secondary:hover {
+  background: rgba(250, 243, 227, 0.12);
+  color: #FAF3E3;
+  border-color: rgba(250, 243, 227, 0.6);
+}
+
+/* ---- Hero ---- */
+html.env-development .hero .meta {
+  color: #A08060;
+}
+html.env-development .hero .meta .dot {
+  background: #C5A882;
+}
+html.env-development .hero .cta-row .github-link {
+  color: #A08060;
+}
+html.env-development .hero .cta-row .github-link:hover {
+  color: #FAF3E3;
+  border-bottom-color: #FAF3E3;
+}
+
+/* ---- URL stack bars ---- */
+/* Borders: flip hardcoded rgba to light-on-dark */
+html.env-development .url-bar {
+  border-color: rgba(250, 243, 227, 0.1);
+}
+html.env-development .url-bar.active {
+  border-color: var(--strawberry);
+}
+/* env-tag: chocolate tag nearly invisible on dark bg — boost contrast */
+html.env-development .url-bar.dev .env-tag {
+  background: rgba(107, 66, 38, 0.45);
+  color: #D4B896;
+}
+/* prod tag: vanilla bg with cream text (--ink after flip) — readable */
+html.env-development .url-bar.prod .env-tag {
+  background: rgba(232, 198, 132, 0.3);
+  color: #FAF3E3;
+}
+
+/* ---- Section eyebrows ---- */
+/* --strawberry-label is dark rose (#B14457) — fine on cream, low
+   contrast on dark. Use the lighter strawberry instead. */
+html.env-development .section-eyebrow,
+html.env-development .hero-text .eyebrow,
+html.env-development .demo-reel-label,
+html.env-development .screenshot-card .label {
+  color: #E8919B;
+}
+
+/* ---- Cards with hardcoded borders ---- */
+html.env-development .screenshot-card,
+html.env-development .feature,
+html.env-development .workflow,
+html.env-development .faq details,
+html.env-development .story-block,
+html.env-development .demo-reel,
+html.env-development .demo-embed {
+  border-color: rgba(250, 243, 227, 0.1);
+}
+
+/* ---- Workflow kbd ---- */
+html.env-development .workflow kbd {
+  background: #2A1208;
+  border-color: rgba(250, 243, 227, 0.15);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  color: #FAF3E3;
+}
+
+/* ---- Shortcuts section ---- */
+/* .shortcuts uses `background: var(--ink)` which after the flip
+   becomes cream — re-darken it. Also fix all the internal colors
+   that relied on the original ink-dark background. */
+html.env-development .shortcuts {
+  background: #2A1208;
+}
+html.env-development .shortcuts h2,
+html.env-development .shortcuts .sub { color: #FAF3E3; }
+html.env-development .shortcuts .sub { color: rgba(250, 243, 227, 0.7); }
+html.env-development .shortcuts kbd {
+  background: #FAF3E3;
+  color: #2B1810;
+}
+html.env-development .setup-note {
+  background: rgba(232, 145, 155, 0.08);
+  border-color: rgba(232, 145, 155, 0.28);
+  color: rgba(250, 243, 227, 0.88);
+}
+html.env-development .scheme-tab {
+  background: rgba(250, 243, 227, 0.06);
+  border-color: rgba(250, 243, 227, 0.12);
+  color: rgba(250, 243, 227, 0.7);
+}
+html.env-development .scheme-tab:hover {
+  background: rgba(250, 243, 227, 0.1);
+  color: #FAF3E3;
+}
+html.env-development .scheme-slide {
+  background: rgba(250, 243, 227, 0.04);
+  border-color: rgba(250, 243, 227, 0.1);
+}
+
+/* ---- FAQ ---- */
+html.env-development .faq summary { color: #FAF3E3; }
+html.env-development .faq .faq-body { color: #C5A882; }
+html.env-development .faq .faq-body code {
+  background: rgba(250, 243, 227, 0.08);
+  color: #E8919B;
+}
+html.env-development .faq .faq-body a { color: #E8919B; }
+
+/* ---- Install CTA ---- */
+html.env-development .install-inner {
+  background: #4A2D1A;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.55);
+}
+html.env-development .install h2 { color: #FAF3E3; }
+html.env-development .install p  { color: #C5A882; }
+html.env-development .install .small     { color: #A08060; }
+html.env-development .install .small a   { color: #C5A882; }
+
+/* ---- Footer ---- */
+html.env-development footer {
+  border-top-color: rgba(250, 243, 227, 0.12);
+}
+html.env-development footer .foot-links a { color: #A08060; }
+html.env-development footer .foot-links a:hover { color: #FAF3E3; }
+
+/* ---- Story section ---- */
+html.env-development .story-text a { color: #E8919B; }
+
+/* ---- Demo embed (interactive demo component inside the page) ---- */
+html.env-development .demo-embed-label { color: #E8919B; }
+html.env-development .demo-embed h3    { color: #FAF3E3; }

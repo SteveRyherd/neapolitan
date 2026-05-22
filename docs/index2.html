@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neapolitan — Compare environments at the same page, in a keystroke</title>
+  <meta name="description" content="A browser extension that jumps between development, staging, and production at the same path — instantly. Compare environments side-by-side without retyping URLs.">
+  <meta name="theme-color" content="#FAF3E3">
+  <link rel="canonical" href="https://neapolitan.page/">
+
+  <!-- ============================================================
+       Env detection — runs synchronously before first paint so
+       the per-env theme CSS loads with no FOUC.
+       Sets html.env-<development|staging|production> and injects
+       the matching <link> for the theme stylesheet.
+       ============================================================ -->
+  <script>
+    (function () {
+      var host = window.location.hostname.replace(/^www\./, '');
+      var env = !host                            ? 'unmatched'  :
+        host === 'neapolitan.page'               ? 'production' :
+        host === 'staging.neapolitan.page'       ? 'staging'    : 'development';
+      document.documentElement.classList.add('env-' + env);
+      var link = document.createElement('link');
+      link.rel  = 'stylesheet';
+      link.href = '/assets/css/theme-' + env + '.css';
+      document.head.appendChild(link);
+    }());
+  </script>
+
+  <!-- Sticky banner + demo-component shared styles -->
+  <link rel="stylesheet" href="/assets/css/demo.css">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/assets/img/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Neapolitan — Compare environments at the same page, in a keystroke">
+  <meta property="og:description" content="Compare any page across dev, staging, and production in a single keystroke. Path, query, and hash come with you.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://neapolitan.page/">
+  <meta property="og:image" content="https://neapolitan.page/assets/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Neapolitan — Compare environments at the same page, in a keystroke">
+  <meta name="twitter:description" content="Compare any page across dev, staging, and production in a single keystroke.">
+  <meta name="twitter:image" content="https://neapolitan.page/assets/img/og-card.png">
+
+  <!-- Schema.org JSON-LD: SoftwareApplication + Person (links author back to steveryherd.com) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Neapolitan Domain Switcher",
+    "operatingSystem": "Chrome, Edge, Brave, Arc, Safari",
+    "applicationCategory": "DeveloperApplication",
+    "softwareVersion": "1.0.1",
+    "url": "https://neapolitan.page/",
+    "downloadUrl": "https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": {
+      "@type": "Person",
+      "name": "Steve Ryherd",
+      "url": "https://steveryherd.com"
+    },
+    "license": "https://github.com/SteveRyherd/neapolitan/blob/main/LICENSE"
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Neapolitan brand palette */
+      --cream: #FAF3E3;
+      --cream-card: #FFF9EC;
+      --vanilla-warm: #F4DAA5;
+      --vanilla-deep: #E8C684;
+      --strawberry: #E8919B;
+      --strawberry-deep: #D67280;
+      /* Label-safe rose — darker for small mono eyebrows so they clear
+         WCAG AA (4.5:1) on cream. Keep --strawberry-deep for large display
+         italics where 3:1 is sufficient. */
+      --strawberry-label: #B14457;
+      --chocolate: #6B4226;
+      --chocolate-deep: #4A2D1A;
+      --ink: #2B1810;
+      --ink-soft: #5A3C2A;
+      --shadow-soft: 0 1px 2px rgba(43, 24, 16, 0.04), 0 4px 12px rgba(43, 24, 16, 0.06);
+      --shadow-lift: 0 4px 8px rgba(43, 24, 16, 0.08), 0 16px 32px rgba(43, 24, 16, 0.10);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    /* Decorative grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.22 0 0 0 0 0.10 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 28px;
+      position: relative;
+      z-index: 2;
+    }
+    a { color: inherit; }
+
+    /* ============ NAV ============ */
+    nav {
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      line-height: 1;
+    }
+    .logo-mark {
+      align-self: center;
+    }
+    .logo-wordmark {
+      display: block;
+      height: 88px;
+      width: auto;
+      /* Nudge the wordmark down to optically center against the box —
+         the script's tall ascenders make a strict-center alignment
+         read as top-heavy. */
+      position: relative;
+      top: 3px;
+    }
+    .logo-mark {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      /* Tilted stripes (110deg) give the mark a slight forward lean —
+         a hint of motion, like speed lines on the cone. */
+      background:
+        linear-gradient(110deg,
+          var(--chocolate) 0%, var(--chocolate) 33.3%,
+          var(--strawberry) 33.3%, var(--strawberry) 66.6%,
+          var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
+      box-shadow: var(--shadow-soft);
+      flex-shrink: 0;
+    }
+    nav .links {
+      display: flex; align-items: center; gap: 28px;
+      font-size: 15px;
+    }
+    nav .links a:not(.btn) {
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    nav .links a:not(.btn):hover { color: var(--ink); }
+
+    /* ============ BUTTONS ============ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--cream);
+    }
+    .btn-primary:hover {
+      background: var(--chocolate-deep);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lift);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
+    .btn-secondary:hover { background: var(--ink); color: var(--cream); }
+
+    /* Bigger CTA buttons used in hero + install */
+    .btn-lg {
+      padding: 16px 28px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding: 56px 0 80px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .hero-text .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--strawberry-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(44px, 6vw, 78px);
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--strawberry-deep);
+    }
+    .hero .lede {
+      font-size: 19px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      max-width: 520px;
+      margin-bottom: 36px;
+    }
+    .hero .cta-row {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      align-items: center;
+    }
+    .hero .cta-row .github-link {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 8px 4px;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .hero .cta-row .github-link:hover {
+      color: var(--ink);
+      border-bottom-color: var(--ink);
+    }
+    .hero .meta {
+      margin-top: 28px;
+      display: flex; align-items: center; gap: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .hero .meta .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--chocolate);
+    }
+
+    /* Hero visual: layered URL stack */
+    .hero-visual { position: relative; }
+    .url-stack {
+      display: flex; flex-direction: column;
+      gap: 14px;
+      transform: rotate(-2deg);
+    }
+    .url-bar {
+      background: var(--cream-card);
+      border: 1.5px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 16px 88px 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      transition: transform 0.3s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .url-bar:hover { transform: translateX(4px); }
+    .url-bar .swatch {
+      width: 10px; height: 32px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .url-bar.dev .swatch { background: var(--chocolate); }
+    .url-bar.staging .swatch { background: var(--strawberry); }
+    .url-bar.prod .swatch { background: var(--vanilla-deep); }
+    .url-bar .env-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .url-bar.dev .env-tag { background: rgba(107, 66, 38, 0.12); color: var(--chocolate); }
+    .url-bar.staging .env-tag { background: rgba(214, 114, 128, 0.18); color: var(--strawberry-deep); }
+    .url-bar.prod .env-tag { background: rgba(232, 198, 132, 0.35); color: var(--ink); }
+    .url-bar .url {
+      color: var(--ink);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .url-bar .url .domain { font-weight: 600; }
+    .url-bar .url .path { color: var(--ink-soft); }
+    .url-bar.active {
+      border-color: var(--strawberry);
+      box-shadow: 0 0 0 4px rgba(232, 145, 155, 0.18), var(--shadow-lift);
+    }
+    .swap-indicator {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 6px rgba(43, 24, 16, 0.25);
+      white-space: nowrap;
+      transition: opacity 0.3s ease;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .swap-indicator .alt-key { font-weight: 600; }
+
+    /* ============ STRIPE SECTION (the three flavors) ============ */
+    .stripe-row {
+      margin: 100px 0 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      box-shadow: var(--shadow-lift);
+    }
+    .stripe {
+      padding: 48px 36px 44px;
+      position: relative;
+      min-height: 240px;
+    }
+    .stripe.choc { background: var(--chocolate); color: var(--cream); }
+    .stripe.straw { background: var(--strawberry); color: var(--ink); }
+    .stripe.van { background: var(--vanilla-warm); color: var(--ink); }
+    .stripe .flavor {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 15px;
+      opacity: 0.75;
+      margin-bottom: 6px;
+    }
+    .stripe h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 38px;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .stripe p {
+      font-size: 15px;
+      line-height: 1.5;
+      opacity: 0.85;
+      max-width: 260px;
+    }
+    .stripe .stripe-key {
+      position: absolute;
+      bottom: 24px; right: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      opacity: 0.6;
+    }
+
+    /* ============ SECTIONS ============ */
+    section.section { padding: 120px 0; }
+    .section-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--strawberry-label);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(34px, 4.5vw, 54px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+    .section-title em { font-style: italic; color: var(--strawberry-deep); font-weight: 500; }
+    .section-sub {
+      font-size: 18px;
+      color: var(--ink-soft);
+      max-width: 600px;
+      margin-bottom: 56px;
+    }
+
+    /* ============ DEMO REEL (animated GIF, full width) ============ */
+    .demo-reel {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-soft);
+    }
+    .demo-reel-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--strawberry-label);
+      margin-bottom: 10px;
+    }
+    .demo-reel h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 22px;
+    }
+    .demo-reel-frame {
+      width: 100%;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      background: var(--ink);
+      display: block;
+    }
+    .demo-reel-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ============ SCREENSHOTS ============ */
+    .screenshots {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      align-items: stretch;
+    }
+    .screenshot-card {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+    }
+    .screenshot-card .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--strawberry-label);
+      margin-bottom: 10px;
+    }
+    .screenshot-card h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .screenshot-card p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .screenshot-card picture {
+      display: block;
+      width: 100%;
+    }
+    .screenshot-card img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      display: block;
+    }
+
+    /* ============ WORKFLOWS / IN THE WILD ============ */
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .workflow {
+      padding: 34px 30px 32px;
+      border-radius: var(--radius-md);
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-left-width: 5px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .workflow:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lift);
+    }
+    .workflow.w-choc { border-left-color: var(--chocolate); }
+    .workflow.w-straw { border-left-color: var(--strawberry); }
+    .workflow.w-van { border-left-color: var(--vanilla-deep); }
+    .workflow .scenario {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 21px;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .workflow p {
+      font-size: 15px;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+    .workflow kbd {
+      min-width: 26px;
+      height: 24px;
+      padding: 0 7px;
+      font-size: 11px;
+      border-radius: 5px;
+      background: var(--cream);
+      border: 1px solid rgba(43, 24, 16, 0.12);
+      box-shadow: 0 1px 0 rgba(43, 24, 16, 0.12);
+      margin: 0 1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* ============ KEYBOARD SHORTCUTS (DARK SECTION) ============ */
+    .shortcuts {
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: var(--radius-lg);
+      padding: 72px 60px;
+      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shortcuts::after {
+      content: '';
+      position: absolute;
+      right: -120px; top: -120px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, var(--strawberry) 0%, transparent 70%);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+    .shortcuts .section-eyebrow { color: var(--strawberry); }
+    .shortcuts h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4vw, 48px);
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+      color: var(--cream);
+    }
+    .shortcuts h2 em { color: var(--strawberry); font-style: italic; }
+    .shortcuts .sub {
+      color: rgba(250, 243, 227, 0.7);
+      font-size: 17px;
+      margin-bottom: 36px;
+      max-width: 620px;
+    }
+    .shortcuts .sub em { color: var(--cream); font-style: italic; }
+
+    /* Scheme carousel */
+    .scheme-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 2;
+    }
+    .scheme-tab {
+      background: rgba(250, 243, 227, 0.06);
+      border: 1px solid rgba(250, 243, 227, 0.12);
+      color: rgba(250, 243, 227, 0.7);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .scheme-tab:hover {
+      background: rgba(250, 243, 227, 0.1);
+      color: var(--cream);
+    }
+    .scheme-tab.active {
+      background: var(--strawberry);
+      color: var(--ink);
+      border-color: var(--strawberry);
+    }
+    .scheme-tab .scheme-tab-num {
+      opacity: 0.6;
+      margin-right: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .scheme-tab.active .scheme-tab-num { opacity: 0.8; }
+
+    .scheme-stage {
+      position: relative;
+      min-height: 320px;
+    }
+    .scheme-slide {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      align-items: center;
+      background: rgba(250, 243, 227, 0.04);
+      border: 1px solid rgba(250, 243, 227, 0.1);
+      border-radius: var(--radius-md);
+      padding: 36px 40px;
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+      inset: 0;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      transform: translateY(8px);
+    }
+    .scheme-slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      position: relative;
+    }
+
+    .scheme-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+    }
+    .scheme-image img {
+      max-width: 100%;
+      max-height: 260px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      /* Frame the black canvas so it reads as a deliberate "card"
+         on the ink section, not a stray rectangle. */
+      border-radius: 18px;
+      border: 1px solid rgba(250, 243, 227, 0.08);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.35),
+        0 18px 36px rgba(0, 0, 0, 0.28);
+    }
+    .scheme-body .scheme-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--strawberry);
+      margin-bottom: 12px;
+    }
+    .scheme-body .scheme-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 30px;
+      letter-spacing: -0.01em;
+      color: var(--cream);
+      margin-bottom: 10px;
+    }
+    .scheme-body .scheme-why {
+      color: rgba(250, 243, 227, 0.8);
+      font-size: 16px;
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+    .scheme-body .scheme-why em { color: var(--cream); font-style: italic; }
+
+    .scheme-keys {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .scheme-keys .key-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Vertical stack of shortcuts (used by the "Classic" / Stack scheme) */
+    .scheme-keys.scheme-keys-vertical {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    /* Two clusters separated by a "reach" gap (used by Banana Split) */
+    .scheme-keys.scheme-keys-split {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .scheme-keys.scheme-keys-split .key-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .scheme-keys.scheme-keys-split .key-stretch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(250, 243, 227, 0.45);
+      padding: 0 14px;
+      margin: 0 6px;
+      white-space: nowrap;
+      position: relative;
+    }
+    .scheme-keys.scheme-keys-split .key-stretch::before,
+    .scheme-keys.scheme-keys-split .key-stretch::after {
+      content: '';
+      flex: 1 0 14px;
+      height: 1px;
+      background-image: linear-gradient(to right, rgba(250, 243, 227, 0.3) 50%, transparent 50%);
+      background-size: 6px 1px;
+      background-repeat: repeat-x;
+      margin: 0 8px;
+    }
+    .scheme-keys .key-line .env-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 999px;
+      margin-right: 10px;
+      line-height: 1;
+      min-width: 64px;
+      text-align: center;
+      display: inline-block;
+    }
+    .scheme-keys .key-line .env-label.dev {
+      background: var(--chocolate);
+      color: var(--cream);
+      border: 1px solid rgba(250, 243, 227, 0.18);
+    }
+    .scheme-keys .key-line .env-label.staging {
+      background: var(--strawberry);
+      color: var(--ink);
+    }
+    .scheme-keys .key-line .env-label.prod {
+      background: var(--vanilla-warm);
+      color: var(--ink);
+    }
+
+    .shortcuts kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 38px;
+      padding: 0 12px;
+      background: var(--cream);
+      color: var(--ink);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25), inset 0 -2px 0 rgba(43, 24, 16, 0.15);
+    }
+    .key-plus {
+      color: rgba(250, 243, 227, 0.5);
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0 2px;
+    }
+
+    .setup-note {
+      margin: 0 0 36px;
+      padding: 22px 26px;
+      background: rgba(232, 145, 155, 0.08);
+      border: 1px solid rgba(232, 145, 155, 0.28);
+      border-left: 4px solid var(--strawberry);
+      border-radius: var(--radius-md);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      color: rgba(250, 243, 227, 0.88);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .setup-note strong { color: var(--cream); font-weight: 600; }
+    .setup-note code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: rgba(250, 243, 227, 0.1);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: var(--strawberry);
+    }
+    .setup-icon {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--strawberry);
+      color: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1;
+    }
+    @media (max-width: 720px) {
+      .scheme-slide { grid-template-columns: 1fr; gap: 24px; padding: 28px 24px; }
+      .scheme-image { min-height: 180px; }
+      .scheme-image img { max-height: 180px; }
+      .scheme-stage { min-height: 540px; }
+    }
+
+    /* ============ FEATURE GRID ============ */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feature {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      padding: 28px 28px 32px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lift);
+    }
+    .feature .icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+    .feature.f-choc .icon { background: var(--chocolate); color: var(--cream); }
+    .feature.f-straw .icon { background: var(--strawberry); color: var(--ink); }
+    .feature.f-van .icon { background: var(--vanilla-warm); color: var(--ink); }
+    .feature h4 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .feature p {
+      font-size: 15px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    /* ============ STORY ============ */
+    .story-block {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 64px 56px;
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .story-stat {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: clamp(80px, 11vw, 140px);
+      line-height: 1;
+      color: var(--ink);
+      letter-spacing: -0.04em;
+    }
+    .story-stat .yr {
+      font-size: 0.36em;
+      color: var(--strawberry-deep);
+      font-style: italic;
+      font-weight: 400;
+      margin-left: 0.05em;
+    }
+    .story-stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-soft);
+      margin-top: 18px;
+    }
+    .story-text p { font-size: 17px; color: var(--ink-soft); margin-bottom: 1em; line-height: 1.6; }
+    .story-text p:last-child { margin-bottom: 0; }
+    .story-text a { color: var(--strawberry-label); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ============ FAQ ============ */
+    .faq details {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq details[open] { box-shadow: var(--shadow-soft); }
+    .faq summary {
+      padding: 22px 26px;
+      cursor: pointer;
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 19px;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      color: var(--ink);
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+      content: "+";
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 22px;
+      color: var(--strawberry-deep);
+      transition: transform 0.2s ease;
+    }
+    .faq details[open] summary::after { content: "–"; }
+    .faq .faq-body {
+      padding: 0 26px 22px;
+      color: var(--ink-soft);
+      font-size: 15.5px;
+      line-height: 1.6;
+    }
+    .faq .faq-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: rgba(43, 24, 16, 0.06);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .faq .faq-body a { color: var(--strawberry-deep); }
+
+    /* ============ INSTALL CTA ============ */
+    .install {
+      background:
+        linear-gradient(rgba(43, 24, 16, 0.04), rgba(43, 24, 16, 0.04)),
+        url('/assets/img/wallpaper.jpg') center/cover no-repeat;
+      border-radius: var(--radius-lg);
+      padding: 80px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .install-inner {
+      background: var(--cream-card);
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 56px 40px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 8px rgba(43, 24, 16, 0.10), 0 24px 48px rgba(43, 24, 16, 0.18);
+      position: relative;
+    }
+    .install-wordmark {
+      display: block;
+      width: clamp(220px, 36vw, 320px);
+      height: auto;
+      margin: 0 auto 28px;
+    }
+    /* Award-ribbon "Best in Show" sticker — anchored to the cream
+       card with translate(-50%, -50%) so it straddles the top-left
+       corner. Both `top` and `left` are viewport-responsive: `left`
+       shrinks (50px on phones → 10px on desktop) so the ribbon hugs
+       the corner more tightly on wide screens, while `top` grows
+       (20px on phones → 40px on desktop) so it doesn't crowd the
+       wordmark on smaller layouts. pointer-events:none so it can't
+       steal clicks. */
+    .install-award {
+      position: absolute;
+      top: clamp(20px, 5vw, 40px);
+      left: clamp(10px, 76px - 4vw, 50px);
+      width: clamp(120px, 13vw, 170px);
+      height: auto;
+      transform: translate(-50%, -50%) rotate(-10deg);
+      z-index: 2;
+    }
+    .install-award picture { display: block; }
+    .install-award img { display: block; width: 100%; height: auto; }
+    /* Second picture (folded-back state) is stacked on top, hidden by default.
+       Hard swap on hover — no crossfade, since the transparent fold area
+       would let the flat version show through during any transition. */
+    .install-award picture + picture {
+      position: absolute;
+      inset: 0;
+      visibility: hidden;
+    }
+    .install-award:hover picture:first-child { visibility: hidden; }
+    .install-award:hover picture + picture { visibility: visible; }
+    .install h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4.5vw, 46px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    .install h2 em { font-style: italic; color: var(--strawberry-deep); }
+    .install p {
+      color: var(--ink-soft);
+      margin-bottom: 32px;
+      font-size: 17px;
+    }
+    .install .small {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .install .small a { color: var(--ink); }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 56px 0 40px;
+      border-top: 1px solid rgba(43, 24, 16, 0.1);
+      margin-top: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    footer .made-by {
+      font-size: 14px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    footer .made-by a { color: var(--ink); font-weight: 500; }
+    footer .footer-mark {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background:
+        linear-gradient(110deg,
+          var(--chocolate) 0%, var(--chocolate) 33.3%,
+          var(--strawberry) 33.3%, var(--strawberry) 66.6%,
+          var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%);
+      box-shadow: var(--shadow-soft);
+      flex-shrink: 0;
+    }
+    footer .foot-links { display: flex; gap: 24px; font-size: 14px; }
+    footer .foot-links a { color: var(--ink-soft); text-decoration: none; }
+    footer .foot-links a:hover { color: var(--ink); }
+
+    /* ============ ANIMATIONS ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-text > * { animation: fadeUp 0.6s ease both; }
+    .hero-text > *:nth-child(1) { animation-delay: 0.05s; }
+    .hero-text > *:nth-child(2) { animation-delay: 0.15s; }
+    .hero-text > *:nth-child(3) { animation-delay: 0.25s; }
+    .hero-text > *:nth-child(4) { animation-delay: 0.35s; }
+    .hero-text > *:nth-child(5) { animation-delay: 0.45s; }
+    .hero-visual { animation: fadeUp 0.8s ease 0.3s both; }
+    .stripe-row .stripe { animation: fadeUp 0.7s ease both; opacity: 0; }
+    .stripe-row .stripe:nth-child(1) { animation-delay: 0.55s; }
+    .stripe-row .stripe:nth-child(2) { animation-delay: 0.65s; }
+    .stripe-row .stripe:nth-child(3) { animation-delay: 0.75s; }
+
+    /* URL cycling: when the URL bar is "cycle-active" we add the active styling
+       and bold the domain/path */
+    .url-bar { transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease; }
+    .url-bar.cycle-active {
+      border-color: var(--strawberry);
+      box-shadow: 0 0 0 4px rgba(232, 145, 155, 0.18), var(--shadow-lift);
+    }
+    .url-bar .url .domain, .url-bar .url .path { transition: color 0.4s ease, font-weight 0.4s ease; }
+    .url-bar.cycle-active .url .domain { color: var(--ink); }
+    .url-bar.cycle-active .url .path { color: var(--ink); font-weight: 600; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-text > *, .hero-visual, .stripe-row .stripe {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 880px) {
+      .hero { padding: 36px 0 60px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; min-width: 0; }
+      .hero-text { min-width: 0; }
+      .hero-text > * { max-width: 100%; }
+      .hero-text .lede { overflow-wrap: break-word; }
+      .hero-visual { min-width: 0; }
+      .url-stack { max-width: 100%; }
+      .url-bar { min-width: 0; }
+      .url-bar .url { min-width: 0; flex: 1 1 0; }
+      .swap-indicator { right: -8px; }
+      .cta-row .btn { width: 100%; justify-content: center; }
+      .stripe-row { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .workflow-grid { grid-template-columns: 1fr; }
+      .screenshots { grid-template-columns: 1fr; }
+      .keys { grid-template-columns: 1fr; }
+      .story-block { grid-template-columns: 1fr; gap: 32px; padding: 48px 32px; }
+      .story-stat { font-size: clamp(72px, 22vw, 110px); }
+      section.section { padding: 80px 0; }
+      nav .links { gap: 16px; }
+      nav .links a:not(.btn) { display: none; }
+      /* Shrink the nav CTA on mobile so it fits on one line next to
+         the wordmark — full-size desktop padding wraps to two lines
+         on iPhone-width viewports. */
+      nav .links .btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .install { padding: 48px 20px; }
+      .install-inner { padding: 40px 24px; }
+      .shortcuts { padding: 48px 28px; }
+    }
+    /* ============================================================
+       Demo embed wrapper — replaces .demo-reel in the #how section
+       ============================================================ */
+    .demo-embed {
+      background: var(--cream-card);
+      border: 1px solid rgba(43, 24, 16, 0.08);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-soft);
+    }
+    .demo-embed-header { padding: 28px 28px 22px; }
+    .demo-embed-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--strawberry-label); margin-bottom: 10px;
+    }
+    .demo-embed h3 {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 26px; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 0;
+    }
+
+    /* ---- Toolbar strip ---- */
+    .ext-toolbar-strip {
+      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--cream-card);
+      border-top: 1px solid rgba(43, 24, 16, 0.08);
+      border-bottom: 1px solid rgba(43, 24, 16, 0.08);
+      position: relative;
+    }
+    .ext-toolbar-strip .hint {
+      flex: 1; font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--ink-soft); opacity: 0.75;
+    }
+    .live-toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink-soft);
+      cursor: pointer; user-select: none;
+      padding: 4px 8px; border-radius: 999px; transition: background-color 0.15s;
+    }
+    .live-toggle:hover { background: rgba(43, 24, 16, 0.04); }
+    .live-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .toggle-track {
+      width: 30px; height: 18px; border-radius: 999px;
+      background: rgba(43, 24, 16, 0.18); position: relative;
+      transition: background-color 0.15s; flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.18s ease;
+    }
+    .live-toggle input:checked + .toggle-track { background: var(--chocolate); }
+    .live-toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(12px); }
+    .live-toggle input:focus-visible + .toggle-track { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .toggle-label { font-weight: 500; color: var(--ink); }
+    .live-toggle input:not(:checked) ~ .toggle-label { color: var(--ink-soft); }
+
+    .ext-button {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: transparent; border: 1px solid transparent; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background-color 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .ext-button:hover { background: rgba(43,24,16,0.05); border-color: rgba(43,24,16,0.08); }
+    .ext-button:active { transform: scale(0.96); }
+    .ext-button[aria-expanded="true"] { background: rgba(43,24,16,0.08); border-color: rgba(43,24,16,0.12); }
+
+    .ext-icon {
+      width: 24px; height: 24px; border-radius: 5px;
+      background: linear-gradient(180deg,
+        #b49982 0%, #b49982 33.3%,
+        #fdaeae 33.3%, #fdaeae 66.6%,
+        #f6e2b3 66.6%, #f6e2b3 100%);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+      position: relative; display: inline-block;
+    }
+    .ext-icon::after {
+      content: attr(data-letter);
+      position: absolute; right: -4px; bottom: -4px;
+      width: 15px; height: 15px; border-radius: 50%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 10px; font-weight: 700; color: #000;
+      background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+    }
+    .ext-icon[data-env="development"]::after { background: #b49982; color: #fff; }
+    .ext-icon[data-env="staging"]::after     { background: #fdaeae; }
+    .ext-icon[data-env="production"]::after  { background: #f6e2b3; }
+    .ext-icon[data-env="unmatched"] { filter: grayscale(0.85) opacity(0.65); }
+    .ext-icon[data-env="unmatched"]::after { content: ""; background: #aaa; }
+
+    /* ---- Demo stage (droste mini-hero) ---- */
+    .demo-stage {
+      padding: 36px 28px 44px;
+      border-top: 1px solid rgba(43, 24, 16, 0.08);
+      transition: background-color 0.25s; min-height: 200px;
+    }
+    .demo-stage.env-development { background: #c5b0a1; }
+    .demo-stage.env-staging     { background: #fff1f1; }
+    .demo-stage.env-production  { background: #faf0d1; }
+    .demo-stage.env-unmatched   { background: #f4f1ec; }
+
+    .stage-env-banner {
+      margin: -36px -28px 28px; padding: 8px 16px;
+      text-align: center; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      font-weight: 500; color: var(--ink);
+      border-bottom: 1px dashed rgba(43, 24, 16, 0.18);
+    }
+    .demo-stage.env-development .stage-env-banner { background: #a3877a; color: #fff; border-bottom-color: rgba(0,0,0,0.2); }
+    .demo-stage.env-staging .stage-env-banner     { background: #ffb8b8; color: var(--ink); }
+
+    .mini-hero { max-width: 620px; margin: 0 auto; color: var(--ink); }
+    .mini-hero-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed rgba(43,24,16,0.15); }
+    .mini-logo-mark { width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; background: linear-gradient(110deg, var(--chocolate) 0%, var(--chocolate) 33.3%, var(--strawberry) 33.3%, var(--strawberry) 66.6%, var(--vanilla-warm) 66.6%, var(--vanilla-warm) 100%); box-shadow: var(--shadow-soft); }
+    .mini-wordmark { font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--ink); }
+    .mini-env-tag { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.55); color: var(--ink); border: 1px solid rgba(43,24,16,0.12); }
+    .demo-stage.env-development .mini-env-tag { background: #b49982; color: #fff; border-color: #a3877a; }
+    .demo-stage.env-staging     .mini-env-tag { background: #fdaeae; border-color: #ffb8b8; }
+    .demo-stage.env-production  .mini-env-tag { background: #f6e2b3; border-color: #ecd494; }
+
+    .mini-eyebrow { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; color: var(--strawberry-label); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .mini-headline { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; color: var(--ink); }
+    .mini-headline em { font-style: italic; color: var(--strawberry-deep); }
+    .mini-lede { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; max-width: 480px; }
+    .mini-lede code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: rgba(255,255,255,0.6); padding: 1px 5px; border-radius: 3px; }
+    .mini-cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .mini-btn { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; background: var(--ink); color: var(--cream); font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+    .mini-link { font-size: 12px; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+    .stage-unmatched { max-width: 540px; margin: 0 auto; text-align: center; color: var(--ink); }
+    .stage-unmatched .stage-flavor { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+    .stage-unmatched h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 8px; }
+    .stage-unmatched p { color: var(--ink-soft); font-size: 14px; }
+    .stage-unmatched code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; }
+
+    /* ---- Popup ---- */
+    .neap-popup {
+      position: absolute; top: calc(100% - 2px); right: 12px; width: 220px;
+      background: #faf0d1; color: #5a4738;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(43,24,16,0.22), 0 2px 6px rgba(43,24,16,0.12);
+      overflow: hidden; z-index: 50;
+      transform-origin: top right;
+      transform: scale(0.96) translateY(-4px); opacity: 0; pointer-events: none;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .neap-popup[data-open="true"] { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+    .neap-popup.env-development { background: #c5b0a1; }
+    .neap-popup.env-staging     { background: #fff1f1; }
+    .neap-popup.env-production  { background: #faf0d1; }
+
+    .neap-popup .np-stripe { display: flex; height: 4px; width: 100%; }
+    .neap-popup .np-stripe > div { height: 100%; width: 33.33%; }
+    .np-s-van  { background: #f6e2b3; }
+    .np-s-straw { background: #fdaeae; }
+    .np-s-choc { background: #b49982; }
+    .neap-popup .np-stripe-top { opacity: 0.6; }
+    .neap-popup .np-stripe-bot { box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 8px; }
+
+    .neap-popup .popup-title { margin: 0; padding: 10px 6px; text-align: center; font-weight: 500; font-size: 14px; border-top: 1px solid white; border-bottom: 1px solid white; }
+    .neap-popup.env-development .popup-title { background: #b49982; color: #fff; }
+    .neap-popup.env-staging     .popup-title { background: #fdaeae; color: #5a4738; }
+    .neap-popup.env-production  .popup-title { background: #f6e2b3; color: #5a4738; }
+    .neap-popup.env-unmatched   .popup-title { background: #e6e1da; color: #5a4738; }
+
+    .neap-popup ul { list-style: none; padding: 12px 0; margin: 0; }
+    .neap-popup ul li { margin: 0; padding: 0; }
+    .neap-popup ul a { display: flex; align-items: center; gap: 8px; padding: 8px 16px; text-decoration: none; cursor: pointer; color: #5a4738; transition: background-color 0.15s, transform 0.15s; border-radius: 4px; margin: 2px 8px; background: rgba(255,255,255,0.6); border-left: 4px solid transparent; font-size: 13px; }
+    .neap-popup ul a:hover { background: rgba(255,255,255,0.85); transform: translateY(-1px); }
+    .neap-popup.env-development ul a.active { background: #a3877a; color: #fff; border-left-color: #8d7260; }
+    .neap-popup.env-staging     ul a.active { background: #ffb8b8; border-left-color: #ff9a9a; }
+    .neap-popup.env-production  ul a.active { background: #ecd494; border-left-color: #e6d090; }
+
+    .neap-popup .icon-badge { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.15); flex-shrink: 0; }
+    .neap-popup .dev-icon-badge     { background: #fff; }
+    .neap-popup .staging-icon-badge { background: #fdaeae; }
+    .neap-popup .prod-icon-badge    { background: #f6e2b3; }
+    .neap-popup .emoji-icon { font-size: 12px; filter: drop-shadow(0 0 1px rgba(0,0,0,0.6)); line-height: 1; }
+    .neap-popup .edit-config-link { display: block; text-align: center; font-size: 12px; padding: 5px 10px; color: #5a4738; text-decoration: none; margin: 10px 0 0; opacity: 0.7; background: transparent !important; border-left: none !important; transform: none !important; }
+    .neap-popup .edit-config-link:hover { opacity: 1; text-decoration: underline; }
+
+    /* ---- Easter egg: Konami toast ---- */
+    .konami-toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--ink); color: var(--cream);
+      padding: 14px 24px; border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace; font-size: 14px;
+      box-shadow: var(--shadow-lift); z-index: 9999;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+    }
+    .konami-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: clamp(36px, 12vw, 50px); }
+      /* Shrink the nav lockup on iPhone-sized viewports — the 88px
+         wordmark crowds a 375px-wide nav. Halving keeps it readable
+         without dominating the top of the fold. */
+      .logo { gap: 10px; }
+      .logo-mark { width: 36px; height: 36px; border-radius: 10px; }
+      .logo-wordmark { height: 44px; top: 2px; }
+      /* Shrink the award ribbon and tuck it into the corner on
+         iPhone-width viewports — at 120px it crashes into the
+         wordmark below. Lift the wallpaper-card overflow clip so
+         the ribbon can spill out onto the cream page background
+         (border-radius still clips the wallpaper bg itself, and
+         body has overflow-x:hidden as a backstop). With the clip
+         gone, we can pull the badge further left/up to sit
+         genuinely in the corner like a sticker. */
+      .install { overflow: visible; }
+      .install-award {
+        width: 90px;
+        top: 6px;
+        left: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky env banner — shown on dev/staging, hidden on production.
+       Text is populated by JS. Styled via demo.css + theme-*.css. -->
+  <div id="pageBanner" class="page-env-banner"></div>
+
+  <div class="wrap">
+
+    <!-- ============ NAV ============ -->
+    <nav>
+      <a href="/" class="logo" aria-label="Neapolitan — home">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <img class="logo-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan">
+      </a>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#story">Story</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a>
+        <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary">Add to Chrome</a>
+      </div>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="eyebrow">v1.0.1 · Chrome &amp; Safari</span>
+          <h1>Same page,<br><em>every environment,</em><br>one keystroke.</h1>
+          <p class="lede">Compare any page across development, staging, and production in a single keystroke. Path, query string, and hash come with you — so you can spot the difference without losing your place.</p>
+          <div class="cta-row">
+            <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
+            <a href="https://github.com/SteveRyherd/neapolitan" class="github-link">View source on GitHub →</a>
+          </div>
+          <div class="meta">
+            <span class="dot"></span>
+            <span>No tracking · No data collected · Open source</span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="url-stack" id="urlStack">
+            <div class="url-bar dev" data-shortcut="X">
+              <span class="swatch"></span>
+              <span class="env-tag">dev</span>
+              <span class="url"><span class="domain">dev.acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+            </div>
+            <div class="url-bar staging" data-shortcut="S">
+              <span class="swatch"></span>
+              <span class="env-tag">staging</span>
+              <span class="url"><span class="domain">staging.acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+              <span class="swap-indicator" id="swapIndicator"><span class="alt-key">Alt</span>+<span id="swapLetter">S</span></span>
+            </div>
+            <div class="url-bar prod" data-shortcut="W">
+              <span class="swatch"></span>
+              <span class="env-tag">prod</span>
+              <span class="url"><span class="domain">acme.com</span><span class="path">/dashboard/users/42?tab=billing</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ THE THREE FLAVORS ============ -->
+    <div class="stripe-row">
+      <div class="stripe choc">
+        <div class="flavor">Chocolate</div>
+        <h3>Development</h3>
+        <p>Where you build and break. One keystroke brings you here from any other environment, same page intact.</p>
+        <div class="stripe-key"><span class="alt-key">ALT</span> + X</div>
+      </div>
+      <div class="stripe straw">
+        <div class="flavor">Strawberry</div>
+        <h3>Staging</h3>
+        <p>The dress rehearsal. Hop in to verify a fix matches dev, then jump to prod with one keystroke — never retyping a URL.</p>
+        <div class="stripe-key"><span class="alt-key">ALT</span> + S</div>
+      </div>
+      <div class="stripe van">
+        <div class="flavor">Vanilla</div>
+        <h3>Production</h3>
+        <p>What your users actually see. Compare it against staging or dev at the exact same page, instantly.</p>
+        <div class="stripe-key"><span class="alt-key">ALT</span> + W</div>
+      </div>
+    </div>
+
+    <!-- ============ HOW IT WORKS / SCREENSHOTS ============ -->
+    <section class="section" id="how">
+      <div class="section-eyebrow">How it works</div>
+      <h2 class="section-title">Three environments. <em>One URL.</em></h2>
+      <p class="section-sub">Configure your domains once. From then on, every URL path, query parameter, and hash fragment travels with you when you compare environments — no copy-paste, no losing your place.</p>
+
+      <!-- Interactive demo — replaces the static GIF. The popup
+           is the real extension popup, the stage below re-themes
+           per environment. id="demo" anchors the IntersectionObserver
+           so "Really go there" links land back here. -->
+      <div class="demo-embed" id="demo">
+        <div class="demo-embed-header">
+          <div class="demo-embed-label">Try it — no install needed</div>
+          <h3>Click the icon. <em style="font-style:italic;color:var(--strawberry-deep)">Hop environments.</em></h3>
+        </div>
+
+        <!-- Toolbar strip: the extension button lives here -->
+        <div class="ext-toolbar-strip" id="toolbarStrip">
+          <span class="hint" id="toolbarHint">Try it →</span>
+
+          <label class="live-toggle" title="When on, clicking an environment actually navigates there">
+            <input type="checkbox" id="liveModeToggle">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Really go there</span>
+          </label>
+
+          <button class="ext-button" id="extButton"
+                  aria-haspopup="true" aria-expanded="false"
+                  aria-label="Open Neapolitan switcher">
+            <span class="ext-icon" id="extIcon" data-env="unmatched" data-letter="?"></span>
+          </button>
+
+          <!-- Popup anchored to the toolbar strip -->
+          <div class="neap-popup" id="neapPopup"
+               role="dialog" aria-label="Switch environment" data-open="false">
+            <div class="np-stripe np-stripe-top">
+              <div class="np-s-choc"></div><div class="np-s-straw"></div><div class="np-s-van"></div>
+            </div>
+            <h2 class="popup-title" id="popupTitle">Production</h2>
+            <div class="np-stripe np-stripe-bot">
+              <div class="np-s-choc"></div><div class="np-s-straw"></div><div class="np-s-van"></div>
+            </div>
+            <ul id="popupLinks"></ul>
+          </div>
+        </div>
+
+        <!-- Stage: droste mini-hero that re-themes per env -->
+        <div class="demo-stage" id="demoStage">
+          <div class="stage-env-banner" id="stageBanner" hidden></div>
+
+          <div class="mini-hero" id="miniHero">
+            <div class="mini-hero-nav">
+              <span class="mini-logo-mark" aria-hidden="true"></span>
+              <span class="mini-wordmark">Neapolitan</span>
+              <span class="mini-env-tag" id="miniEnvTag">Production</span>
+            </div>
+            <div class="mini-hero-body">
+              <span class="mini-eyebrow" id="miniEyebrow">v1.0.1 · Chrome &amp; Safari</span>
+              <h2 class="mini-headline" id="miniHeadline">Same page, <em>every environment,</em> one keystroke.</h2>
+              <p class="mini-lede" id="miniLede">You're viewing <code id="stageHost">neapolitan.page</code> — the <strong id="miniFlavor">Vanilla</strong> stripe.</p>
+              <div class="mini-cta-row">
+                <span class="mini-btn">Add to Chrome</span>
+                <span class="mini-link">View source ↗</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage-unmatched" id="stageUnmatched" hidden>
+            <div class="stage-flavor">Unmatched</div>
+            <h2>Not on a configured host</h2>
+            <p><code id="unmatchedHost">file://</code> isn't a configured environment — but the links above still navigate to the real environments.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screenshots">
+        <div class="screenshot-card">
+          <div class="label">The popup</div>
+          <h3>One click, every project</h3>
+          <p>Browse to any configured site, click the icon, pick an environment. The popup shows you exactly where you are and where you can go.</p>
+          <picture>
+            <source srcset="/assets/img/popup.webp" type="image/webp">
+            <img src="/assets/img/popup-2x.png" alt="The Neapolitan popup showing development, staging, and production options for the current site" loading="lazy" width="720" height="738">
+          </picture>
+        </div>
+        <div class="screenshot-card">
+          <div class="label">The options page</div>
+          <h3>Set up once. Forget it.</h3>
+          <p>Define your projects and their environment URLs. Neapolitan auto-detects which environment you're in based on the current tab.</p>
+          <picture>
+            <source srcset="/assets/img/options.webp" type="image/webp">
+            <img src="/assets/img/options-2x.png" alt="The Neapolitan options page showing environment configuration and the four built-in keyboard shortcut schemes" loading="lazy" width="1400" height="1084">
+          </picture>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ IN THE WILD / WORKFLOWS ============ -->
+    <section class="section" style="padding-top: 0;">
+      <div class="section-eyebrow">In the wild</div>
+      <h2 class="section-title">When you'd reach for it.</h2>
+      <p class="section-sub">Three scenarios that show up every week if you ship software.</p>
+      <div class="workflow-grid">
+        <div class="workflow w-choc">
+          <div class="scenario">"There's a bug only in production."</div>
+          <p>Click into the broken page. Hit <kbd class="alt-key">Alt</kbd>+<kbd>X</kbd>. You're in dev at the exact same URL, ready to reproduce.</p>
+        </div>
+        <div class="workflow w-straw">
+          <div class="scenario">"Did my fix actually ship to staging?"</div>
+          <p>Cycle <kbd class="alt-key">Alt</kbd>+<kbd>X</kbd> → <kbd class="alt-key">Alt</kbd>+<kbd>S</kbd> → <kbd class="alt-key">Alt</kbd>+<kbd>W</kbd>. Three environments, same page, side by side.</p>
+        </div>
+        <div class="workflow w-van">
+          <div class="scenario">"QA wants to compare staging vs prod."</div>
+          <p>Send them the prod URL. They install Neapolitan, hit a key, and they're on the matching staging page in one second.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ KEYBOARD SHORTCUTS ============ -->
+    <section class="section" id="features" style="padding-top: 0;">
+      <div class="shortcuts">
+        <div class="section-eyebrow">Keyboard shortcuts</div>
+        <h2>Switch without clicking.</h2>
+        <p class="sub">Pick a scheme below and set it yourself — here are four worth copying. Each one earns its place differently.</p>
+
+        <!-- 30-second setup banner: lifted above the carousel so the
+             "no defaults" reality is the first thing the visitor sees. -->
+        <div class="setup-note">
+          <span class="setup-icon">1</span>
+          <span><strong>30-second setup.</strong> Chrome reserves keyboard shortcuts for the user — extensions can <em>suggest</em>, but can't bind. After installing, open <code>chrome://extensions/shortcuts</code> and copy whichever scheme below matches your muscle memory.</span>
+        </div>
+
+        <!-- Tab navigation -->
+        <div class="scheme-tabs" id="schemeTabs" role="tablist">
+          <button class="scheme-tab active" data-scheme="0" role="tab" aria-selected="true"><span class="scheme-tab-num">01</span>The Classic — 3 Stacked Scoops</button>
+          <button class="scheme-tab" data-scheme="1" role="tab" aria-selected="false"><span class="scheme-tab-num">02</span>Easy as 1·2·3</button>
+          <button class="scheme-tab" data-scheme="2" role="tab" aria-selected="false"><span class="scheme-tab-num">03</span>Neapolitan</button>
+          <button class="scheme-tab" data-scheme="3" role="tab" aria-selected="false"><span class="scheme-tab-num">04</span>Banana Split</button>
+        </div>
+
+        <!-- Carousel stage -->
+        <div class="scheme-stage" id="schemeStage">
+
+          <article class="scheme-slide active" data-scheme="0" role="tabpanel">
+            <div class="scheme-image">
+              <picture>
+                <source srcset="/assets/img/scheme-stack.webp" type="image/webp">
+                <img src="/assets/img/scheme-stack.png" alt="A glowing triple-scoop ice cream cone with vanilla, strawberry, and chocolate stacked vertically on a single waffle cone" loading="lazy" width="520" height="520">
+              </picture>
+            </div>
+            <div class="scheme-body">
+              <div class="scheme-label">01 · The Classic — 3 Stacked Scoops</div>
+              <h3 class="scheme-name">Scoops on a cone.</h3>
+              <p class="scheme-why">On your keyboard, <em>W·S·X</em> stack vertically in the same column — like three scoops on a cone. Easy to find without looking down.</p>
+              <div class="scheme-keys scheme-keys-vertical">
+                <span class="key-line"><span class="env-label prod">Prod</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>W</kbd></span>
+                <span class="key-line"><span class="env-label staging">Staging</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>S</kbd></span>
+                <span class="key-line"><span class="env-label dev">Dev</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>X</kbd></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="scheme-slide" data-scheme="1" role="tabpanel">
+            <div class="scheme-image">
+              <picture>
+                <source srcset="/assets/img/scheme-counting.webp" type="image/webp">
+                <img src="/assets/img/scheme-counting.png" alt="Three glowing single-scoop ice cream cones in a row — chocolate, strawberry, vanilla — like counting one, two, three" loading="lazy" width="520" height="520">
+              </picture>
+            </div>
+            <div class="scheme-body">
+              <div class="scheme-label">02 · Easy as 1·2·3</div>
+              <h3 class="scheme-name">Three cones in a row.</h3>
+              <p class="scheme-why">Just count: <em>1</em> for dev, <em>2</em> for staging, <em>3</em> for prod. The hardest scheme to forget — and the most obvious mental model on the planet.</p>
+              <div class="scheme-keys">
+                <span class="key-line"><span class="env-label dev">Dev</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>1</kbd></span>
+                <span class="key-line"><span class="env-label staging">Staging</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>2</kbd></span>
+                <span class="key-line"><span class="env-label prod">Prod</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>3</kbd></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="scheme-slide" data-scheme="2" role="tabpanel">
+            <div class="scheme-image">
+              <picture>
+                <source srcset="/assets/img/scheme-familiar.webp" type="image/webp">
+                <img src="/assets/img/scheme-familiar.png" alt="A glowing golden tub of Neapolitan ice cream with chocolate, strawberry, and vanilla compartments side by side" loading="lazy" width="520" height="520">
+              </picture>
+            </div>
+            <div class="scheme-body">
+              <div class="scheme-label">03 · Neapolitan</div>
+              <h3 class="scheme-name">Copy. Save. Paste.</h3>
+              <p class="scheme-why">The keys you already use a thousand times a day — <em>C·S·V</em>. They also happen to be <em>Chocolate</em>, <em>Strawberry</em>, <em>Vanilla</em>, so the metaphor maps perfectly to the flavor codes.</p>
+              <div class="scheme-keys">
+                <span class="key-line"><span class="env-label dev">Dev</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>C</kbd></span>
+                <span class="key-line"><span class="env-label staging">Staging</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>S</kbd></span>
+                <span class="key-line"><span class="env-label prod">Prod</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>V</kbd></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="scheme-slide" data-scheme="3" role="tabpanel">
+            <div class="scheme-image">
+              <picture>
+                <source srcset="/assets/img/scheme-banana.webp" type="image/webp">
+                <img src="/assets/img/scheme-banana.png" alt="A banana split in a blue dish — chocolate, vanilla, and strawberry scoops nestled between two banana halves, topped with a cherry and wafer sticks" loading="lazy" width="520" height="520">
+              </picture>
+            </div>
+            <div class="scheme-body">
+              <div class="scheme-label">04 · Banana Split</div>
+              <h3 class="scheme-name">No codenames. Just initials.</h3>
+              <p class="scheme-why">Forget the dessert metaphor — <em>D·S·P</em> stands for Development, Staging, Production. Easy to remember, but the <em>P</em> key sits so far from the others that you either chord with two hands (a "split") or stretch your fingers across the keyboard — not ideal when your other hand is on the mouse.</p>
+              <div class="scheme-keys scheme-keys-split">
+                <div class="key-group">
+                  <span class="key-line"><span class="env-label dev">Dev</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>D</kbd></span>
+                  <span class="key-line"><span class="env-label staging">Staging</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>S</kbd></span>
+                </div>
+                <span class="key-stretch" aria-hidden="true">long&nbsp;reach</span>
+                <div class="key-group">
+                  <span class="key-line"><span class="env-label prod">Prod</span><kbd class="alt-key">Alt</kbd><span class="key-plus">+</span><kbd>P</kbd></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURE GRID ============ -->
+    <section class="section" style="padding-top: 0;">
+      <div class="section-eyebrow">Built for the way you work</div>
+      <h2 class="section-title">Quietly thorough.</h2>
+      <p class="section-sub">Designed by a working developer to disappear into your workflow until you need it, then deliver instantly.</p>
+      <div class="feature-grid">
+        <div class="feature f-choc">
+          <div class="icon">⌥</div>
+          <h4>Path preservation</h4>
+          <p>Your URL path, query parameters, and hash fragments come with you when you switch — no copy-pasting, no losing your place.</p>
+        </div>
+        <div class="feature f-straw">
+          <div class="icon">⌖</div>
+          <h4>Auto-detection</h4>
+          <p>Neapolitan recognizes which environment you're in automatically. The icon updates the moment you load a configured site.</p>
+        </div>
+        <div class="feature f-van">
+          <div class="icon">▦</div>
+          <h4>Many projects</h4>
+          <p>Configure as many products and domain mappings as you need. Each gets its own set of environment URLs.</p>
+        </div>
+        <div class="feature f-choc">
+          <div class="icon">◐</div>
+          <h4>Four themes</h4>
+          <p>Neapolitan (default), Dark, Light, and High Contrast. Pick the one that fits your editor and your environment.</p>
+        </div>
+        <div class="feature f-straw">
+          <div class="icon">⌘</div>
+          <h4>Customizable keys</h4>
+          <p>The default shortcuts work out of the box. Remap them in Chrome's extension shortcut settings to fit your muscle memory.</p>
+        </div>
+        <div class="feature f-van">
+          <div class="icon">⛨</div>
+          <h4>Zero tracking</h4>
+          <p>No analytics, no telemetry, no data collection. Neapolitan runs entirely on your machine — and the source is on GitHub.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STORY ============ -->
+    <section class="section" id="story" style="padding-top: 0;">
+      <div class="story-block">
+        <div>
+          <div class="story-stat">12<span class="yr">yr</span></div>
+          <div class="story-stat-label">In the making</div>
+        </div>
+        <div class="story-text">
+          <div class="section-eyebrow">The story</div>
+          <h2 class="section-title" style="margin-bottom: 18px;">Built for myself in 2013. Shipped in 2025.</h2>
+          <p>The first version of this lived in my own browser for a decade — 45 lines of JavaScript, written one afternoon because our server names were numbered and forgettable. Before that, I'd been rewriting URLs by hand, every hour, for years.</p>
+          <p>It was &ldquo;good enough for me.&rdquo; So it stayed that way — unchanged, unshipped, unmentioned.</p>
+          <p>Then Chrome's Manifest V3 forced a rewrite. I could retire the tool or rebuild it properly. I picked rebuild — modern extension architecture, redesigned UI, Safari support, the documentation I'd never bothered to write. Same idea, twelve years of refinement, and now it's free for everyone.</p>
+          <p style="margin-top: 20px;"><a href="https://steveryherd.com" rel="author">— Steve Ryherd</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section faq" id="faq" style="padding-top: 0;">
+      <div class="section-eyebrow">FAQ</div>
+      <h2 class="section-title">Questions you'd ask before installing.</h2>
+
+      <details>
+        <summary>Why not just edit my hosts file?</summary>
+        <div class="faq-body">
+          <p>You could, and if your only goal is to route a single hostname to localhost, that's fine. But hosts file edits change the meaning of a URL globally for every app on your machine, they can't preserve a path while you swap environments, and they don't survive switching projects. Neapolitan lives in the browser, switches per-tab, and keeps your path/query/hash intact.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How is this different from using Chrome profiles?</summary>
+        <div class="faq-body">
+          <p>Profiles are about isolating cookies and extensions. Neapolitan is about translating URLs. You can absolutely use both — pair Neapolitan with a "work" profile if you want — but profiles don't help you load the same page on dev when you're staring at prod.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What permissions does it actually need, and why?</summary>
+        <div class="faq-body">
+          <p><code>tabs</code> to read the current tab's URL and navigate it. <code>storage</code> to save your environment configurations locally. <code>&lt;all_urls&gt;</code> so it can recognize and switch between any sites you've configured — Neapolitan never reads page contents, only the URL bar. See the <a href="/privacy.html">privacy page</a> for the full breakdown.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does Neapolitan send any data anywhere?</summary>
+        <div class="faq-body">
+          <p>No. No analytics, no telemetry, no remote config, no servers. Your environment configurations are stored locally via <code>chrome.storage.local</code> and never leave your browser. The code is open source — verify it yourself on <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Will it work on Edge, Brave, Arc, or other Chromium browsers?</summary>
+        <div class="faq-body">
+          <p>Yes. Any browser that installs Chrome Web Store extensions can run Neapolitan — Edge, Brave, Arc, Vivaldi, Opera. Safari has a separate build (see the <a href="https://github.com/SteveRyherd/neapolitan/blob/main/.github/SAFARI_INSTALLATION.md">Safari installation guide</a>) since Apple's extension system is different.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Will my shortcuts conflict with my IDE?</summary>
+        <div class="faq-body">
+          <p>Chrome doesn't let extensions bind keyboard shortcuts for you — so Neapolitan ships with <em>none bound by default</em>. You decide what to use, at <code>chrome://extensions/shortcuts</code>. The site lists four recommended schemes (The Classic, 1·2·3, Neapolitan, Banana Split) but you can pick anything that doesn't collide with what you already use. Browser-bound keys also only fire in the browser, so your IDE bindings are never touched.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Is it free? Will it stay free?</summary>
+        <div class="faq-body">
+          <p>Yes and yes. MIT licensed, open source, no paid tiers planned. If you want to support development, the most helpful thing is a Chrome Web Store review and a star on the repo.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============ INSTALL CTA ============ -->
+    <div class="install">
+      <div class="install-inner">
+        <div class="install-award" aria-hidden="true">
+          <picture>
+            <source srcset="/assets/img/award-ribbon_flat.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon_flat.png" alt="" width="765" height="759">
+          </picture>
+          <picture>
+            <source srcset="/assets/img/award-ribbon2_folded.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon2_folded.png" alt="" width="765" height="759">
+          </picture>
+        </div>
+        <img class="install-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan" width="478" height="123">
+        <h2>A developer tool that's as <em>delicious</em> as it is useful.</h2>
+        <p>Free. Open source. Available for Chrome and Safari today.</p>
+        <a href="https://chromewebstore.google.com/detail/neapolitan-domain-switcher/pbmeeanefgoglnbaikepdhmdjhohodbc" class="btn btn-primary btn-lg">Add to Chrome</a>
+        <div class="small">
+          Safari user? <a href="https://github.com/SteveRyherd/neapolitan/blob/main/.github/SAFARI_INSTALLATION.md">See the Safari installation guide →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+      <div class="made-by">
+        <span class="footer-mark" aria-hidden="true"></span>
+        <span>Built by <a href="https://steveryherd.com">Steve Ryherd</a> · Open source on <a href="https://github.com/SteveRyherd/neapolitan">GitHub</a></span>
+      </div>
+      <div class="foot-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="https://github.com/SteveRyherd/neapolitan/blob/main/LICENSE">License</a>
+        <a href="https://github.com/SteveRyherd/neapolitan/issues">Report a bug</a>
+        <a href="https://github.com/SteveRyherd/neapolitan/blob/main/CHANGELOG.md">Changelog</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============ KONAMI TOAST (easter egg, all envs) ============ -->
+  <div id="konamiToast" class="konami-toast" aria-live="polite"></div>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script>
+  /* ============================================================
+     1. ENV DETECTION (shared with head script; re-run here for JS)
+     ============================================================ */
+  (function () {
+    var host = window.location.hostname.replace(/^www\./, '');
+    window.__neapEnv = !host                            ? 'unmatched'  :
+      host === 'neapolitan.page'               ? 'production' :
+      host === 'staging.neapolitan.page'       ? 'staging'    : 'development';
+  }());
+
+  /* ============================================================
+     2. PER-ENV CONTENT — version string, headline, CTAs
+     ============================================================ */
+  (function () {
+    var env = window.__neapEnv;
+
+    var CONTENT = {
+      development: {
+        pageTitle:  'Neapolitan [dev] — Compare environments at the same page',
+        eyebrow:    'v1.0.1-dev · build #42',
+        headline:   ['Same page,', '<em>every environment,</em>', 'one commit closer.'],
+        ctaText:    'File an issue',
+        ctaHref:    'https://github.com/SteveRyherd/neapolitan/issues',
+        navCtaText: 'File an issue',
+        banner:     '🍫  Dev build — not for sharing',
+      },
+      staging: {
+        pageTitle:  'Neapolitan [rc] — Compare environments at the same page',
+        eyebrow:    'v1.0.1-rc · pre-release',
+        headline:   ['Same page,', '<em>every environment,</em>', 'nearly ready.'],
+        ctaText:    'View release notes',
+        ctaHref:    'https://github.com/SteveRyherd/neapolitan/blob/main/CHANGELOG.md',
+        navCtaText: 'Release notes',
+        banner:     '🍓  Staging — release candidate',
+      },
+      production: null, // keep HTML defaults
+    };
+
+    var c = CONTENT[env];
+    if (!c) return; // production: leave everything as-is
+
+    // Page title
+    document.title = c.pageTitle;
+
+    // Sticky page banner
+    var banner = document.getElementById('pageBanner');
+    if (banner && c.banner) banner.textContent = c.banner;
+
+    // Hero eyebrow
+    var eyebrow = document.querySelector('.hero-text .eyebrow');
+    if (eyebrow) eyebrow.textContent = c.eyebrow;
+
+    // Hero h1 — innerHTML so <em> renders
+    var h1 = document.querySelector('.hero h1');
+    if (h1) h1.innerHTML = c.headline.join('<br>');
+
+    // Hero primary CTA
+    var heroCta = document.querySelector('.hero .cta-row .btn-primary');
+    if (heroCta) { heroCta.textContent = c.ctaText; heroCta.href = c.ctaHref; }
+
+    // Nav primary CTA
+    var navCta = document.querySelector('nav .links .btn-primary');
+    if (navCta) { navCta.textContent = c.navCtaText; navCta.href = c.ctaHref; }
+
+    // Install CTA button (bottom of page)
+    var installCta = document.querySelector('.install .btn-primary');
+    if (installCta) { installCta.textContent = c.ctaText; installCta.href = c.ctaHref; }
+
+    // Version eyebrow tooltip — clicking shows fake build metadata on dev/staging
+    if (eyebrow) {
+      eyebrow.style.cursor = 'help';
+      eyebrow.title = env === 'development'
+        ? 'Branch: development · Commit: a3f8c1d · Built: just now'
+        : 'Branch: staging · Tag: v1.0.1-rc.1 · CI: passing';
+    }
+  }());
+
+  /* ============================================================
+     3. MAC DETECTION + URL STACK CYCLING (original index.html JS)
+     ============================================================ */
+    (function () {
+      // ---- Mac detection: swap "Alt" → ⌥ on macOS ----
+      var ua = navigator.userAgent || '';
+      var plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+      var isMac = /Mac|iPhone|iPad|iPod/i.test(plat) || /Macintosh/i.test(ua);
+      if (isMac) {
+        document.querySelectorAll('.alt-key').forEach(function (el) {
+          // Preserve case (ALT in stripe row stays uppercase glyph anyway; ⌥ has no case)
+          el.textContent = '⌥';
+          el.setAttribute('aria-label', 'Option');
+          el.title = 'Option (Alt)';
+        });
+      }
+
+      // ---- URL stack cycling: rotate the "active" bar through dev → staging → prod ----
+      var stack = document.getElementById('urlStack');
+      if (!stack) return;
+      var bars = stack.querySelectorAll('.url-bar');
+      var indicator = document.getElementById('swapIndicator');
+      var letterEl = document.getElementById('swapLetter');
+      if (!bars.length || !indicator || !letterEl) return;
+
+      var idx = 1; // start on staging (mockup default)
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function moveIndicatorTo(bar) {
+        bar.appendChild(indicator);
+      }
+      function setActive(i) {
+        bars.forEach(function (b, j) { b.classList.toggle('cycle-active', i === j); });
+        var letter = bars[i].getAttribute('data-shortcut') || 'S';
+        letterEl.textContent = letter;
+        moveIndicatorTo(bars[i]);
+      }
+
+      // Initial state
+      setActive(idx);
+
+      if (prefersReducedMotion) return;
+
+      setTimeout(function () {
+        setInterval(function () {
+          idx = (idx + 1) % bars.length;
+          setActive(idx);
+        }, 2600);
+      }, 1500);
+    })();
+
+    // ---- Scheme carousel ----
+    (function () {
+      var tabs = document.querySelectorAll('.scheme-tab');
+      var slides = document.querySelectorAll('.scheme-slide');
+      var stage = document.getElementById('schemeStage');
+      if (!tabs.length || !slides.length || !stage) return;
+
+      var current = 0;
+      var autoTimer = null;
+      var autoIntervalMs = 7000;
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function show(i) {
+        tabs.forEach(function (t, j) {
+          var isActive = i === j;
+          t.classList.toggle('active', isActive);
+          t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        slides.forEach(function (s, j) { s.classList.toggle('active', i === j); });
+        current = i;
+      }
+
+      function advance() {
+        show((current + 1) % slides.length);
+      }
+
+      function startAuto() {
+        if (prefersReducedMotion) return;
+        stopAuto();
+        autoTimer = setInterval(advance, autoIntervalMs);
+      }
+      function stopAuto() {
+        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+      }
+
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () {
+          show(i);
+          stopAuto();
+          // Resume auto-advance 12s after the last manual interaction
+          setTimeout(startAuto, 12000);
+        });
+      });
+
+      // Pause auto-advance on hover so people can read
+      stage.addEventListener('mouseenter', stopAuto);
+      stage.addEventListener('mouseleave', startAuto);
+
+      // Start
+      startAuto();
+    })();
+
+  /* ============================================================
+     4. INTERACTIVE DEMO COMPONENT
+     ============================================================ */
+  (function () {
+    var ENVIRONMENTS = [
+      { type: 'development', label: 'Development', host: 'development.neapolitan-9ah.pages.dev', emoji: '🍫', flavor: 'Chocolate' },
+      { type: 'staging',     label: 'Staging',     host: 'staging.neapolitan.page',              emoji: '🍓', flavor: 'Strawberry' },
+      { type: 'production',  label: 'Production',  host: 'www.neapolitan.page',                  emoji: '🍦', flavor: 'Vanilla' },
+    ];
+    var TEXT_INDICATOR = { development: 'D', staging: 'S', production: 'P' };
+    var BADGE_CLASS    = { development: 'dev-icon-badge', staging: 'staging-icon-badge', production: 'prod-icon-badge' };
+    var VIEW_CONTENT   = {
+      development: { banner: '🍫  Dev build — not for sharing', eyebrow: 'v1.0.1-dev · build #42',       ledeSuffix: ' stripe. This is where the work happens.' },
+      staging:     { banner: '🍓  Staging — release candidate', eyebrow: 'v1.0.1-rc · pre-release',      ledeSuffix: ' stripe. The dress rehearsal — last stop before prod.' },
+      production:  { banner: null,                              eyebrow: 'v1.0.1 · Chrome &amp; Safari', ledeSuffix: ' stripe. Click the icon above to hop to a different one.' },
+    };
+
+    // Demo uses the same faked env detection as demo.html —
+    // any hostname → some matched state (for display purposes).
+    function detectDemoEnv() {
+      var host = window.location.hostname.replace(/^www\./, '');
+      if (!host) return null;
+      if (host === 'neapolitan.page') return ENVIRONMENTS[2];           // production
+      if (host === 'staging.neapolitan.page') return ENVIRONMENTS[1];   // staging
+      return ENVIRONMENTS[0];                                            // development
+    }
+
+    function buildSwitchURL(targetHost) {
+      var u = new URL(window.location.href);
+      // Always preserve the #demo hash so the user lands back at the demo
+      return 'https://' + targetHost + u.pathname + u.search + '#demo';
+    }
+
+    var $ext        = document.getElementById('extButton');
+    var $extIcon    = document.getElementById('extIcon');
+    var $liveMode   = document.getElementById('liveModeToggle');
+    var $popup      = document.getElementById('neapPopup');
+    var $links      = document.getElementById('popupLinks');
+    var $title      = document.getElementById('popupTitle');
+    var $stage      = document.getElementById('demoStage');
+    var $stageBanner= document.getElementById('stageBanner');
+    var $miniHero   = document.getElementById('miniHero');
+    var $miniEnvTag = document.getElementById('miniEnvTag');
+    var $miniEyebrow= document.getElementById('miniEyebrow');
+    var $miniFlavor = document.getElementById('miniFlavor');
+    var $miniLede   = document.getElementById('miniLede');
+    var $stageHost  = document.getElementById('stageHost');
+    var $unmatched  = document.getElementById('stageUnmatched');
+    var $unmHost    = document.getElementById('unmatchedHost');
+    var $hint       = document.getElementById('toolbarHint');
+
+    if (!$ext) return; // demo not on this page
+
+    function render(env) {
+      var envType = env ? env.type : 'unmatched';
+      $extIcon.dataset.env    = envType;
+      $extIcon.dataset.letter = env ? TEXT_INDICATOR[env.type] : '?';
+      $hint.textContent = env
+        ? "You're on " + env.label + " — try switching →"
+        : "Not a configured host — preview still works ↓";
+
+      $popup.classList.remove('env-development','env-staging','env-production','env-unmatched');
+      $popup.classList.add('env-' + envType);
+      $title.textContent = env ? env.label : 'No matching environment';
+
+      $links.innerHTML = '';
+      var targets = env ? ENVIRONMENTS : ENVIRONMENTS;
+      for (var i = 0; i < targets.length; i++) {
+        $links.appendChild(renderLink(targets[i], env));
+      }
+      if (env) {
+        var editLi = document.createElement('li');
+        var editA  = document.createElement('a');
+        editA.className = 'edit-config-link';
+        editA.href = '#';
+        editA.textContent = 'Edit configuration';
+        editA.addEventListener('click', function (e) { e.preventDefault(); });
+        editLi.appendChild(editA);
+        $links.appendChild(editLi);
+      }
+
+      $stage.classList.remove('env-development','env-staging','env-production','env-unmatched');
+      $stage.classList.add('env-' + envType);
+
+      if (env) {
+        $miniHero.hidden   = false;
+        $unmatched.hidden  = true;
+        $miniEnvTag.textContent = env.label;
+        $miniFlavor.textContent = env.flavor;
+        var view = VIEW_CONTENT[env.type];
+        if (view.banner) { $stageBanner.hidden = false; $stageBanner.textContent = view.banner; }
+        else               { $stageBanner.hidden = true; }
+        $miniEyebrow.innerHTML = view.eyebrow;
+        $miniLede.innerHTML = "You're viewing <code>" + env.host + "</code> — the <strong>" + env.flavor + "</strong>" + view.ledeSuffix;
+      } else {
+        $miniHero.hidden  = true;
+        $stageBanner.hidden = true;
+        $unmatched.hidden = false;
+        if ($unmHost) $unmHost.textContent = window.location.hostname || 'file://';
+      }
+    }
+
+    function renderLink(target, currentEnv) {
+      var li = document.createElement('li');
+      var a  = document.createElement('a');
+      a.href  = currentEnv ? buildSwitchURL(target.host) : 'https://' + target.host + '/';
+      a.title = a.href;
+
+      var badge = document.createElement('span');
+      badge.className = 'icon-badge ' + BADGE_CLASS[target.type];
+      var emoji = document.createElement('span');
+      emoji.className = 'emoji-icon';
+      emoji.textContent = target.emoji;
+      badge.appendChild(emoji);
+      a.appendChild(badge);
+
+      var name = document.createElement('span');
+      name.textContent = target.label;
+      a.appendChild(name);
+
+      if (currentEnv && target.type === currentEnv.type) a.classList.add('active');
+
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        if ($liveMode.checked) return;
+        e.preventDefault();
+        render(target);
+        closePopup();
+      });
+      li.appendChild(a);
+      return li;
+    }
+
+    function openPopup()  { $popup.dataset.open = 'true';  $ext.setAttribute('aria-expanded','true'); }
+    function closePopup() { $popup.dataset.open = 'false'; $ext.setAttribute('aria-expanded','false'); }
+
+    $ext.addEventListener('click', function (e) { e.stopPropagation(); ($popup.dataset.open === 'true') ? closePopup() : openPopup(); });
+    document.addEventListener('click', function (e) { if (!$popup.contains(e.target) && !$ext.contains(e.target)) closePopup(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePopup(); });
+
+    // Live-mode toggle persistence
+    try { $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true'; } catch (e) {}
+    $liveMode.addEventListener('change', function () {
+      try { localStorage.setItem('neap.demo.liveMode', String($liveMode.checked)); } catch (e) {}
+    });
+
+    // IntersectionObserver: update URL hash when demo scrolls into view
+    // so "Really go there" links return the user to the right spot.
+    if ('IntersectionObserver' in window) {
+      var demoSection = document.getElementById('demo');
+      if (demoSection) {
+        new IntersectionObserver(function (entries) {
+          var isVisible = entries[0].isIntersecting;
+          try {
+            history.replaceState(null, '', window.location.pathname + (isVisible ? '#demo' : ''));
+          } catch (e) {}
+        }, { threshold: 0.3 }).observe(demoSection);
+      }
+    }
+
+    render(detectDemoEnv());
+  }());
+
+  /* ============================================================
+     5. EASTER EGGS
+     ============================================================ */
+  (function () {
+    var env = window.__neapEnv || 'production';
+
+    // ---- A. Styled console message on dev / staging ----
+    if (env === 'development') {
+      console.log('%c🍫 Hey — you found the dev branch.', 'color:#C5A882;font-size:15px;font-weight:bold;font-style:italic;');
+      console.log('%cThings here may be half-baked. If you spot something broken, we\'d love a bug report:\nhttps://github.com/SteveRyherd/neapolitan/issues', 'color:#8A6550;font-size:12px;');
+    } else if (env === 'staging') {
+      console.log('%c🍓 You\'re on staging. This is the dress rehearsal.', 'color:#D67280;font-size:15px;font-weight:bold;font-style:italic;');
+      console.log('%cIf you find something that shouldn\'t ship, now\'s your moment:\nhttps://github.com/SteveRyherd/neapolitan/issues', 'color:#A05060;font-size:12px;');
+    }
+
+    // ---- B. Konami code (works on ALL envs — best surprise on prod) ----
+    var KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    var konamiIdx = 0;
+    var konamiMessages = {
+      development: '🍫 Unlimited scoops unlocked. (This was already free.)',
+      staging:     '🍓 You found the pre-release easter egg. Impressive.',
+      production:  '🍦 The secret vanilla layer. You earned it.',
+      unmatched:   '🍨 You found us. Hi.',
+    };
+    var $toast = document.getElementById('konamiToast');
+    document.addEventListener('keydown', function (e) {
+      if (e.key === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) {
+          konamiIdx = 0;
+          if ($toast) {
+            $toast.textContent = konamiMessages[env] || konamiMessages.production;
+            $toast.classList.add('show');
+            setTimeout(function () { $toast.classList.remove('show'); }, 3200);
+          }
+        }
+      } else {
+        konamiIdx = 0;
+      }
+    });
+
+    // ---- C. Logo mark click counter — dev only (5 clicks → hidden message) ----
+    if (env === 'development') {
+      var logoMark = document.querySelector('.logo-mark');
+      var clickCount = 0;
+      var clickTimer = null;
+      if (logoMark) {
+        logoMark.style.cursor = 'pointer';
+        logoMark.addEventListener('click', function () {
+          clickCount++;
+          clearTimeout(clickTimer);
+          if (clickCount >= 5) {
+            clickCount = 0;
+            if ($toast) {
+              $toast.textContent = '🍫🍫🍫 You clicked five times. The bar is yours.';
+              $toast.classList.add('show');
+              setTimeout(function () { $toast.classList.remove('show'); }, 3200);
+            }
+          } else {
+            // Reset if user stops clicking for 1.5s
+            clickTimer = setTimeout(function () { clickCount = 0; }, 1500);
+          }
+        });
+      }
+    }
+
+    // ---- D. Secret source comment (visible to view-source readers) ----
+    // (This is the comment — no JS needed, but logged for discovery.)
+    if (env === 'development') {
+      console.log('%c<!-- 🍫 Hello, view-source explorer. The dev branch is yours to poke at. -->', 'color:#6B4226;font-size:11px;font-family:monospace;');
+    }
+  }());
+
+  </script>
+</body>
+</html>

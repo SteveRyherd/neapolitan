@@ -1,0 +1,54 @@
+/* ============================================================
+   theme-staging.css — light strawberry wash.
+
+   html.env-staging is set on <html> by an inline <head> script
+   before first paint. Much lighter touch than dev — we shift the
+   body background and tint the cards; text colors stay dark.
+   ============================================================ */
+
+/* ---- Body ---- */
+html.env-staging body {
+  background: #FDE8EA;
+  padding-top: 72px; /* room for sticky banner (see demo.css) */
+}
+
+/* ---- Sticky environment banner ---- */
+html.env-staging .page-env-banner {
+  display: block;
+  background: #F5C5C9;
+  color: #7A2535;
+  border-bottom: 1px solid rgba(122, 37, 53, 0.18);
+}
+
+/* ---- Cards — light strawberry tint ---- */
+html.env-staging .url-bar,
+html.env-staging .screenshot-card,
+html.env-staging .feature,
+html.env-staging .workflow,
+html.env-staging .faq details,
+html.env-staging .story-block,
+html.env-staging .demo-embed {
+  background: #FFF1F2;
+  border-color: rgba(214, 114, 128, 0.18);
+}
+
+html.env-staging .install-inner {
+  background: #FFF1F2;
+}
+
+/* ---- Section eyebrows — deepen the rose so it reads on the pink bg ---- */
+html.env-staging .section-eyebrow,
+html.env-staging .hero-text .eyebrow,
+html.env-staging .demo-reel-label,
+html.env-staging .screenshot-card .label {
+  color: #A03347;
+}
+
+/* ---- Stripe row — already colored, keep as-is ---- */
+
+/* ---- Shortcuts section — already dark, looks great against the pink ---- */
+
+/* ---- Footer ---- */
+html.env-staging footer {
+  border-top-color: rgba(214, 114, 128, 0.25);
+}

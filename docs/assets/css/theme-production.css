@@ -1,0 +1,7 @@
+/* ============================================================
+   theme-production.css — no overrides needed.
+
+   Production is the default cream design. This file exists so
+   the <head> script always loads a theme file for every env,
+   keeping the pattern consistent and easy to extend.
+   ============================================================ */
