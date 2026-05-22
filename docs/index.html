@@ -1176,6 +1176,20 @@
       .logo { gap: 10px; }
       .logo-mark { width: 36px; height: 36px; border-radius: 10px; }
       .logo-wordmark { height: 44px; top: 2px; }
+      /* Shrink the award ribbon and tuck it into the corner on
+         iPhone-width viewports — at 120px it crashes into the
+         wordmark below. Lift the wallpaper-card overflow clip so
+         the ribbon can spill out onto the cream page background
+         (border-radius still clips the wallpaper bg itself, and
+         body has overflow-x:hidden as a backstop). With the clip
+         gone, we can pull the badge further left/up to sit
+         genuinely in the corner like a sticker. */
+      .install { overflow: visible; }
+      .install-award {
+        width: 90px;
+        top: 6px;
+        left: 6px;
+      }
     }
   </style>
 </head>
@@ -1544,12 +1558,12 @@
       <div class="install-inner">
         <div class="install-award" aria-hidden="true">
           <picture>
-            <source srcset="/assets/img/award-ribbon_nofold.webp" type="image/webp">
-            <img src="/assets/img/award-ribbon_nofold.png" alt="" width="765" height="759">
+            <source srcset="/assets/img/award-ribbon_flat.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon_flat.png" alt="" width="765" height="759">
           </picture>
           <picture>
-            <source srcset="/assets/img/award-ribbon_realistic.webp" type="image/webp">
-            <img src="/assets/img/award-ribbon_realistic.png" alt="" width="765" height="759">
+            <source srcset="/assets/img/award-ribbon2_folded.webp" type="image/webp">
+            <img src="/assets/img/award-ribbon2_folded.png" alt="" width="765" height="759">
           </picture>
         </div>
         <img class="install-wordmark" src="/assets/img/wordmark.png" alt="Neapolitan" width="478" height="123">
