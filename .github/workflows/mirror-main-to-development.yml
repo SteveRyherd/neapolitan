@@ -1,0 +1,24 @@
+name: Mirror main to development
+
+# `development` is not a real working branch — it's a passive mirror of
+# `main` that Cloudflare Pages publishes as the development preview at
+# development.neapolitan-9ah.pages.dev. Every push to main force-pushes
+# the same commit onto development so the preview stays in lockstep.
+# Do not commit directly to development; this workflow will overwrite it.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Force-push main to development
+        run: git push --force origin HEAD:development

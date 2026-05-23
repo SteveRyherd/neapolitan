@@ -987,6 +987,16 @@
       try {
         localStorage.setItem('neap.demo.liveMode', String($liveMode.checked));
       } catch (e) { /* swallow */ }
+      // When live mode flips ON, snap the popup/stage back to the
+      // *real* environment. In sandbox mode (off), clicks call
+      // render(target) and the displayed state drifts away from the
+      // actual host. Turning live mode on means "links now go for
+      // real" — so the popup must reflect where the user actually is,
+      // not whichever sandbox view they last picked. We don't reset
+      // when flipping off; the visitor can keep exploring from there.
+      if ($liveMode.checked) {
+        render(detectEnvironment());
+      }
     });
 
     /* ============================================================
