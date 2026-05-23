@@ -909,9 +909,17 @@
       // jumps to the live environment. Left-click is intercepted
       // below: in-place swap by default, real navigation when
       // "Really go there" is toggled on.
-      const targetUrl = currentEnv
+      //
+      // Matched case: buildSwitchURL preserves u.search, so an
+      // existing ?livemode=on rides along to the new host for free.
+      // Unmatched case (file://, preview deploys): there's no source
+      // URL to carry over, so we append the flag explicitly.
+      let targetUrl = currentEnv
         ? buildSwitchURL(target.host)
         : 'https://' + target.host + '/';
+      if (!currentEnv && $liveMode.checked) {
+        targetUrl += '?livemode=on';
+      }
       a.href = targetUrl;
       a.title = targetUrl;
 
@@ -978,15 +986,30 @@
     });
 
     /* ============================================================
-       Live-mode toggle persistence.
+       Live-mode state — URL-driven, not localStorage.
+       Each pages.dev subdomain has its own localStorage, so
+       persisting there silently dropped live mode every time the
+       visitor hopped to a real environment. The query string
+       ?livemode=on rides along with buildSwitchURL's u.search and
+       carries cleanly across hosts, plus it makes a live-mode demo
+       link shareable.
        ============================================================ */
-    try {
-      $liveMode.checked = localStorage.getItem('neap.demo.liveMode') === 'true';
-    } catch (e) { /* private mode / disabled storage — fine */ }
+    function urlHasLiveMode() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('livemode') === 'on';
+    }
+    function syncLiveModeToUrl(on) {
+      const url = new URL(window.location.href);
+      if (on) url.searchParams.set('livemode', 'on');
+      else    url.searchParams.delete('livemode');
+      // replaceState — don't push a history entry, the back button
+      // shouldn't pop a state change the user made via a toggle.
+      history.replaceState(null, '', url.toString());
+    }
+
+    $liveMode.checked = urlHasLiveMode();
     $liveMode.addEventListener('change', () => {
-      try {
-        localStorage.setItem('neap.demo.liveMode', String($liveMode.checked));
-      } catch (e) { /* swallow */ }
+      syncLiveModeToUrl($liveMode.checked);
       // When live mode flips ON, snap the popup/stage back to the
       // *real* environment. In sandbox mode (off), clicks call
       // render(target) and the displayed state drifts away from the
